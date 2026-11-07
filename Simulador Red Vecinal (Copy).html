@@ -1,0 +1,1608 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Simulador Red Vecinal (Copy)</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Figtree:wght@400..700&display=swap">
+<style>
+/* Concepto: un teléfono simulado a la izquierda y una guía de demo para el equipo a la derecha.
+   En pantallas angostas la guía baja debajo del teléfono. En modo emergencia el acento del teléfono pasa a rojo. */
+:root{
+  --bg:#e9eef5; --app:#f7f9fc; --surface:#ffffff; --surface-2:#e3e9f2; --ink:#12202e; --muted:#54657a; --line:#d0d9e5;
+  --accent:#0a6b66; --on-accent:#ffffff; --accent-soft:#d5eeeb;
+  --mark:#e8a317; --mark-soft:#fff0c2; --mark-ink:#5a3b00;
+  --good:#17784a; --good-soft:#daf2e5;
+  --info:#2a5ea8;
+  --alert:#c42b1a; --on-alert:#ffffff; --alert-soft:#fde5e1;
+  --frame:#18222e;
+  --font-display:'Bricolage Grotesque','Segoe UI',system-ui,sans-serif;
+  --font-body:'Figtree','Segoe UI',system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0b131c; --app:#101a25; --surface:#172331; --surface-2:#1f2d3e; --ink:#e7eef6; --muted:#9bacc0; --line:#2b3b4f;
+  --accent:#4cc4b9; --on-accent:#04211f; --accent-soft:#16373a;
+  --mark:#f0b429; --mark-soft:#3a2f10; --mark-ink:#ffe3a0;
+  --good:#4fc78b; --good-soft:#163829;
+  --info:#82b3ff;
+  --alert:#ff7b67; --on-alert:#2c0a05; --alert-soft:#3d1b17;
+  --frame:#000000; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0b131c; --app:#101a25; --surface:#172331; --surface-2:#1f2d3e; --ink:#e7eef6; --muted:#9bacc0; --line:#2b3b4f;
+  --accent:#4cc4b9; --on-accent:#04211f; --accent-soft:#16373a;
+  --mark:#f0b429; --mark-soft:#3a2f10; --mark-ink:#ffe3a0;
+  --good:#4fc78b; --good-soft:#163829;
+  --info:#82b3ff;
+  --alert:#ff7b67; --on-alert:#2c0a05; --alert-soft:#3d1b17;
+  --frame:#000000; color-scheme:dark}
+
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font-body);font-size:15px;line-height:1.45;
+  padding-block:24px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,textarea:focus-visible,input:focus-visible,.sheet:focus-visible{outline:3px solid var(--mark);outline-offset:2px}
+.wrap{max-width:1040px;margin:0 auto}
+.eyebrow{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0 0 4px;font-weight:600}
+h1.title{font-family:var(--font-display);font-size:clamp(26px,5vw,38px);line-height:1.08;margin:0 0 8px;text-wrap:balance;font-weight:700}
+.lead{max-width:64ch;color:var(--muted);margin:0 0 24px}
+.stage{display:grid;grid-template-columns:minmax(0,400px) minmax(0,1fr);gap:32px;align-items:start}
+@media (max-width:900px){.stage{grid-template-columns:minmax(0,1fr)}}
+
+/* Teléfono */
+.phone{position:relative;width:100%;max-width:400px;height:780px;margin-inline:auto;display:flex;flex-direction:column;background:var(--app);
+  border:9px solid var(--frame);border-radius:40px;overflow:hidden;box-shadow:0 18px 40px rgba(10,20,35,.22)}
+.phone[data-emg="1"]{--accent:var(--alert);--on-accent:var(--on-alert);--accent-soft:var(--alert-soft)}
+.ribbon{background:var(--mark-soft);color:var(--mark-ink);font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;text-align:center;padding:5px 8px}
+.appbar{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 16px 8px}
+.appname{font-family:var(--font-display);font-weight:700;font-size:20px;margin:0;line-height:1.1}
+.zone{margin:2px 0 0;font-size:12px;color:var(--muted)}
+.net{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:8px 13px;font-size:13px;font-weight:600;min-height:40px}
+.net .dot{width:9px;height:9px;border-radius:50%;background:var(--good)}
+.net.off{border-color:var(--mark);background:var(--mark-soft);color:var(--mark-ink)}
+.net.off .dot{background:var(--mark)}
+.banner{margin:0 16px 8px;padding:9px 12px;border-radius:12px;font-size:13px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.banner.warn{background:var(--mark-soft);color:var(--mark-ink)}
+.banner.emg{background:var(--alert-soft);color:var(--alert);font-weight:600}
+.linkbtn{background:none;border:0;padding:8px;font-weight:700;text-decoration:underline;color:inherit;min-height:40px}
+.screen{flex:1;min-height:0;overflow-y:auto;padding:6px 16px 20px;display:flex;flex-direction:column;gap:18px}
+.screen:focus{outline:none}
+.tabbar{display:grid;grid-template-columns:repeat(5,1fr);border-top:1px solid var(--line);background:var(--surface)}
+.tabbar button{background:none;border:0;display:flex;flex-direction:column;align-items:center;gap:3px;padding:9px 2px 10px;font-size:12px;font-weight:600;color:var(--muted);min-height:58px}
+.tabbar button[aria-current="page"]{color:var(--accent)}
+.tabbar button[aria-current="page"] .ic{stroke-width:2.6}
+.ic{flex:none}
+
+.h1{font-family:var(--font-display);font-size:26px;line-height:1.1;margin:0 0 6px;font-weight:700;text-wrap:balance}
+.h2{font-family:var(--font-display);font-size:19px;line-height:1.2;margin:0;font-weight:700;text-wrap:balance}
+.sub{margin:0 0 12px;color:var(--muted)}
+.sec{font-family:var(--font-display);font-size:16px;margin:0 0 4px;font-weight:700}
+.secsub{margin:0 0 10px;color:var(--muted);font-size:13px}
+.ask{width:100%;display:flex;align-items:center;justify-content:space-between;gap:10px;text-align:left;background:var(--surface);border:2px solid var(--accent);border-radius:16px;padding:16px;font-size:16px;color:var(--muted);min-height:58px}
+.ask .ic{color:var(--accent)}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.chip{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:9px 13px;font-size:13px;font-weight:600;text-align:left;min-height:40px}
+.chips.static .chip{cursor:default;background:var(--surface-2)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;width:100%;border:0;border-radius:14px;background:var(--accent);color:var(--on-accent);font-weight:700;padding:13px 16px;min-height:50px}
+.btn.big{min-height:56px;font-size:16px}
+.btn.sm{width:auto;min-height:44px;padding:9px 14px;font-size:14px}
+.btn.ghost{background:var(--surface);color:var(--ink);border:1px solid var(--line)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.list{display:flex;flex-direction:column;gap:8px}
+.item{display:flex;align-items:center;gap:12px;text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px;width:100%;min-height:62px}
+.itype{width:38px;height:38px;border-radius:12px;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;flex:none}
+.ibody{display:flex;flex-direction:column;gap:3px;min-width:0;flex:1}
+.ititle{font-weight:600;overflow-wrap:anywhere}
+.isub{font-size:13px;color:var(--muted)}
+.chev{color:var(--muted);font-size:22px}
+.badge{display:inline-block;border-radius:999px;padding:2px 9px;font-size:12px;font-weight:700;background:var(--surface-2);color:var(--ink)}
+.badge.warn{background:var(--mark-soft);color:var(--mark-ink)}
+.badge.good{background:var(--good-soft);color:var(--good)}
+.badge.acc{background:var(--accent-soft);color:var(--accent)}
+.avatar{width:42px;height:42px;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;font-weight:700;font-size:14px;flex:none}
+.avatar.big{width:64px;height:64px;font-size:20px}
+.tip{background:var(--accent-soft);border-radius:14px;padding:12px 14px;display:flex;flex-direction:column;gap:8px;font-size:14px}
+.tip .row{display:flex;gap:8px;flex-wrap:wrap}
+
+.detailhead{display:flex;gap:10px;align-items:flex-start}
+.iconbtn{background:var(--surface);border:1px solid var(--line);border-radius:12px;width:44px;height:44px;display:grid;place-items:center;flex:none}
+.sortbar{display:flex;gap:6px;flex-wrap:wrap;align-items:center;font-size:13px;color:var(--muted)}
+.sortbar .chip[aria-pressed="true"]{background:var(--accent);color:var(--on-accent);border-color:var(--accent)}
+.prop{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:12px}
+.phead{display:flex;align-items:center;gap:12px}
+.pname{display:flex;flex-direction:column;flex:1;min-width:0}
+.namebtn{background:none;border:0;padding:0;text-align:left;font-weight:700;font-size:16px;text-decoration:underline;text-decoration-color:var(--line);text-underline-offset:3px}
+.role{font-size:13px;color:var(--muted)}
+.rate{font-weight:700;color:var(--mark-ink);background:var(--mark-soft);border-radius:999px;padding:4px 10px;font-size:14px}
+.facts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:0}
+.facts div{background:var(--app);border-radius:10px;padding:8px}
+.facts dt{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.facts dd{margin:2px 0 0;font-weight:700;font-size:14px;overflow-wrap:anywhere}
+.skel{height:132px;border-radius:16px;background:var(--surface-2);opacity:.7}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:10px}
+.card.warn{background:var(--mark-soft);border-color:transparent;color:var(--mark-ink)}
+.card.good{background:var(--good-soft);border-color:transparent}
+.timeline{list-style:none;margin:0;padding:0;display:flex;gap:6px}
+.timeline li{flex:1;text-align:center;font-size:12px;font-weight:600;padding:8px 4px;border-radius:10px;background:var(--surface-2);color:var(--muted)}
+.timeline li.done{background:var(--accent-soft);color:var(--accent)}
+.timeline li.cur{outline:2px solid var(--accent)}
+.stars{display:flex;gap:6px}
+.stars button{background:var(--surface);border:1px solid var(--line);border-radius:12px;width:48px;height:48px;display:grid;place-items:center;color:var(--muted)}
+.stars button[aria-pressed="true"]{background:var(--mark-soft);color:var(--mark);border-color:var(--mark)}
+.stars button[aria-pressed="true"] .ic{fill:currentColor}
+.quote{font-family:var(--font-display);font-size:16px;margin:0}
+
+.stateGrid{display:flex;flex-direction:column;gap:10px}
+.state{display:flex;flex-direction:column;gap:2px;text-align:left;border-radius:16px;border:2px solid transparent;padding:14px 16px;min-height:68px;font-size:18px}
+.state b{font-family:var(--font-display)}
+.state small{font-size:13px;font-weight:500;opacity:.85}
+.state.good{background:var(--good-soft);color:var(--good)}
+.state.bad{background:var(--alert-soft);color:var(--alert)}
+.state.help{background:var(--accent-soft);color:var(--info)}
+.state.sel{border-color:currentColor}
+.yourstate{margin:8px 0 0;font-weight:700}
+.eneed{display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:10px 12px}
+.eneed.sel{border-color:var(--alert);box-shadow:0 0 0 2px var(--alert-soft)}
+.eneedmain{background:none;border:0;padding:6px 0;text-align:left;flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;font-weight:600;min-height:44px}
+.eneedmain small{font-weight:500;color:var(--muted);font-size:12px}
+.map{width:100%;height:auto;background:var(--surface);border:1px solid var(--line);border-radius:16px;display:block}
+.map .ring{fill:none;stroke:var(--line);stroke-dasharray:3 4}
+.map .rl{font-size:11px;fill:var(--muted)}
+.map .me{fill:var(--mark);stroke:var(--ink);stroke-width:2}
+.map .nd{fill:var(--alert);stroke:var(--surface);stroke-width:2}
+.map .nt{fill:var(--on-alert);font-size:11px;font-weight:700;text-anchor:middle}
+.map .rs{fill:var(--good)}
+.map .gp{fill:var(--info)}
+.map .sl{font-size:12px;font-weight:700;fill:var(--ink)}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12px;color:var(--muted);margin-top:8px}
+.legend i{display:inline-block;width:11px;height:11px;margin-right:5px;vertical-align:-1px}
+.lg-n{background:var(--alert);border-radius:50%}.lg-r{background:var(--good);border-radius:3px}.lg-g{background:var(--info);clip-path:polygon(50% 0,100% 100%,0 100%)}.lg-m{background:var(--mark);border-radius:50%}
+.rchips{display:flex;flex-wrap:wrap;gap:8px}
+.rchips span{background:var(--good-soft);color:var(--good);border-radius:999px;padding:6px 12px;font-size:13px;font-weight:700}
+.tog{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px 14px;text-align:left;font-weight:600;min-height:52px}
+.tog .sw{width:44px;height:26px;border-radius:999px;background:var(--surface-2);position:relative;flex:none;border:1px solid var(--line)}
+.tog .sw::after{content:"";position:absolute;top:2px;left:2px;width:20px;height:20px;border-radius:50%;background:var(--muted)}
+.tog[aria-checked="true"] .sw{background:var(--accent-soft);border-color:var(--accent)}
+.tog[aria-checked="true"] .sw::after{left:20px;background:var(--accent)}
+.note{font-size:13px;color:var(--muted);margin:0}
+.note.warn{color:var(--mark-ink);background:var(--mark-soft);padding:8px 12px;border-radius:10px}
+.alertbtn{background:var(--alert);color:var(--on-alert)}
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.tile{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px}
+.tile b{display:block;font-family:var(--font-display);font-size:26px;line-height:1.1}
+.tile span{font-size:12px;color:var(--muted)}
+.bar{height:10px;border-radius:999px;background:var(--surface-2);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--accent)}
+.reprow{display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-bottom:1px solid var(--line)}
+.reprow:last-child{border-bottom:0}
+
+/* Hojas */
+.scrim{position:absolute;inset:0;background:rgba(10,18,28,.55);z-index:20}
+.sheet{position:absolute;left:0;right:0;bottom:0;max-height:90%;overflow-y:auto;z-index:21;background:var(--surface);border-radius:24px 24px 0 0;padding:18px 16px 22px;display:flex;flex-direction:column;gap:12px}
+.sheet:focus{outline:none}
+.sheethead{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.sheethead h3{font-family:var(--font-display);font-size:21px;margin:0}
+.steps3{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin:0;font-size:12px;font-weight:700;color:var(--muted)}
+.steps3 span{background:var(--surface-2);border-radius:999px;padding:4px 10px}
+.steps3 span.ok{background:var(--accent-soft);color:var(--accent)}
+.steps3 .count{margin-left:auto;background:var(--mark-soft);color:var(--mark-ink)}
+.typegrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.type{display:flex;flex-direction:column;align-items:flex-start;gap:2px;text-align:left;background:var(--app);border:2px solid var(--line);border-radius:14px;padding:10px 12px;min-height:76px;font-weight:700}
+.type small{font-weight:500;color:var(--muted);font-size:12px}
+.type .ic{color:var(--accent)}
+.type.sel{border-color:var(--accent);background:var(--accent-soft)}
+.lbl{font-size:13px;font-weight:700}
+textarea{width:100%;border:1px solid var(--line);border-radius:12px;background:var(--app);color:var(--ink);padding:12px;font:inherit;resize:none}
+.suggs{display:flex;flex-direction:column;gap:6px}
+.slides{min-height:120px}
+.dots{display:flex;gap:6px;justify-content:center}
+.dots i{width:8px;height:8px;border-radius:50%;background:var(--line)}
+.dots i.on{background:var(--accent)}
+.row2{display:flex;gap:8px}
+.toast{position:absolute;left:14px;right:14px;bottom:76px;z-index:30;background:var(--ink);color:var(--bg);padding:11px 14px;border-radius:12px;font-size:14px;opacity:0;transform:translateY(6px);pointer-events:none;transition:opacity .2s,transform .2s}
+.toast.show{opacity:1;transform:none}
+@media (prefers-reduced-motion:reduce){.toast{transition:none}}
+
+/* Chat, roles y comentarios */
+.chip[aria-pressed="true"]{background:var(--accent);color:var(--on-accent);border-color:var(--accent)}
+.field{width:100%;border:1px solid var(--line);border-radius:12px;background:var(--app);color:var(--ink);padding:12px;font:inherit;min-height:48px}
+.isub.trunc{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.seg{display:grid;grid-template-columns:1fr 1fr;background:var(--surface-2);border-radius:14px;padding:4px;gap:4px}
+.seg button{border:0;background:none;border-radius:11px;padding:11px 8px;font-weight:700;color:var(--muted);min-height:46px}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--accent);box-shadow:0 1px 3px rgba(0,0,0,.14)}
+.cmt{border-bottom:1px solid var(--line);padding:8px 0;display:flex;flex-direction:column;gap:2px;font-size:14px}
+.cmt:last-child{border-bottom:0}
+.cstars{color:var(--mark-ink);font-weight:700;letter-spacing:1px}
+.chatpanel{position:absolute;inset:0;z-index:22;background:var(--app);display:flex;flex-direction:column}
+.chatpanel:focus{outline:none}
+.chathead{display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid var(--line);background:var(--surface)}
+.chatnote{margin:0;padding:6px 14px;font-size:12px;color:var(--muted);background:var(--surface-2)}
+.msgs{flex:1;min-height:0;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:8px}
+.msg{max-width:82%;padding:10px 13px;border-radius:16px;font-size:15px;overflow-wrap:anywhere}
+.msg.them{align-self:flex-start;background:var(--surface);border:1px solid var(--line);border-bottom-left-radius:4px}
+.msg.me{align-self:flex-end;background:var(--accent);color:var(--on-accent);border-bottom-right-radius:4px}
+.msg small{display:block;font-size:11px;opacity:.85;margin-top:2px}
+.msg.typing{color:var(--muted);font-style:italic}
+.quick{display:flex;gap:6px;overflow-x:auto;padding:8px 14px 0}
+.quick .chip{white-space:nowrap;flex:none}
+.composer{display:flex;gap:8px;padding:10px 14px 14px}
+.composer input{flex:1;min-width:0;border:1px solid var(--line);border-radius:12px;padding:12px;font:inherit;background:var(--surface);color:var(--ink);min-height:48px}
+.composer .btn{min-height:48px}
+
+.codebig{font-family:var(--font-display);font-size:38px;letter-spacing:.3em;font-weight:700;color:var(--accent)}
+.timer{font-family:var(--font-display);font-size:30px;font-weight:700;color:var(--accent);font-variant-numeric:tabular-nums}
+.thumb{width:100%;max-height:150px;object-fit:cover;border-radius:12px;border:1px solid var(--line);display:block}
+.detbox{background:var(--app);border:1px solid var(--line);border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:8px;font-size:14px}
+.offer{border-top:1px solid var(--line);padding-top:10px;display:flex;flex-direction:column;gap:8px}
+.msg.sys{align-self:center;max-width:92%;background:var(--mark-soft);color:var(--mark-ink);font-size:13px;text-align:center;border-radius:12px}
+label.btn{cursor:pointer}
+
+/* Guía de demo */
+.guide{display:flex;flex-direction:column;gap:20px;min-width:0}
+.guide h2{font-family:var(--font-display);font-size:24px;margin:0 0 4px}
+.guide p{margin:0}
+.cases{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px}
+.casebtn{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 12px;text-align:left;font-weight:700;min-height:48px}
+.casebtn[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.casebody{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:12px}
+.casebody h3{font-family:var(--font-display);font-size:19px;margin:0}
+.steps{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:8px}
+.steps li{display:flex;gap:10px;align-items:flex-start}
+.steps .box{width:22px;height:22px;border-radius:7px;border:2px solid var(--line);display:grid;place-items:center;flex:none;font-size:13px;font-weight:700;margin-top:1px}
+.steps li.ok .box{background:var(--good);border-color:var(--good);color:var(--surface)}
+.steps li.ok span:last-child{color:var(--muted)}
+.say{background:var(--accent-soft);color:var(--ink);border-radius:12px;padding:10px 12px;font-size:14px}
+.gmetrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
+.mvp{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
+.mvp div{border-radius:14px;padding:12px 14px;font-size:14px}
+.mvp h4{margin:0 0 6px;font-family:var(--font-display);font-size:15px}
+.mvp ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:3px}
+.mvp .f{background:var(--good-soft)}.mvp .s{background:var(--mark-soft);color:var(--mark-ink)}.mvp .l{background:var(--surface-2)}
+/* v7 */
+a.btn{text-decoration:none}
+.tabbar span{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tabbar button{padding-inline:1px}
+.net.langb{padding:8px 11px}
+.net .ic{display:inline-block;vertical-align:-3px}
+.phone{transition:border-color .2s}
+.phone.flash{border-color:var(--mark)}
+.phone[data-hc="1"]{--ink:#000;--muted:#1b1b1b;--line:#111;--surface:#fff;--app:#fff;--surface-2:#e6e6e6;--accent:#00403c;--on-accent:#fff;--accent-soft:#d4ebe8;--mark-ink:#000;--mark-soft:#ffe9a8;--good:#0b4d2c;--good-soft:#d4efdf;--alert:#8f1408;--alert-soft:#fbd9d4;--info:#0f3f86}
+.phone[data-hc="1"] .item,.phone[data-hc="1"] .card,.phone[data-hc="1"] .eneed,.phone[data-hc="1"] .chip,.phone[data-hc="1"] .tog,.phone[data-hc="1"] .type,.phone[data-hc="1"] .prop,.phone[data-hc="1"] .btn.ghost{border:2px solid #111}
+.phone[data-big="1"] .screen,.phone[data-big="1"] .sheet,.phone[data-big="1"] .chatpanel{zoom:1.18}
+.guide input[type=range]{width:100%;accent-color:var(--accent)}
+.guide label.rng{display:flex;justify-content:space-between;gap:10px;font-weight:600;font-size:14px}
+</style>
+
+<div class="wrap">
+  <header>
+    <p class="eyebrow">Hackathon UTP – El Comercio 2026 · simulación</p>
+    <h1 class="title">Red de capacidades y confianza vecinal</h1>
+    <p class="lead">Simulación de la idea del equipo: el vecino dice qué necesita, su barrio propone cómo resolverlo, cada interacción confirmada construye reputación y esa misma red se activa en una emergencia. Todos los vecinos, precios y ubicaciones son ficticios.</p>
+  </header>
+  <main class="stage">
+    <div class="phone" id="phone" data-emg="0">
+      <div class="ribbon">Demo · datos simulados</div>
+      <div id="chrome"></div>
+      <div class="screen" id="screen" tabindex="-1"></div>
+      <nav class="tabbar" id="tabbar" aria-label="Secciones de la app"></nav>
+      <div id="overlay"></div>
+      <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    </div>
+    <aside class="guide" id="guide" aria-label="Guía de demo para el equipo"></aside>
+  </main>
+</div>
+
+<script>
+(function(){
+'use strict';
+var $=function(s){return document.querySelector(s)};
+var esc=function(s){return String(s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})};
+
+var P={
+  home:'<path d="M3 11.5 12 4l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',
+  swap:'<path d="M4 8h13l-3.5-3.5M20 16H7l3.5 3.5"/>',
+  alert:'<path d="M12 4 2.8 20h18.4z"/><path d="M12 10v4.5M12 17.4v.1"/>',
+  user:'<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.2 3.6-6.5 8-6.5s8 2.3 8 6.5"/>',
+  person:'<circle cx="12" cy="8" r="3.5"/><path d="M5 20c0-3.6 3-5.5 7-5.5s7 1.9 7 5.5"/>',
+  box:'<path d="M3 7l9-4 9 4v10l-9 4-9-4z"/><path d="M3 7l9 4 9-4M12 11v10"/>',
+  heart:'<path d="M12 20.5s-8-4.8-8-10.8A4.4 4.4 0 0 1 12 7a4.4 4.4 0 0 1 8 2.7c0 6-8 10.8-8 10.8z"/>',
+  back:'<path d="M15 5 8 12l7 7"/>',
+  chat:'<path d="M4 5h16v11H9l-5 4z"/>',
+  close:'<path d="M6 6l12 12M18 6 6 18"/>',
+  globe:'<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3.2 3 14.8 0 18M12 3c-3 3.2-3 14.8 0 18"/>',
+  star:'<path d="m12 3.5 2.6 5.4 5.9.8-4.3 4.1 1 5.9L12 16.9l-5.2 2.8 1-5.9L3.5 9.7l5.9-.8z"/>'
+};
+var ic=function(n,s){s=s||22;return '<svg class="ic" width="'+s+'" height="'+s+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+P[n]+'</svg>'};
+var ICON={servicio:'person',producto:'box',prestamo:'swap',ayuda:'heart'};
+
+/* Datos ficticios */
+var PROV={
+  carlos:{name:'Carlos Mendoza',role:'Gasfitero',svc:{r:4.9,n:23},vec:{r:4.7,n:8},zone:8,ayudas:3,caps:'Primeros auxilios registrados',prev:true,vb:14},
+  maria:{name:'María Quispe',role:'Gasfitera',svc:{r:4.7,n:18},vec:{r:4.8,n:5},zone:5,ayudas:2,caps:'Herramientas registradas',prev:false,vb:9},
+  jose:{name:'José Ramos',role:'Gasfitero',svc:{r:4.6,n:12},vec:{r:0,n:0},zone:3,ayudas:0,caps:'Sin capacidades registradas',prev:false,vb:6},
+  rosa:{name:'Bodega Doña Rosa',role:'Bodega',svc:{r:4.7,n:64},vec:{r:0,n:0},zone:21,ayudas:0,caps:'Agua y víveres',prev:false,vb:18},
+  sol:{name:'Minimarket El Sol',role:'Minimarket',svc:{r:4.5,n:41},vec:{r:0,n:0},zone:12,ayudas:0,caps:'Agua y víveres',prev:false,vb:11},
+  lalo:{name:'Bodega Don Lalo',role:'Bodega',svc:{r:4.4,n:29},vec:{r:0,n:0},zone:9,ayudas:0,caps:'Agua y víveres',prev:false,vb:7},
+  luis:{name:'Luis Paredes',role:'Vecino',svc:{r:0,n:0},vec:{r:4.9,n:14},zone:14,ayudas:9,caps:'Herramientas registradas',prev:false,vb:10},
+  elena:{name:'Elena Castro',role:'Vecina',svc:{r:0,n:0},vec:{r:4.8,n:10},zone:10,ayudas:6,caps:'Primeros auxilios registrados',prev:true,vb:8},
+  marco:{name:'Marco Rivas',role:'Vecino',svc:{r:0,n:0},vec:{r:4.6,n:6},zone:6,ayudas:3,caps:'Movilidad registrada',prev:false,vb:5},
+  nelly:{name:'Nelly Flores',role:'Vecina',svc:{r:0,n:0},vec:{r:4.9,n:17},zone:17,ayudas:12,caps:'Ayuda a adultos mayores',prev:false,vb:12},
+  tomas:{name:'Tomás Vega',role:'Vecino',svc:{r:0,n:0},vec:{r:4.7,n:9},zone:9,ayudas:5,caps:'Herramientas registradas',prev:false,vb:7},
+  ines:{name:'Inés Rojas',role:'Vecina',svc:{r:0,n:0},vec:{r:4.5,n:4},zone:4,ayudas:2,caps:'Sin capacidades registradas',prev:false,vb:3},
+  pedro:{name:'Pedro Lazo',role:'Electricista',svc:{r:4.8,n:31},vec:{r:4.6,n:5},zone:11,ayudas:2,caps:'Herramientas registradas',prev:false,vb:11},
+  rosam:{name:'Rosa Medina',role:'Costurera',svc:{r:4.9,n:27},vec:{r:4.8,n:7},zone:9,ayudas:4,caps:'Primeros auxilios registrados',prev:false,vb:9}
+};
+var CAT={
+  servicio:{label:'Servicio',hint:'Un oficio o profesional',steps:['Aceptada','Servicio hecho'],acts:['Confirmar que quedó resuelto'],ctx:'svc',ctxName:'servicios',
+    sugg:['Necesito un gasfitero para arreglar una fuga','Necesito un electricista, se fue la luz en la cocina'],
+    props:[{id:'carlos',d:'500 m',dm:500,p:'S/ 35',pv:35,a:'Disponible ahora',diag:10},{id:'maria',d:'800 m',dm:800,p:'S/ 40',pv:40,a:'Disponible hoy',diag:10},{id:'jose',d:'1,2 km',dm:1200,p:'S/ 30',pv:30,a:'Disponible en 2 h'}]},
+  producto:{label:'Producto',hint:'Algo cerca de ti',steps:['Aceptada','Entregado'],acts:['Confirmar que llegó'],ctx:'svc',ctxName:'servicios',
+    sugg:['Necesito 2 bidones de agua','Necesito pan y leche, no puedo salir'],
+    props:[{id:'rosa',d:'300 m',dm:300,p:'S/ 12',pv:12,a:'Entrega en 10 min'},{id:'sol',d:'600 m',dm:600,p:'S/ 11',pv:11,a:'Entrega en 25 min'},{id:'lalo',d:'450 m',dm:450,p:'S/ 13',pv:13,a:'Entrega en 15 min'}]},
+  prestamo:{label:'Préstamo',hint:'Prestar, alquilar o trueque',steps:['Aceptada','Entregado','Devuelto'],acts:['Confirmar entrega','Confirmar devolución'],ctx:'vec',ctxName:'entre vecinos',
+    sugg:['Necesito un taladro por una hora','Necesito una escalera por hoy'],
+    props:[{id:'luis',d:'250 m',dm:250,p:'Préstamo gratis',pv:0,a:'Disponible ahora'},{id:'elena',d:'400 m',dm:400,p:'Alquiler S/ 5',pv:5,a:'Disponible hoy'},{id:'marco',d:'700 m',dm:700,p:'Trueque',pv:0,a:'Esta tarde'}]},
+  ayuda:{label:'Ayuda',hint:'Un favor o tiempo de alguien',steps:['Aceptada','Ayuda recibida'],acts:['Confirmar que recibí la ayuda'],ctx:'vec',ctxName:'entre vecinos',
+    sugg:['Necesito ayuda para mover un mueble','Necesito que alguien cuide a mi hijo 2 horas'],
+    props:[{id:'nelly',d:'200 m',dm:200,p:'Favor gratuito',pv:0,a:'Disponible ahora'},{id:'tomas',d:'600 m',dm:600,p:'Intercambio de habilidades',pv:0,a:'Hoy en la tarde'},{id:'ines',d:'900 m',dm:900,p:'A cambio de un favor',pv:0,a:'Mañana'}]}
+};
+var QUICK=[{k:'servicio',t:'Necesito un gasfitero para arreglar una fuga',l:'Gasfitero'},{k:'servicio',t:'Necesito un electricista, se fue la luz en la cocina',l:'Electricista'},{k:'producto',t:'Necesito 2 bidones de agua',l:'2 bidones de agua'}];
+Object.keys(PROV).forEach(function(k){PROV[k].adj={n:0,of:PROV[k].svc.n,unj:0}});
+PROV.carlos.adj={n:2,of:23,unj:0};PROV.maria.adj={n:1,of:18,unj:0};PROV.jose.adj={n:5,of:12,unj:2};
+var PROV_INIT=JSON.stringify(PROV);
+var ROLES=[['demanda','Busco ayuda','Pido servicios, productos o favores'],['oferta','Ofrezco un servicio','Doy a conocer lo que hago'],['ambos','Las dos cosas','Puedo pedir y también ofrecer']];
+var SVCS=['Gasfitería','Electricidad','Costura','Clases particulares','Cuidado de niños','Otro'];
+var AVS=['Hoy','Esta semana','Fines de semana'];
+var CTAGS=['Puntual','Claro con el problema','Buen trato','Cumplió lo acordado'];
+var NOSHOW=15000, GRACE=30000;
+var MOTIVES=['El problema es distinto al descrito','Hacen falta más materiales','Es más trabajo de lo previsto','Otro motivo (lo explico en el chat)'];
+var RS=['La otra persona no responde','El problema es distinto al descrito','No llegamos a acuerdo en el precio','Cambié de opinión'];
+var DONEL={servicio:'Trabajo realizado',producto:'Entrega realizada',prestamo:'Préstamo cerrado',ayuda:'Ayuda realizada'};
+var DQ={servicio:[['¿Dónde está el problema?',['Cocina','Baño','Techo o pared','Otro']],['¿Desde cuándo pasa?',['Hoy','Hace unos días','Hace semanas']],['¿Hay riesgo ahora?',['Sí, hay fuga o chispas','No, puede esperar']]],
+ producto:[['¿Cuántos necesitas?',['1','2','3 o más']],['¿Entrega o recojo?',['Que me lo lleven','Paso a recogerlo']]],
+ prestamo:[['¿Por cuánto tiempo?',['1 hora','Hoy','Varios días']],['¿Ofreces algo a cambio?',['Nada','Trueque','Propina']]],
+ ayuda:[['¿Cuánto tiempo toma?',['30 min','1 a 2 h','Medio día']],['¿Es urgente?',['Sí','No']]]};
+var EXPH='data:image/svg+xml;utf8,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 110"><rect width="160" height="110" fill="#cfd8e3"/><rect x="20" y="62" width="120" height="14" rx="4" fill="#7b8794"/><rect x="70" y="28" width="16" height="36" fill="#7b8794"/><path d="M78 80c-6 8-6 14 0 14s6-6 0-14z" fill="#2a8fd8"/><path d="M96 84c-4 6-4 10 0 10s4-4 0-10z" fill="#2a8fd8"/><text x="80" y="18" font-size="10" text-anchor="middle" fill="#334">foto de ejemplo</text></svg>');
+function num(v){var m=String(v).match(/\d+/);return m?parseInt(m[0],10):35}
+function fmtDur(ms){var q=Math.max(1,Math.round(ms/1000));if(q<60)return q+' s';var m=Math.floor(q/60);if(m<60)return m+' min'+(q%60?' '+(q%60)+' s':'');return Math.floor(m/60)+' h '+(m%60)+' min'}
+function fmtClock(ms){var q=Math.max(0,Math.floor(ms/1000)),h=Math.floor(q/3600),m=Math.floor(q%3600/60);q=q%60;var z=function(x){return (x<10?'0':'')+x};return (h?h+':':'')+z(m)+':'+z(q)}
+function sancLevel(u){return ['En regla','Aviso','Menos visibilidad','Suspensión temporal','Baja (con apelación)'][Math.min(u,4)]}
+function curPrice(n,x){return n.price!=null?n.price:x.pv}
+function cdText(r){var l=r-Date.now();return l>0?' (disponible en '+Math.ceil(l/1000)+' s)':''}
+function jobById(id){return S.jobs.filter(function(x){return x.id===id})[0]}
+function cancelInfo(rec,wc){
+  var el=Date.now()-rec.accAt;
+  if(wc)return {pen:0,txt:'Cancelar con causa no afecta tu cumplimiento.'};
+  if(rec.adjState==='rejected'||(rec.adj&&rec.adj.state==='rejected'))return {pen:0,txt:'No hubo acuerdo de precio: cancelar no te penaliza.'};
+  if(el<GRACE)return {pen:0,txt:'Estás en la ventana de gracia (demo: 30 s; real: unos minutos). Sin costo.'};
+  if(rec.verified)return {pen:10,txt:'El trabajo ya empezó. Cancelar ahora baja tu cumplimiento 10 puntos y el otro lado recibe un aviso.'};
+  return {pen:5,txt:'Pasó la ventana de gracia. Cancelar baja tu cumplimiento 5 puntos.'};
+}
+function newComposer(o,type,text,chip){return {open:o,type:type||null,text:text||'',chip:!!chip,textTouched:!!text,det:{q:{},text:'',photoUrl:'',video:''},detOpen:false,mod:null}}
+function mkDet(c){var d=c.det,has=d.text.trim()||d.photoUrl||d.video||Object.keys(d.q).length;if(!has)return null;ev('det');return {q:DQ[c.type].map(function(_,i){return d.q[i]||null}),text:d.text.trim(),photoUrl:d.photoUrl,video:d.video}}
+function detHTML(dt){
+  if(!dt)return '<span class="note">Sin detalles adicionales.</span>';
+  var b=[],qa=(dt.q||[]).filter(Boolean);
+  if(qa.length)b.push('<div class="chips static" style="margin-top:0">'+qa.map(function(a){return '<span class="chip">'+esc(a)+'</span>'}).join('')+'</div>');
+  if(dt.text)b.push('<span>“'+esc(dt.text)+'”</span>');
+  if(dt.photoUrl)b.push('<img class="thumb" alt="Foto del problema" src="'+dt.photoUrl+'">');else if(dt.photos)b.push('<img class="thumb" alt="Foto de ejemplo del problema" src="'+EXPH+'">');
+  if(dt.video)b.push('<span class="badge acc">Video: '+esc(dt.video)+' · con subtítulos</span>');
+  return b.length?'<div class="detbox"><b>Detalles del problema</b>'+b.join('')+'</div>':'<span class="note">Sin detalles adicionales.</span>';
+}
+function detComposer(c){
+  var d=c.det,qs=c.type?DQ[c.type]:null;
+  var b='<button class="chip" data-act="togDet" aria-expanded="'+!!c.detOpen+'">'+(c.detOpen?'Ocultar detalles':'+ Añadir detalles (opcional, no cuenta como clic)')+'</button>';
+  if(!c.detOpen)return b;
+  var h=b+'<div class="detbox">';
+  if(qs)h+=qs.map(function(q,qi){return '<span class="lbl">'+q[0]+'</span><div class="chips" style="margin-top:0" role="group" aria-label="'+esc(q[0])+'">'+q[1].map(function(a){return '<button class="chip" data-act="dq" data-q="'+qi+'" data-a="'+esc(a)+'" aria-pressed="'+(d.q[qi]===a)+'">'+a+'</button>'}).join('')+'</div>'}).join('');
+  else h+='<span class="note">Elige un tipo y verás preguntas guiadas.</span>';
+  h+='<label class="lbl" for="dtext">Cuéntalo con más detalle</label><textarea id="dtext" rows="3" placeholder="Qué pasó, qué ves, qué ya intentaste">'+esc(d.text)+'</textarea>'+
+    '<span class="lbl">Foto o video del problema</span><div class="row2"><label class="btn ghost sm">Foto<input id="dphoto" type="file" accept="image/*" hidden></label><label class="btn ghost sm">Video<input id="dvideo" type="file" accept="video/*" hidden></label><button class="btn ghost sm" data-act="dex">Usar ejemplo</button></div>';
+  if(d.photoUrl)h+='<img class="thumb" alt="Foto adjunta" src="'+d.photoUrl+'">';
+  if(d.video)h+='<span class="badge acc">Video: '+esc(d.video)+'</span>';
+  return h+'<p class="note">Solo lo ven quienes te proponen. Quitamos la ubicación de tus fotos. Video: máximo 30 s (en la demo, 20 MB). Sin internet se sube al volver.</p></div>';
+}
+var TAGS=['Puntual','Buen trato','Buen precio','Trabajo limpio'];
+var WHENS=[['Ahora mismo',1],['Hoy',12],['Mañana',36],['Esta semana',168]];
+var ETA={carlos:.2,maria:6,jose:2,rosa:.2,sol:.4,lalo:.25,luis:0,elena:5,marco:8,nelly:0,tomas:8,ines:30};
+function limitH(w){for(var i=0;i<WHENS.length;i++){if(WHENS[i][0]===w)return WHENS[i][1]}return 12}
+var JOBTXT={'Gasfitería':['Necesito arreglar una fuga en el lavadero','Se malogró la llave del baño'],'Electricidad':['Se fue la luz en la cocina','Necesito cambiar un tomacorriente'],'Costura':['Necesito arreglar un pantalón','Necesito ajustar un vestido'],'Clases particulares':['Busco clases de matemática para mi hijo','Necesito reforzar inglés'],'Cuidado de niños':['Necesito cuidado para mi hijo 2 horas','Busco alguien para el sábado en la tarde'],'Otro':['Necesito ayuda con una tarea del hogar','Necesito una mano con un arreglo']};
+var JOBPEOPLE=[{id:'j1',comm:'voz',who:'Marta Díaz',d:'400 m',when:'Hoy',rate:5,comment:'Muy puntual y dejó todo limpio.',cr:{r:4.8,n:12,c:98},addr:'Calle Los Pinos 123, dpto. 2 (simulada)',det:{q:['Cocina','Hace unos días','No, puede esperar'],text:'Gotea debajo del lavadero y la tubería de abajo está húmeda. Ya cerré la llave de paso.',photos:1,video:'gotera-lavadero.mp4 (12 s)'}},
+{id:'j2',comm:'texto',who:'Raúl Ortiz',d:'650 m',when:'Esta semana',rate:4,comment:'Buen trabajo, quedó todo bien.',cr:{r:4.1,n:3,c:80},addr:'Av. Las Flores 456 (simulada)',det:{q:['Baño','Hace semanas','No, puede esperar'],text:'',photos:0,video:''}}];
+var GREET={servicio:'Hola, gracias por elegirme. ¿A qué hora te queda bien?',producto:'Hola, recibí tu pedido. ¿Lo llevo a tu puerta o pasas a recogerlo?',prestamo:'Hola, claro, te lo presto. ¿Cuándo pasas a recogerlo?',ayuda:'Hola, con gusto te ayudo. ¿Cuándo te viene bien?'};
+var COM={
+  carlos:[{w:'Marta D.',s:5,t:'Llegó a la hora y dejó todo limpio. Cobró lo acordado.'},{w:'Jorge P.',s:5,t:'Resolvió la fuga en 20 minutos.'},{w:'Lucía R.',s:4,t:'Buen trabajo. Avisó tarde que se retrasaba.'}],
+  maria:[{w:'Raúl O.',s:5,t:'Explicó qué falló antes de empezar. Muy clara con el precio.'},{w:'Ana S.',s:5,t:'Rápida y ordenada.'},{w:'Pablo V.',s:4,t:'Buen servicio, algo más cara que otros.'}],
+  jose:[{w:'Elena C.',s:5,t:'Económico y cumplió.'},{w:'Marco R.',s:4,t:'Funciona bien, tardó un poco en llegar.'}]
+};
+var COMDEF=[{w:'Marta D.',s:5,t:'Todo en orden, muy amable.'},{w:'Raúl O.',s:4,t:'Cumplió lo acordado.'}];
+function getComments(id){var p=PROV[id];if(!p.comments)p.comments=(COM[id]||COMDEF).map(function(c){return {w:c.w,s:c.s,t:c.t}});return p.comments}
+function cmtHTML(c){return '<div class="cmt"><span><b>'+esc(c.w)+'</b> <span class="cstars" aria-label="'+c.s+' de 5 estrellas">'+'★'.repeat(c.s)+'☆'.repeat(5-c.s)+'</span></span><span>'+esc(c.t)+'</span></div>'}
+var DIR=['carlos','pedro','rosam'];
+var MODS=['Préstamo','Trueque','Alquiler','Donación','Favor','Intercambio de habilidades','Movilidad solidaria'];
+var ENEEDS=[
+ {id:'e1',k:'mayor',t:'Adulto mayor necesita movilidad',why:'Don Teodoro tiene cita en la posta y no puede caminar hasta la avenida.',needs:['Movilidad'],d:350,ang:40,conf:2,who:'Don Teodoro',tipo:'emerg',stars:5,addr:'Calle Las Rosas 88 (simulada)'},
+ {id:'e2',k:'sismo',t:'Familia sin agua tras el sismo',why:'Se rompió la tubería de su edificio. Son 5 personas y una es bebé.',needs:['Agua'],d:500,ang:200,conf:5,who:'Familia Rojas',tipo:'emerg',stars:5,addr:'Av. Los Álamos 410 (simulada)'},
+ {id:'e3',k:'medico',t:'Persona necesita primeros auxilios',why:'Una vecina se cayó de la escalera y tiene un corte en la pierna.',needs:['Primeros auxilios'],d:700,ang:300,conf:1,who:'Carmen Ruiz',tipo:'emerg',stars:5,addr:'Jr. Las Dalias 77 (simulada)'},
+ {id:'e4',k:'incendio',t:'Incendio en una vivienda cercana',why:'Se quemó parte de la cocina. La familia está bien pero necesita dónde dormir hoy.',needs:['Refugio temporal','Ropa y frazadas'],d:420,ang:120,conf:3,who:'Familia Ortega',tipo:'emerg',stars:5,addr:'Pasaje Girasoles 9 (simulada)'}
+];
+var ERES=[{d:150,ang:120},{d:400,ang:260},{d:300,ang:330},{d:600,ang:80},{d:520,ang:150}];
+var EGROUPS=[{n:'Brigada vecinal',d:250,ang:20},{n:'Serenazgo',d:450,ang:100},{n:'Centro de salud',d:700,ang:160},{n:'Bomberos',d:720,ang:230},{n:'Punto de apoyo (parroquia)',d:600,ang:350}];
+var RCHIPS=['Agua · 3','Botiquines · 2','Movilidad · 1','Herramientas · 4','Espacios seguros · 1'];
+var CAPS=[['primeros','Primeros auxilios'],['movilidad','Movilidad'],['herramientas','Herramientas'],['mayores','Ayudar a adultos mayores']];
+var TUT=[
+  ['Cuéntanos qué necesitas','Eliges el tipo, lo describes y publicas. Son tres pasos como máximo.'],
+  ['Tu barrio propone','Vecinos y negocios cercanos responden con precio, distancia, reputación y disponibilidad. Tú eliges.'],
+  ['Si hay una emergencia, la red se activa','Marcas Estoy bien, Necesito ayuda o Puedo ayudar. Solo se muestra tu zona aproximada, nunca tu dirección.']
+];
+var CASES=[
+  {t:'Caso 1 · Servicio',g:'Necesito un gasfitero: de la necesidad a la reputación de dos vías.',
+   steps:[['Publicar la necesidad (tipo Servicio) y elegir el plazo: prueba "Ahora mismo"','pub:servicio'],['Opcional: "Añadir detalles" (preguntas guiadas, descripción, foto o video) sin sumar clics','det'],['Ver las propuestas y compararlas: ordenar o abrir un perfil (mira su historial de ajustes de precio)','cmp:servicio'],['Aceptar una propuesta (el precio es estimado)','acc:servicio'],['Validar el código de encuentro (simula que el proveedor lo ingresa): arranca el cronómetro','code'],['Simular que el proveedor propone otro precio: acepta, contraoferta o rechaza','adjn'],['Escribirle por el chat para coordinar','chat'],['Confirmar el servicio (muestra cuánto tardó), dar estrellas y dejar un comentario','rate:servicio'],['Ver cómo el proveedor también te califica como cliente','rated2']],
+   say:'No buscamos entre cientos de publicaciones: el vecino dice qué necesita y su barrio propone. El precio es estimado y solo cambia si ambos lo aceptan. Al final se califican los dos.'},
+  {t:'Caso 2 · Entre vecinos',g:'Un taladro por una hora, sin dinero o con trueque.',
+   steps:[['Pedir el taladro (tipo Préstamo)','pub:prestamo'],['Aceptar una propuesta','acc:prestamo'],['Validar el código de encuentro','code'],['Confirmar la entrega','stage:prestamo:1'],['Confirmar la devolución','stage:prestamo:2'],['Valorar al vecino','rate:prestamo'],['Ver cómo el vecino también te valora','rated2']],
+   say:'El mismo motor sirve para favores y préstamos. Se confirman entrega y devolución, y la reputación sale solo de interacciones confirmadas.'},
+  {t:'Caso 3 · Emergencia',g:'La red cotidiana cambia de reglas después de un sismo.',
+   steps:[['Activar el modo emergencia','emg'],['Marcar tu estado: Estoy bien, Necesito ayuda o Puedo ayudar','estado'],['Ofrecer ayuda a una necesidad cercana','ayudo'],['Tocar una necesidad para verla en el mapa','mapa']],
+   say:'No hace falta abrir la app en los segundos críticos. La red ya existe: antes se prepara, después se coordina con tres acciones.'},
+  {t:'Caso 4 · Sin internet',g:'La app abre sin conexión y sincroniza al volver.',
+   steps:[['Quitar internet (botón Online de arriba)','off'],['Crear una solicitud sin internet','pend'],['Restaurar el internet','on'],['Ver cómo la solicitud se sincroniza','synced']],
+   say:'La app abre sin internet y guarda tu solicitud como pendiente. Se envía sola cuando vuelve la conexión. No prometemos comunicación entre celulares sin red.'},
+  {t:'Caso 5 · Ofrezco un servicio',g:'Ahora eres tú quien ofrece: ves el problema, cotizas, ajustas con acuerdo y calificas al cliente.',
+   steps:[['En Perfil, elegir "Ofrezco un servicio" o "Las dos cosas"','role'],['Publicar tu servicio','offer'],['Abrir una solicitud: detalles, foto, distancia aproximada y calificación del cliente; prueba "Pedir más detalles"','more'],['Enviar tu propuesta con precio estimado (opción de visita de diagnóstico)','sent'],['Validar el código que te da el cliente (prueba uno incorrecto primero): arranca el cronómetro','code'],['Proponer otro precio con motivo: el cliente decide','adj'],['Escribirle al cliente por el chat','chat'],['Marcar el servicio como hecho (muestra el tiempo) y calificar al cliente','jrate'],['Ver cuándo el cliente también te califica','jobdone']],
+   say:'Una misma persona puede pedir y ofrecer. Quien ofrece ve el problema antes de cotizar, no puede subir el precio sin acuerdo, y construye reputación. También el cliente tiene calificación.'},
+  {t:'Caso 6 · Cancelaciones',g:'Reglas justas sin pagos: cuida el cumplimiento, no el bolsillo.',
+   steps:[['Abrir la necesidad y cancelar dentro de la ventana de gracia (30 s): sin costo','cancel:free'],['Preparar de nuevo, esperar y cancelar tarde: baja tu cumplimiento','cancel:late'],['Cancelar con causa (elige "La otra persona no responde"): no penaliza','cancel:cause'],['Esperar 15 s y tocar "¿No llegó?": cancelas sin penalización','noshow'],['Escribir en el chat "cancelemos por WhatsApp" y ver el aviso','offapp']],
+   say:'Sin pagos, lo que protege la confianza es el cumplimiento. La consecuencia crece con el avance del trabajo, cancelar con causa no se penaliza y no se permite pedir cancelar fuera de la app. Cada vez que preparas el caso tienes una propuesta nueva para probar una variante.'},
+  {t:'Caso 7 · Vender un producto',g:'La misma lógica al revés: publicas con tu precio y los vecinos proponen.',
+   steps:[['Publicar un producto con foto, descripción y precio de lista','sell'],['Contraofertar a quien propone menos (máximo 2 rondas)','counter'],['Aceptar una propuesta y cerrar la venta','sold'],['Validar el código de encuentro','code'],['Marcar la entrega y calificar al comprador','jrate']],
+   say:'Quien vende fija un precio de lista; los vecinos lo compran o proponen uno menor, y el vendedor acepta, rechaza o contraoferta. Usa el mismo motor: código, chat y calificación de dos vías.'},
+  {t:'Caso 8 · Nivel solidario',g:'Ayudar suma puntos privados y un nombre de nivel; la visibilidad de tus productos mejora con el nivel.',
+   steps:[['En Perfil, ver tu nivel y tus puntos privados (solo tú los ves)','solview'],['En Vecinos, ofrecer ayuda a Ana (Ofrecer, esperar, Validar código y Ayuda hecha)','helpdone'],['Ver el balance: puntos, personas distintas y el salto de nivel','bal'],['Repetir con Ana en su segundo pedido: rinde la mitad','dim'],['Ayudar a Lucía: ella califica con 3 estrellas y no suma puntos','nopts'],['Ver en "Productos cerca" cómo sube tu producto con el nivel (cambia el peso en la guía)','mkt'],['Abrir la constancia de ayuda vecinal y alternar nombre o código','cons']],
+   say:'Los puntos y el puesto son privados: quien no ayuda no se siente señalado. En público solo se ve el nombre del nivel. Solo cuentan ayudas confirmadas con código y 4 o 5 estrellas, con rendimientos decrecientes y tope diario para evitar trampas. El peso de la visibilidad es un parámetro que probaremos con usuarios reales.'},
+  {t:'Caso 9 · Emergencia ampliada',g:'Tipo de situación, institución primero, muro con título y porqué, ubicación controlada y recursos sin dinero.',
+   steps:[['Activar el modo emergencia','emg'],['Tocar "Necesito ayuda" y elegir una situación (prueba Incendio)','sos:pick'],['Ver el contacto oficial primero, escribir qué pasó y qué necesitas, y publicar','sos:pub'],['Esperar a que un vecino acepte, abrir el chat y compartir tu ubicación exacta solo con él','sos:share'],['Probar un caso sensible (Violencia o acoso): se envía en privado','sos:priv'],['Filtrar el muro por tipo de situación','efilt'],['Confirmar el reporte de otro vecino','conf'],['Ofrecer un donativo a un punto de acopio','don']],
+   say:'Primero la institución oficial, después los vecinos. En público solo se ve la zona aproximada; la ubicación exacta la decide quien pide ayuda y solo la ve quien aceptó. Los casos sensibles no se publican. Los donativos son sin dinero y van a puntos de acopio.'},
+  {t:'Caso 10 · Muro, idiomas y accesibilidad',g:'Muro completo de pedidos y ofertas, idiomas y una app que no depende del audio.',
+   steps:[['En Vecinos, filtrar el muro por modalidad','wfilt'],['Ver las Ofertas y tocar "Lo quiero"','wofr'],['Publicar tu propia oferta al barrio','wpub'],['Cambiar el idioma (botón de arriba o Perfil)','lang'],['Probar alto contraste, texto grande o alertas visuales en Perfil','a11y'],['Elegir cómo prefieres comunicarte y abrir un chat para usar las frases rápidas','comm'],['Verificar tu perfil (simulado)','verify']],
+   say:'El idioma se cambia sin tocar el diseño; quechua, francés, portugués, chino y japonés están como ejemplo de las pantallas principales. Nada depende del audio: chat de texto con frases rápidas, avisos visuales y con vibración, y un campo para decir cómo prefieres comunicarte.'}
+];
+
+/* Estado */
+var S, T=[], uid=0, tt=null, lastKey='', hadOverlay=false;
+function fresh(keepCase){PROV=JSON.parse(PROV_INIT);var o=(typeof S!=='undefined'&&S)?S:null;return {lang:o?o.lang:'es',hc:o?o.hc:false,big:o?o.big:false,vis:o?o.vis:true,comm:o?o.comm:'voz',sol:solNew(),verified:false,v:{dni:'',consent:false,selfie:false},cons:{name:false},hlp:{},conf:{},posts:[],sos:{tipo:null,why:'',needs:{},called:false},eFilt:'Todas',wall:'req',filt:'Todas',myOffers:[],wo:{mod:null,text:''},msort:'rec',pledge:{},don:{qty:5,ac:null},acopios:[],ac:{n:'',acc:{}},brig:false,tab:'inicio',online:true,emergency:false,needs:[],activeNeed:null,
+  composer:newComposer(false,null,'',false),lastClicks:null,resolved:0,
+  caps:{primeros:true,movilidad:false,herramientas:true,mayores:false},estado:null,sosChoice:'Agua',mineSos:null,helped:{},selNeed:null,
+  sheet:null,tut:0,done:new Set(),tip:true,offered:{},toast:'',caseIdx:keepCase||0,cw:'Hoy',role:'demanda',mode:'demanda',offers:[],jobs:[],od:{k:null,price:'S/ 35',av:'Hoy'},chats:{},chatOpen:null,chatDraft:'',myComments:[],sales:[],sell:{text:'',price:'',photo:null},adj:{price:0,motive:null,photo:null},cx:{reason:null},me:{vec:{r:0,n:0},svc:{r:0,n:0},cli:{r:0,n:0},cumpl:{pct:100},adj:{n:0,ok:0},unj:0}}}
+
+/* Chat */
+function chatChips(c){var b=c.kind==='prov'?['¿A qué hora puedes?','Te espero a las 5 pm','Avísame cuando llegues','Gracias']:c.kind==='emg'?['Estoy en el segundo piso','Gracias, te espero','¿Cuánto demoras?','Ya estoy bien']:['¿Qué necesitas exactamente?','Puedo ir hoy a las 5 pm','Estoy en camino','Gracias'];return b.concat(QPH)}
+function openChatFor(key,name,sub,kind,first){if(!S.chats[key])S.chats[key]={key:key,name:name,sub:sub,kind:kind,msgs:[{from:'them',t:first}],replyN:0,typing:false}}
+function replyFor(c,text){
+  var t=text.toLowerCase(), prov=c.kind==='prov';
+  if(/gracias/.test(t))return prov?'A ti, vecino. Cualquier cosa me escribes por aquí.':'Gracias a ti. Nos vemos.';
+  if(/precio|cuánto|cuanto|cobr/.test(t))return prov?'Es el precio de mi propuesta. Si hacen falta materiales, te aviso antes.':'Quedamos en el precio de tu propuesta.';
+  if(/espero|\d ?pm/.test(t))return prov?'Perfecto, ahí estaré. Te aviso cuando salga.':'Perfecto, te espero a esa hora.';
+  if(/llegues|camino/.test(t))return prov?'Claro, te escribo apenas llegue.':'Perfecto, te espero.';
+  if(/repetir/.test(t))return 'Claro, te lo escribo de nuevo con más calma.';
+  if(/ya llegu/.test(t))return 'Perfecto, ya te veo.';
+  if(/necesito ayuda/.test(t))return 'Estoy atento. Dime qué necesitas primero.';
+  if(/todo bien|ya estoy bien/.test(t))return 'Me alegra. Quedo atento por si algo cambia.';
+  if(c.kind==='emg'){var es=['Hola, gracias por responder. ¿Puedes llegar pronto?','Perfecto, aquí te espero.','Listo, gracias por tu ayuda.'];var rr=es[Math.min(c.replyN,es.length-1)];c.replyN++;return rr}
+  var seq=prov?['Puedo hoy en la tarde, ¿te parece a las 5 pm?','Perfecto, ahí estaré. Te aviso cuando salga.','Listo, quedamos así.']:['Hola, gracias por responder. ¿Puedes venir hoy?','Perfecto, te espero. ¿Necesitas que deje algo preparado?','Listo, gracias.'];
+  var r=seq[Math.min(c.replyN,seq.length-1)];c.replyN++;return r;
+}
+function sendChat(text){
+  var c=S.chats[S.chatOpen];if(!c)return;
+  text=(text||S.chatDraft||'').trim();if(!text)return;
+  S.chatDraft='';ev('chat');
+  var off=/cancel|fuera de la app|whatsapp|yape|plin/i.test(text), sysm={from:'sys',t:'Aviso: pedir o aceptar cancelar fuera de la app, o pagar por otros medios para saltarse las reglas, no está permitido y afecta ambas cuentas. Si pasa, repórtalo.'};
+  if(off)ev('offapp');
+  if(!S.online){c.msgs.push({from:'me',t:text,pend:true});if(off)c.msgs.push(sysm);render();return}
+  c.msgs.push({from:'me',t:text});if(off)c.msgs.push(sysm);c.typing=true;render();
+  T.push(setTimeout(function(){c.typing=false;c.msgs.push({from:'them',t:replyFor(c,text)});render()},1300));
+}
+function flushChats(){
+  Object.keys(S.chats).forEach(function(k){
+    var c=S.chats[k],p=c.msgs.filter(function(m){return m.pend});if(!p.length)return;
+    p.forEach(function(m){m.pend=false});var last=p[p.length-1].t;c.typing=true;
+    T.push(setTimeout(function(){c.typing=false;c.msgs.push({from:'them',t:replyFor(c,last)});render()},1800));
+  });
+}
+function chatHTML(){
+  var c=S.chats[S.chatOpen];if(!c)return '';
+  return '<div class="chatpanel" role="dialog" aria-modal="true" aria-label="Chat con '+esc(c.name)+'" tabindex="-1">'+
+    '<div class="chathead"><button class="iconbtn" data-act="closeChat" aria-label="Volver">'+ic('back')+'</button><span class="avatar">'+initials(c.name)+'</span><div class="pname"><b>'+esc(c.name)+'</b><span class="role">'+esc(c.sub)+'</span></div></div>'+
+    '<p class="chatnote">Tu dirección exacta no se comparte en el chat. Para cancelar o cambiar el precio usa los botones de la app. Conversación simulada.</p>'+
+    '<div class="msgs" id="msgs" role="log" aria-live="polite">'+c.msgs.map(function(m){return '<div class="msg '+m.from+'">'+esc(m.t)+(m.pend?'<small>Pendiente de envío</small>':'')+'</div>'}).join('')+(c.typing?'<div class="msg them typing">escribiendo…</div>':'')+'</div>'+
+    '<div class="quick">'+chatChips(c).map(function(q,i){return '<button class="chip" data-act="quickMsg" data-i="'+i+'">'+esc(q)+'</button>'}).join('')+'</div>'+
+    '<div class="composer"><input id="chatin" type="text" autocomplete="off" placeholder="Escribe un mensaje" aria-label="Mensaje" value="'+esc(S.chatDraft)+'"><button class="btn sm" data-act="sendChat">Enviar</button></div></div>';
+}
+function mensajes(){
+  var keys=Object.keys(S.chats).reverse();
+  var h='<section><h2 class="h1">Mensajes</h2><p class="sub">Coordina con la persona con quien cierras el servicio.</p></section>';
+  if(!keys.length)return h+'<div class="card"><b>Aún no tienes conversaciones</b><span class="note">Se abren solas cuando aceptas una propuesta o aceptan la tuya.</span></div>';
+  return h+'<div class="list">'+keys.map(function(k){var c=S.chats[k],last=c.msgs[c.msgs.length-1];
+    return '<button class="item" data-act="openChat" data-key="'+k+'"><span class="avatar">'+initials(c.name)+'</span><span class="ibody"><span class="ititle">'+esc(c.name)+'</span><span class="isub trunc">'+(last.from==='me'?'Tú: ':'')+esc(last.t)+'</span></span><span class="chev" aria-hidden="true">›</span></button>'}).join('')+'</div>';
+}
+
+/* Ofertante */
+function segHTML(){return '<div class="seg" role="group" aria-label="Qué quieres hacer ahora">'+[['demanda','Busco ayuda'],['oferta','Ofrezco']].map(function(o){return '<button data-act="mode" data-k="'+o[0]+'" aria-pressed="'+(S.mode===o[0])+'">'+o[1]+'</button>'}).join('')+'</div>'}
+function codeForm(j,f){
+  return '<span class="badge acc">Propuesta aceptada</span><span class="note">Dirección exacta: '+esc(j.addr||'')+'</span><label class="lbl" for="jc'+j.id+'">Pide a '+f+' su código de encuentro</label><div class="row2"><input id="jc'+j.id+'" class="field" inputmode="numeric" maxlength="4" placeholder="0000" autocomplete="off"><button class="btn sm" data-act="verifyJob" data-id="'+j.id+'">Validar</button></div>'+(j.err?'<span class="note warn" role="alert">Código incorrecto. Revísalo con '+f+'.</span>':'')+'<span class="note">Código de demo: '+j.code+'</span>';
+}
+function adjJob(j,f){
+  if(j.kind==='venta')return '';
+  var a=j.adjState;
+  if(!a)return '<button class="btn ghost" data-act="openAdjust" data-id="'+j.id+'">Proponer otro precio</button>';
+  if(a==='pending')return '<span class="badge warn">Esperando respuesta de '+f+' sobre S/ '+j.adjTo+'…</span>';
+  if(a==='accepted')return '<span class="badge good">Precio acordado entre ambos: S/ '+j.pnum+'</span>';
+  if(a==='counter')return '<div class="card warn"><b>'+f+' contraofertó S/ '+j.counter+'</b><div class="row2"><button class="btn sm" data-act="adjAccC" data-id="'+j.id+'">Aceptar</button><button class="btn sm ghost" data-act="adjRejC" data-id="'+j.id+'">Rechazar</button></div></div>';
+  return '<div class="card"><b>Sin acuerdo de precio</b><span class="note">Se mantiene S/ '+j.pnum+'. Si no quieres seguir, cancela sin penalización.</span>'+(j.adjReported?'<span class="badge good">Rechazo reportado</span>':'<button class="btn ghost" data-act="reportRej" data-id="'+j.id+'">Reportar rechazo sin motivo</button>')+'</div>';
+}
+function rateClientForm(j,f){
+  return '<div class="card"><b>'+(j.kind==='venta'?'Entrega realizada':'Trabajo realizado')+' en '+fmtDur(j.dur)+'. Califica el nivel de servicio y deja tus comentarios</b>'+
+    '<span class="note">Calificas a '+f+' como '+(j.kind==='venta'?'comprador':'cliente')+'. Las calificaciones se muestran cuando ambos terminan.</span>'+
+    '<div class="stars" role="group" aria-label="Calificación">'+[1,2,3,4,5].map(function(q){return '<button data-act="jstar" data-id="'+j.id+'" data-n="'+q+'" aria-label="'+q+(q===1?' estrella':' estrellas')+'" aria-pressed="'+((j.myRate||0)>=q)+'">'+ic('star',22)+'</button>'}).join('')+'</div>'+
+    '<span class="lbl">Toca para sumar a tu comentario</span><div class="chips" style="margin-top:0">'+CTAGS.map(function(t){return '<button class="chip" data-act="jtag" data-id="'+j.id+'" data-k="'+t+'">'+t+'</button>'}).join('')+'</div>'+
+    '<label class="lbl" for="jcm'+j.id+'">Comentario (opcional)</label><textarea id="jcm'+j.id+'" rows="2">'+esc(j.myComment||'')+'</textarea>'+
+    '<button class="btn" data-act="jrate" data-id="'+j.id+'"'+(j.myRate?'':' disabled')+'>Enviar calificación</button></div>';
+}
+function jobCard(j){
+  var f=j.who.split(' ')[0], act='', ven=j.kind==='venta';
+  var head='<div style="display:flex;flex-direction:column;gap:2px"><b>'+esc(j.who)+'</b>'+commBadge(j)+'<span>'+esc(j.text)+'</span><span class="note">A ~'+j.d+' (aprox.) · '+esc(j.pay)+' · '+(ven?'Entrega':'Lo necesita')+': <b>'+esc(j.when)+'</b></span>'+(j.cr?'<span class="note">'+(ven?'Comprador':'Cliente')+': ★ '+j.cr.r.toFixed(1)+' · '+j.cr.n+(ven?' compras':' servicios')+' · cumple '+j.cr.c+'%</span>':'')+'</div>';
+  if(j.status==='new')act='<button class="btn" data-act="openPropose" data-id="'+j.id+'">Ver solicitud y cotizar</button>';
+  else if(j.status==='sent')act='<span class="badge warn">Esperando respuesta de '+f+'…</span>';
+  else if(j.status==='accepted'){
+    if(j.verified)act='<span class="badge good">Encuentro confirmado con código</span><div class="card"><b>'+(ven?'Entrega en curso':'Trabajo en curso')+'</b><span class="timer" data-since="'+j.startedAt+'">'+fmtClock(Date.now()-j.startedAt)+'</span><span class="note">Desde que se validó el código. Es informativo, no un cobro.</span><button class="btn sm ghost" data-act="skipTime" data-k="j" data-id="'+j.id+'">Demo: avanzar 45 min</button></div>'+adjJob(j,f);
+    else act=codeForm(j,f)+'<button class="btn ghost" data-act="noShow" data-k="j" data-id="'+j.id+'" data-ready="'+(j.accAt+NOSHOW)+'"'+(Date.now()<j.accAt+NOSHOW?' disabled':'')+'>Marcar que '+f+' no apareció<span class="cd">'+cdText(j.accAt+NOSHOW)+'</span></button>';
+    act+='<div class="row2"><button class="btn ghost" data-act="openChat" data-key="'+j.id+'">Escribir a '+f+'</button>'+(j.verified&&j.adjState!=='pending'&&j.adjState!=='counter'?'<button class="btn" data-act="jobDone" data-id="'+j.id+'">'+(ven?'Entrega hecha':'Servicio hecho')+'</button>':'')+'</div><button class="btn ghost" data-act="openCancel" data-k="j" data-id="'+j.id+'">Cancelar</button>';
+  }
+  else if(j.status==='toRate')act=rateClientForm(j,f);
+  else if(j.status==='waiting')act='<span class="badge warn">Hecho en '+fmtDur(j.dur)+' · esperando que '+f+' también te califique…</span>';
+  else if(j.status==='cancelled')act='<span class="badge warn">Cancelado</span><span class="note">'+esc(j.cancelNote||'')+'</span>';
+  else act='<span class="badge good">Hecho en '+fmtDur(j.dur)+' · ★ '+j.stars+'</span><span class="note">'+f+' te dijo: “'+esc(j.comment)+'”</span><span class="note">Tu calificación a '+f+': ★ '+j.myRate+'</span>';
+  return '<article class="card">'+head+act+'</article>';
+}
+function offerCard(sl,o){
+  var f=o.who.split(' ')[0],st=o.state,a='';
+  var tag=o.price>=o.list?'Compra al precio de lista':'Propone S/ '+o.price+' (lista S/ '+o.list+')';
+  if(st==='new')a='<div class="row2"><button class="btn sm" data-act="offAcc" data-id="'+o.id+'">Aceptar S/ '+o.price+'</button><button class="btn sm ghost" data-act="offRej" data-id="'+o.id+'">Rechazar</button></div>'+(o.price<o.list?'<button class="btn ghost" data-act="offCtr" data-id="'+o.id+'">Contraofertar S/ '+Math.round((o.price+o.list)/2)+'</button>':'');
+  else if(st==='waiting')a='<span class="badge warn">Esperando respuesta de '+f+' a tu contraoferta…</span>';
+  else if(st==='recounter')a='<span class="note"><b>'+f+' contraofertó S/ '+o.price+'</b> (última ronda)</span><div class="row2"><button class="btn sm" data-act="offAcc" data-id="'+o.id+'">Aceptar S/ '+o.price+'</button><button class="btn sm ghost" data-act="offRej" data-id="'+o.id+'">Rechazar</button></div>';
+  else if(st==='sold')a='<span class="badge good">Vendido a S/ '+o.price+'</span>';
+  else if(st==='lost')a='<span class="badge">Cerrada: el producto se vendió</span>';
+  else a='<span class="badge warn">Rechazada</span>';
+  return '<div class="offer"><span><b>'+esc(o.who)+'</b> · '+o.d+'<br><span class="note">'+tag+' · ★ '+o.cr.r.toFixed(1)+' · cumple '+o.cr.c+'%</span></span>'+a+'</div>';
+}
+function salesHTML(){
+  var h='';
+  if(S.sales.length)h+='<section><h3 class="sec">Mis productos</h3><div class="list">'+S.sales.map(function(sl){
+    return '<article class="card">'+(sl.photo?'<img class="thumb" alt="Foto del producto" src="'+sl.photo+'">':'')+'<b>'+esc(sl.text)+'</b><span class="note">Precio de lista S/ '+sl.price+' · '+(sl.status==='sold'?'Vendido a S/ '+sl.sold:'Tus vecinos ven este precio')+'</span>'+(sl.offers.length?sl.offers.map(function(o){return offerCard(sl,o)}).join(''):'<span class="badge warn">Esperando propuestas…</span>')+'</article>'}).join('')+'</div></section>';
+  var vj=S.jobs.filter(function(j){return j.kind==='venta'});
+  if(vj.length)h+='<section><h3 class="sec">Entregas de tus ventas</h3><div class="list">'+vj.map(jobCard).join('')+'</div></section>';
+  return h;
+}
+function ofertaHome(){
+  var sj=S.jobs.filter(function(j){return j.kind!=='venta'});
+  var h='<section><h2 class="h1">Ofrece tu servicio</h2><p class="sub">Cuéntanos qué haces y tu barrio te encuentra. Tu reputación crece con cada trabajo.</p><button class="btn big" data-act="openOffer">'+(S.offers.length?'Publicar otro servicio':'Publicar mi servicio')+'</button><button class="btn ghost big" style="margin-top:8px" data-act="openSell">Vender un producto</button></section>'+salesHTML();
+  if(!S.offers.length)return h+'<div class="card"><b>Aún no ofreces ningún servicio</b><span class="note">Publica tu servicio para ver solicitudes de tu zona.</span></div>';
+  h+='<section><h3 class="sec">Mis servicios</h3><div class="list">'+S.offers.map(function(o){return '<div class="item"><span class="itype">'+ic('person',20)+'</span><span class="ibody"><span class="ititle">'+esc(o.k)+'</span><span class="isub">'+esc(o.price)+' · '+o.av+'</span></span><span class="badge good">Visible</span></div>'}).join('')+'</div></section>';
+  h+='<section><h3 class="sec">Solicitudes cerca de ti</h3><p class="secsub">Mira el problema, cotiza un precio estimado y el vecino elige.</p><div class="list">'+sj.map(jobCard).join('')+'</div></section>';
+  return h;
+}
+function publishOffer(){
+  var od=S.od;if(!od.k)return;
+  S.offers.unshift({id:++uid,k:od.k,price:(od.price||'').trim()||'A convenir',av:od.av});
+  if(!S.jobs.some(function(j){return j.kind!=='venta'})){
+    var tx=JOBTXT[od.k]||JOBTXT['Otro'], pn=num(S.offers[0].price);
+    S.jobs=S.jobs.concat(JOBPEOPLE.map(function(q,i){var o=JSON.parse(JSON.stringify(q));return {id:q.id,kind:'servicio',who:q.who,d:q.d,when:q.when,text:tx[i],pay:'S/ '+pn,pnum:pn,rate:q.rate,comment:q.comment,cr:o.cr,addr:q.addr,det:o.det,comm:q.comm,status:'new',stars:0}}));
+  }
+  S.sheet=null;ev('offer');toast('Servicio publicado. Ya te pueden encontrar en tu zona.');
+}
+function askMore(id){
+  var j=jobById(id);if(!j||j.more)return;
+  var f=j.who.split(' ')[0];j.more='asked';render();
+  T.push(setTimeout(function(){
+    j.more='done';var d=j.det||{q:[],text:'',photos:0,video:''};
+    j.det={q:d.q,text:(d.text?d.text+' ':'')+'Añadido: el goteo aumenta cuando abro el agua caliente.',photos:(d.photos||0)+1,video:d.video};
+    ev('more');toast(f+' añadió más detalles y una foto nueva.');
+  },1600));
+}
+function sendProposal(id){
+  var j=jobById(id);if(!j||j.status!=='new')return;
+  var el=document.getElementById('pprice');if(el&&el.value.trim())j.pnum=num(el.value);
+  j.pay='S/ '+j.pnum+' (estimado)'+(j.diag?' + visita S/ 10':'');
+  j.status='sent';S.sheet=null;ev('sent');toast('Propuesta enviada. '+j.who.split(' ')[0]+' la está revisando.');
+  T.push(setTimeout(function(){
+    j.code=String(1000+Math.floor(Math.random()*9000));j.verified=false;j.err=false;j.accAt=Date.now();
+    j.status='accepted';openChatFor(j.id,j.who,'Cliente · tu servicio','client','Hola, vi tu propuesta. ¿Puedes venir hoy?');
+    toast(j.who.split(' ')[0]+' aceptó tu propuesta. Ya puedes escribirle.');
+  },2000));
+}
+function adjSend(id){
+  var j=jobById(id);if(!j||S.adj.motive===null)return;
+  var np=num(S.adj.price), old=j.pnum, f=j.who.split(' ')[0];
+  j.adjState='pending';j.adjTo=np;S.me.adj.n++;
+  j.adjLog=(j.adjLog||[]).concat([{from:old,to:np,motive:MOTIVES[S.adj.motive]}]);
+  S.sheet=null;ev('adj');toast('Propuesta de precio enviada. '+f+' decide.');
+  T.push(setTimeout(function(){
+    if(np<=Math.round(old*1.35)){j.pnum=np;j.pay='S/ '+np;j.adjState='accepted';S.me.adj.ok++;toast(f+' aceptó el nuevo precio: S/ '+np+'.')}
+    else{j.adjState='counter';j.counter=Math.round((old+np)/2);toast(f+' contraofertó S/ '+j.counter+'.')}
+  },2000));
+}
+function jobDone(id){
+  var j=jobById(id);if(!j||j.status!=='accepted'||!j.verified)return;
+  j.dur=Date.now()-j.startedAt;j.status='toRate';S.resolved++;
+  toast((j.kind==='venta'?'Entrega':'Servicio')+' marcado como hecho en '+fmtDur(j.dur)+'.');
+}
+function jobRate(id){
+  var j=jobById(id);if(!j||j.status!=='toRate'||!j.myRate)return;
+  var f=j.who.split(' ')[0];
+  j.status='waiting';ev('jrate');toast('Calificación enviada. Se muestra cuando '+f+' también te califique.');
+  T.push(setTimeout(function(){
+    j.stars=j.rate;var m=S.me.svc;m.r=(m.r*m.n+j.rate)/(m.n+1);m.n++;
+    var nm=j.who.split(' ');S.myComments.unshift({w:nm[0]+' '+nm[1][0]+'.',s:j.rate,t:j.comment});
+    if(j.cr){j.cr.r=(j.cr.r*j.cr.n+j.myRate)/(j.cr.n+1);j.cr.n++}
+    j.status='done';ev('jobdone');toast(nm[0]+' te calificó con '+j.rate+' estrellas y dejó un comentario.');
+  },1600));
+}
+function adjAccC(id){var j=jobById(id);if(!j)return;j.pnum=j.counter;j.pay='S/ '+j.pnum;j.adjState='accepted';S.me.adj.ok++;render()}
+function sellReady(){return S.sell.text.trim().length>2&&/\d/.test(S.sell.price)&&num(S.sell.price)>0}
+function sellPublish(){
+  if(!sellReady())return;
+  var id='s'+(++uid), pr=num(S.sell.price);
+  var sale={id:id,text:S.sell.text.trim(),price:pr,photo:S.sell.photo,status:'open',offers:[]};
+  S.sales.unshift(sale);S.sheet=null;ev('sell');toast('Producto publicado. Tus vecinos ya lo ven.');
+  var B=[{who:'Lucía Prado',d:'300 m',pr:pr,acc1:true,cr:{r:4.9,n:15,c:99},rate:5,comment:'Producto como en la foto, trato muy amable.'},
+    {who:'Mario Soto',d:'550 m',pr:Math.max(1,Math.round(pr*0.8)),acc1:true,cr:{r:4.5,n:6,c:92},rate:4,comment:'Todo bien, entrega puntual.'},
+    {who:'Gloria Vera',d:'800 m',pr:Math.max(1,Math.round(pr*0.6)),acc1:false,cr:{r:4.2,n:3,c:85},rate:4,comment:'Buena atención.'}];
+  B.forEach(function(b,i){T.push(setTimeout(function(){sale.offers.push({id:id+'o'+i,who:b.who,d:b.d,price:b.pr,list:pr,state:'new',acc1:b.acc1,cr:b.cr,rate:b.rate,comment:b.comment});render()},1200*(i+1)))});
+}
+function findOffer(oid){for(var i=0;i<S.sales.length;i++){for(var k=0;k<S.sales[i].offers.length;k++){if(S.sales[i].offers[k].id===oid)return [S.sales[i],S.sales[i].offers[k]]}}return null}
+function sellDeal(sl,o){
+  o.state='sold';sl.status='sold';sl.sold=o.price;
+  sl.offers.forEach(function(x){if(x!==o&&x.state!=='rejected')x.state='lost'});
+  var j={id:'v'+(++uid),kind:'venta',who:o.who,d:o.d,when:'Hoy',text:'Compra: '+sl.text,pay:'S/ '+o.price,pnum:o.price,rate:o.rate,comment:o.comment,cr:o.cr,addr:'Punto de entrega acordado (simulado)',det:null,status:'accepted',stars:0,code:String(1000+Math.floor(Math.random()*9000)),verified:false,err:false,accAt:Date.now()};
+  S.jobs.push(j);openChatFor(j.id,o.who,'Comprador · tu producto','client','Hola, quedamos de acuerdo en el precio. ¿Dónde nos encontramos?');
+  ev('sold');toast('Venta cerrada a S/ '+o.price+'. Valida el código cuando se encuentren.');
+}
+function offerAct(a,oid){
+  var r=findOffer(oid);if(!r)return;var sl=r[0],o=r[1];
+  if(a==='offAcc'){if(o.state==='new'||o.state==='recounter')sellDeal(sl,o)}
+  else if(a==='offRej'){o.state='rejected';render()}
+  else if(a==='offCtr'&&o.state==='new'){
+    var c=Math.round((o.price+o.list)/2);ev('counter');o.state='waiting';render();
+    T.push(setTimeout(function(){
+      if(o.acc1){o.price=c;sellDeal(sl,o)}
+      else{o.price=Math.round((o.price+c)/2);o.state='recounter';toast(o.who.split(' ')[0]+' contraofertó S/ '+o.price+'. Es la última ronda.')}
+    },1600));
+  }
+}
+function cancelRec(k,id){return k==='n'?getNeed(+id):jobById(id)}
+function doCancel(k,id){
+  var rec=cancelRec(k,id);if(!rec||S.cx.reason===null)return;
+  var wc=S.cx.reason<3, inf=cancelInfo(rec,wc), m=S.me.cumpl;
+  m.pct=Math.max(0,m.pct-inf.pen);
+  rec.status='cancelled';rec.cancelNote=(wc?'Cancelado con causa. ':'')+inf.txt+' Tu cumplimiento: '+m.pct+'%.';
+  ev(wc?'cancel:cause':(inf.pen?'cancel:late':'cancel:free'));
+  S.sheet=null;S.cx={reason:null};toast('Cancelado. Tu cumplimiento: '+m.pct+'%.');
+}
+function noShow(k,id){
+  var rec=cancelRec(k,id);if(!rec||rec.verified||Date.now()<rec.accAt+NOSHOW)return;
+  var other=k==='n'?PROV[rec.chosen].name.split(' ')[0]:rec.who.split(' ')[0];
+  if(k==='n')PROV[rec.chosen].noshow=(PROV[rec.chosen].noshow||0)+1;
+  rec.status='cancelled';rec.cancelNote=other+' no apareció tras la espera. Cancelado sin penalización para ti; '+other+' recibe una consecuencia.';
+  ev('noshow');toast('Registrado. No te afecta.');
+}
+function setRole(k){
+  S.role=k;S.mode=k==='oferta'?'oferta':'demanda';if(k!=='demanda')ev('role');
+  S.sheet=null;S.activeNeed=null;S.tab='inicio';
+  toast({demanda:'Listo: usas la app para buscar ayuda.',oferta:'Listo: ahora ofreces tus servicios.',ambos:'Listo: puedes buscar y ofrecer. Cambia arriba cuando quieras.'}[k]);
+}
+function ev(k){S.done.add(k)}
+function clearTimers(){T.forEach(clearTimeout);T=[]}
+function getNeed(id){for(var i=0;i<S.needs.length;i++){if(S.needs[i].id===id)return S.needs[i]}return null}
+function headline(p){var t=p.svc.n+p.vec.n;return t?(p.svc.r*p.svc.n+p.vec.r*p.vec.n)/t:0}
+function initials(n){return n.split(' ').map(function(w){return w[0]}).slice(0,2).join('')}
+function composerClicks(c){return c.chip?1:(c.type?1:0)+(c.textTouched?1:0)}
+
+function toast(msg){if(S.vis)flash();S.toast=msg;clearTimeout(tt);tt=setTimeout(function(){S.toast='';renderToast()},3600);render()}
+function renderToast(){var t=$('#toast');t.textContent=S.toast||'';t.classList.toggle('show',!!S.toast&&!S.chatOpen)}
+
+function startArrival(n){
+  n.arrived=0;
+  var step=function(){if(n.arrived<3){n.arrived++;render();T.push(setTimeout(step,650))}};
+  T.push(setTimeout(step,500));
+}
+function setOnline(on){
+  if(on===S.online)return;
+  S.online=on;
+  if(!on){ev('off');render();return}
+  ev('on');
+  flushChats();flushPosts();
+  var pend=S.needs.filter(function(n){return n.status==='pending'});
+  if(pend.length){
+    pend.forEach(function(n){n.status='syncing'});
+    toast('Volvió el internet. Sincronizando tu solicitud…');
+    T.push(setTimeout(function(){
+      pend.forEach(function(n){n.status='open';startArrival(n)});
+      ev('synced');toast('Sincronizado. Ya llegan propuestas.');
+    },1400));
+  }else{render()}
+}
+
+/* ===== v7: parámetros, idiomas, solidaridad, muro, emergencias ===== */
+var CFG={lv:[3,10,25],minAvg:4.5,minPeople:8,pts:{corta:1,larga:3,emerg:5},bonusNew:1,cap:6,vis:0.5,visMax:1,others:[132,96,71,48,33,21,14,9,5]};
+var LVN=['Vecino nuevo','Vecino activo','Vecino colaborador','Vecino solidario'];
+var LANGS=[['es','Español','Idioma base'],['en','English','Pantallas principales'],['qu','Runasimi (quechua)','Ejemplo: debe revisarlo un hablante nativo'],['fr','Français','Pantallas principales'],['pt','Português','Pantallas principales'],['zh','中文','Pantallas principales'],['ja','日本語','Pantallas principales']];
+var I18N={
+ es:{home:"Inicio",neighbors:"Vecinos",messages:"Mensajes",emergency:"Emergencia",profile:"Perfil",appname:"Red del barrio",appnameEmg:"Modo emergencia",zone:"Zona aproximada · sin dirección exacta",online:"Online",offline:"Offline",needq:"¿Qué necesitas?",needsub:"Cuéntalo y los vecinos y negocios de tu zona te proponen cómo resolverlo.",askph:"Escribe tu necesidad…",neighTitle:"Entre vecinos",imok:"Estoy bien",needhelp:"Necesito ayuda",canhelp:"Puedo ayudar",language:"Idioma",requests:"Pedidos",offers:"Ofertas"},
+ en:{home:"Home",neighbors:"Neighbors",messages:"Messages",emergency:"Emergency",profile:"Profile",appname:"Neighborhood network",appnameEmg:"Emergency mode",zone:"Approximate area · no exact address",online:"Online",offline:"Offline",needq:"What do you need?",needsub:"Tell us and neighbors and businesses nearby will offer ways to solve it.",askph:"Write what you need…",neighTitle:"Among neighbors",imok:"I'm okay",needhelp:"I need help",canhelp:"I can help",language:"Language",requests:"Requests",offers:"Offers"},
+ qu:{home:"Wasi",neighbors:"Ayllukuna",messages:"Willakuykuna",emergency:"Utqay yanapay",profile:"Ñuqa",appname:"Llaqta llika",appnameEmg:"Utqay yanapay",zone:"Qayllanchasqa kitilla · mana chiqaq direccionniyuq",online:"Internetwan",offline:"Mana internetwan",needq:"Imatataq munanki?",needsub:"Willakuy, ayllukunapas llaqtamasikunapas yanapasunki.",askph:"Munasqaykita qillqay…",neighTitle:"Ayllukuna ukhupi",imok:"Allinmi kani",needhelp:"Yanapayta necesitani",canhelp:"Yanapayta atini",language:"Simi",requests:"Mañakuykuna",offers:"Quykuna"},
+ fr:{home:"Accueil",neighbors:"Voisins",messages:"Messages",emergency:"Urgence",profile:"Profil",appname:"Réseau du quartier",appnameEmg:"Mode urgence",zone:"Zone approximative · sans adresse exacte",online:"En ligne",offline:"Hors ligne",needq:"De quoi avez-vous besoin ?",needsub:"Dites-le et les voisins et commerces proches vous proposeront une solution.",askph:"Écrivez votre besoin…",neighTitle:"Entre voisins",imok:"Je vais bien",needhelp:"J'ai besoin d'aide",canhelp:"Je peux aider",language:"Langue",requests:"Demandes",offers:"Offres"},
+ pt:{home:"Início",neighbors:"Vizinhos",messages:"Mensagens",emergency:"Emergência",profile:"Perfil",appname:"Rede do bairro",appnameEmg:"Modo emergência",zone:"Área aproximada · sem endereço exato",online:"Online",offline:"Offline",needq:"Do que você precisa?",needsub:"Conte e os vizinhos e comércios da região propõem como resolver.",askph:"Escreva o que precisa…",neighTitle:"Entre vizinhos",imok:"Estou bem",needhelp:"Preciso de ajuda",canhelp:"Posso ajudar",language:"Idioma",requests:"Pedidos",offers:"Ofertas"},
+ zh:{home:"首页",neighbors:"邻居",messages:"消息",emergency:"紧急",profile:"我的",appname:"社区网络",appnameEmg:"紧急模式",zone:"大致区域 · 不显示确切地址",online:"在线",offline:"离线",needq:"你需要什么？",needsub:"说出来，附近的邻居和商家会提出解决办法。",askph:"写下你的需求…",neighTitle:"邻里互助",imok:"我很好",needhelp:"我需要帮助",canhelp:"我可以帮忙",language:"语言",requests:"请求",offers:"提供"},
+ ja:{home:"ホーム",neighbors:"近所",messages:"メッセージ",emergency:"緊急",profile:"プロフィール",appname:"地域ネットワーク",appnameEmg:"緊急モード",zone:"おおよそのエリア・正確な住所は非表示",online:"オンライン",offline:"オフライン",needq:"何が必要ですか？",needsub:"伝えると、近所の人や店が解決方法を提案します。",askph:"必要なことを書く…",neighTitle:"ご近所どうし",imok:"無事です",needhelp:"助けが必要",canhelp:"助けられます",language:"言語",requests:"依頼",offers:"提供"}
+};
+function L(k){var d=I18N[S.lang]||I18N.es;return d[k]!=null?d[k]:I18N.es[k]}
+function langName(){return LANGS.filter(function(l){return l[0]===S.lang})[0][1]}
+var COMMS=[['voz','Voz o texto'],['texto','Solo texto'],['senas','Lengua de señas peruana'],['escrito','Apoyo escrito']];
+var COMMN={voz:'Voz o texto',texto:'Solo texto',senas:'Lengua de señas peruana',escrito:'Apoyo escrito'};
+var QPH=['✋ ¿Puedes repetir?','📍 Ya llegué','🆘 Necesito ayuda','✅ Todo bien'];
+function commBadge(j){return j.comm&&j.comm!=='voz'?'<span class="badge acc">Prefiere: '+COMMN[j.comm]+'</span>':''}
+function flash(){var ph=$('#phone');if(!ph)return;ph.classList.add('flash');setTimeout(function(){ph.classList.remove('flash')},900);try{if(navigator.vibrate)navigator.vibrate([120,60,120])}catch(e){}}
+function fmtP(x){return String(Math.round(x*10)/10).replace('.',',')}
+
+/* Datos nuevos */
+var REQS=[
+ {id:'r1',who:'Ana Salas',text:'Necesita una escalera por la tarde',d:'200 m',mod:'Préstamo',tipo:'corta',stars:5,addr:'Jr. Los Cedros 210 (simulada)'},
+ {id:'r2',who:'Don Teodoro',text:'Busca compañía para ir a la posta',d:'450 m',mod:'Movilidad solidaria',tipo:'larga',stars:5,addr:'Calle Las Rosas 88 (simulada)'},
+ {id:'r3',who:'Lucía Prado',text:'Busca ayuda con inglés a cambio de clases de matemática',d:'520 m',mod:'Intercambio de habilidades',tipo:'larga',stars:3,addr:'Av. Primavera 330 (simulada)'},
+ {id:'r4',who:'Ana Salas',text:'Necesita ayuda para cargar las compras',d:'200 m',mod:'Favor',tipo:'corta',stars:5,addr:'Jr. Los Cedros 210 (simulada)'},
+ {id:'r5',who:'Hugo Cáceres',text:'Pide ayuda para mover un mueble',d:'380 m',mod:'Favor',tipo:'larga',stars:5,addr:'Pasaje Sol 12 (simulada)'}
+];
+var OFRS=[
+ {id:'o1',who:'Mario Soto',text:'Presta un taladro y herramientas',d:'300 m',mod:'Préstamo'},
+ {id:'o2',who:'Teresa Gil',text:'Regala ropa de bebé en buen estado',d:'520 m',mod:'Donación'},
+ {id:'o3',who:'Mateo Quispe',text:'Enseña Lengua de Señas Peruana a cambio de ayuda con trámites',d:'610 m',mod:'Intercambio de habilidades'},
+ {id:'o4',who:'Pablo Reyes',text:'Lleva a vecinos al mercado los sábados',d:'440 m',mod:'Movilidad solidaria'},
+ {id:'o5',who:'Sara León',text:'Ayuda con tareas del colegio (primaria)',d:'700 m',mod:'Favor'}
+];
+var ETYPES=[
+ {k:'incendio',n:'Incendio',off:'Bomberos',num:'116',needs:['Agua','Refugio temporal','Ropa y frazadas','Movilidad'],priv:false},
+ {k:'medico',n:'Emergencia médica',off:'SAMU',num:'106',needs:['Primeros auxilios','Movilidad al centro de salud','Compañía'],priv:false},
+ {k:'sismo',n:'Sismo o desastre',off:'Defensa Civil (INDECI)',num:'115',needs:['Agua','Refugio temporal','Herramientas','Alimentos','Primeros auxilios'],priv:false},
+ {k:'inund',n:'Inundación o huaico',off:'Defensa Civil (INDECI)',num:'115',needs:['Refugio temporal','Ropa y frazadas','Herramientas','Alimentos'],priv:false},
+ {k:'robo',n:'Robo o asalto',off:'Policía Nacional',num:'105',needs:['Acompañamiento','Testigos','Aviso a vecinos'],priv:false},
+ {k:'mayor',n:'Persona mayor o sola',off:'Serenazgo o centro de salud',num:'tu municipalidad',needs:['Compañía','Movilidad','Alimentos'],priv:false},
+ {k:'violencia',n:'Violencia o acoso',off:'Línea 100 y Policía',num:'100 · 105',needs:['Espacio seguro','Acompañamiento'],priv:true},
+ {k:'fallec',n:'Fallecimiento',off:'Policía y SAMU',num:'105 · 106',needs:['Compañía a la familia','Trámites','Alimentos'],priv:true},
+ {k:'desap',n:'Persona desaparecida',off:'Policía Nacional',num:'105',needs:['Búsqueda en grupo','Difusión'],priv:false}
+];
+function et(k){return ETYPES.filter(function(x){return x.k===k})[0]}
+var OFFICIAL=[['Policía Nacional','105','Robo, agresión, personas desaparecidas'],['Bomberos','116','Incendio y rescate'],['SAMU','106','Emergencia médica'],['Defensa Civil (INDECI)','115','Sismo, inundación y huaico'],['Línea 100','100','Violencia familiar y sexual: consulta y apoyo']];
+var RNEED=[{id:'q1',t:'Agua embotellada',need:60,have:20,u:'litros'},{id:'q2',t:'Frazadas',need:15,have:6,u:'unidades'},{id:'q3',t:'Alimentos no perecibles',need:30,have:12,u:'kits'}];
+var ACOP0=[{id:'a1',n:'Parroquia San Martín',zone:'a unos 600 m',acc:'Agua, ropa, alimentos',by:'Aliado (simulado)'},{id:'a2',n:'Local comunal',zone:'a unos 350 m',acc:'Frazadas, herramientas',by:'Nelly Flores · Vecina solidaria'}];
+var ACITEMS=['Agua','Ropa','Alimentos','Frazadas','Herramientas'];
+var MARKET=[{n:'Plantones de menta y romero',who:'Bodega Doña Rosa',d:300,price:8,r:4.7,rel:4.5,lv:0},{n:'Mesa de comedor de madera',who:'Tomás Vega',d:600,price:150,r:4.7,rel:4.0,lv:2},{n:'Bicicleta de paseo aro 26',who:'Jorge Pinto',d:450,price:120,r:4.4,rel:4.1,lv:0}];
+var WMODMAP={'Préstamo':'prestamo','Donación':'prestamo','Alquiler':'prestamo','Trueque':'prestamo'};
+
+/* Nivel solidario */
+function solNew(){return {pts:0,helps:0,people:{},ratedSum:0,ratedN:0,day:0,log:[],lastBal:null}}
+function solSeedRaw(n,d){var s=S.sol;s.helps=n;s.pts=n*2;s.ratedN=n;s.ratedSum=n*4.8;s.people={};for(var i=0;i<d;i++)s.people['Vecino '+String.fromCharCode(65+i)]=1}
+function solLevel(){var s=S.sol,d=Object.keys(s.people).length,avg=s.ratedN?s.ratedSum/s.ratedN:0;
+  if(s.helps>=CFG.lv[2]&&d>=CFG.minPeople&&avg>=CFG.minAvg)return 3;
+  if(s.helps>=CFG.lv[1])return 2;if(s.helps>=CFG.lv[0])return 1;return 0}
+function registerHelp(who,tipo,stars,dur){
+  var s=S.sol,before=solLevel(),times=s.people[who]||0,base=CFG.pts[tipo]||1,p=0,why='';
+  if(stars<4){why='Gracias por ayudar. Esta ayuda no suma puntos porque necesita 4 o 5 estrellas.';ev('nopts')}
+  else{
+    if(times===0){p=base+CFG.bonusNew;why='+'+base+' por la ayuda y +'+CFG.bonusNew+' por ayudar a una persona nueva.'}
+    else if(times===1){p=base/2;why='Segunda ayuda a la misma persona: vale la mitad.';ev('dim')}
+    else{p=0;why='Ya ayudaste varias veces a esta persona: no suma más puntos, para evitar acuerdos entre amigos.';ev('dim')}
+    var room=Math.max(0,CFG.cap-s.day);
+    if(p>room){why+=' Llegaste al tope diario ('+CFG.cap+' puntos): sumaste '+fmtP(room)+'.';p=room}
+    s.people[who]=times+1;
+    if(times<2){s.helps++;s.ratedSum+=stars;s.ratedN++}
+    s.pts+=p;s.day+=p;
+  }
+  var after=solLevel();
+  var res={who:who,tipo:tipo,stars:stars,dur:dur,pts:p,why:why,lvUp:after>before?LVN[after]:null,total:s.pts};
+  s.log.unshift(res);s.lastBal=res;ev('bal');return res;
+}
+function hq(id){return REQS.concat(ENEEDS).filter(function(x){return x.id===id})[0]}
+function hStart(id){
+  var x=hq(id);if(!x||S.hlp[id])return;
+  var em=id.charAt(0)==='e';
+  S.hlp[id]={st:'off',code:String(1000+Math.floor(Math.random()*9000))};
+  ev('hstart');if(em)ev('ayudo');
+  T.push(setTimeout(function(){
+    S.hlp[id].st='acc';
+    openChatFor(id,x.who,(em?'Emergencia':'Pedido')+' · tu ayuda','emg','Hola, gracias por ofrecerte. ¿Cuándo puedes llegar?');
+    toast(x.who.split(' ')[0]+' aceptó tu ayuda. Ya ves su dirección exacta y puedes escribirle.');
+  },1200));
+  render();
+}
+function hCode(id){var h=S.hlp[id];if(!h||h.st!=='acc')return;h.st='doing';h.t0=Date.now();ev('hcode');toast('Código validado. La ayuda quedó confirmada y en curso.')}
+function hDone(id){
+  var h=S.hlp[id],x=hq(id);if(!h||h.st!=='doing')return;
+  h.st='rating';render();
+  T.push(setTimeout(function(){
+    h.st='done';var dur=Date.now()-h.t0;
+    registerHelp(x.who,x.tipo,x.stars,dur);ev('helpdone');
+    S.sheet='balance';render();
+  },1300));
+}
+function hBtn(id,who){
+  var h=S.hlp[id],f=who.split(' ')[0],em=id.charAt(0)==='e';
+  if(!h)return '<button class="btn sm" data-act="hStart" data-id="'+id+'">'+(em?L('canhelp'):'Ofrecer')+'</button>';
+  if(h.st==='off')return '<span class="badge warn">Esperando a '+esc(f)+'…</span>';
+  if(h.st==='acc')return '<button class="btn sm" data-act="hCode" data-id="'+id+'">Validar código (demo)</button>';
+  if(h.st==='doing')return '<button class="btn sm" data-act="hDone" data-id="'+id+'">Ayuda hecha</button>';
+  if(h.st==='rating')return '<span class="badge warn">Esperando calificación…</span>';
+  return '<span class="badge good">Ayuda confirmada</span>';
+}
+function hExtra(id,addr,who){
+  var h=S.hlp[id];if(!h)return '';
+  if(h.st==='acc')return '<small>Código que te da '+esc(who.split(' ')[0])+': <b>'+h.code+'</b> · Dirección exacta (solo la ves tú por aceptar): '+esc(addr)+'</small><button class="linkbtn" style="align-self:flex-start" data-act="openChat" data-key="'+id+'">Abrir chat</button>';
+  if(h.st==='doing')return '<small>En curso: el cronómetro está corriendo.</small>';
+  return '';
+}
+
+/* Muro entre vecinos */
+function reqCard(r){
+  return '<div class="eneed"><span class="eneedmain"><span>'+esc(r.who)+': '+esc(r.text)+'</span><small>'+r.d+' · '+r.mod+'</small>'+hExtra(r.id,r.addr,r.who)+'</span>'+hBtn(r.id,r.who)+'</div>';
+}
+function ofrCard(o,mine){
+  return '<div class="eneed"><span class="eneedmain"><span>'+esc(o.who)+': '+esc(o.text)+'</span><small>'+o.d+' · '+o.mod+'</small></span>'+(mine?'<span class="badge good">Publicada</span>':'<button class="btn sm ghost" data-act="want" data-id="'+o.id+'">Lo quiero</button>')+'</div>';
+}
+function lvBoost(l){return [0,0,0.4,1][l]}
+function lvBonus(l){return Math.min(CFG.visMax,CFG.vis*2*lvBoost(l))}
+function marketHTML(){
+  var lv=solLevel(),items=MARKET.map(function(x){return {n:x.n,who:x.who,d:x.d,price:x.price,r:x.r,rel:x.rel,lv:x.lv}});
+  if(S.sales.length){var sl=S.sales[0];items.push({n:sl.text,who:'Tú',d:150,price:sl.price,r:4.2,rel:3.8,lv:lv,mine:true});ev('mkt')}
+  items.forEach(function(x){x.b=lvBonus(x.lv);x.sc=x.rel+x.b});
+  items.sort(function(a,b){return S.msort==='dist'?a.d-b.d:S.msort==='price'?a.price-b.price:b.sc-a.sc});
+  var h='<section><h3 class="sec">Productos cerca (como los ve un comprador)</h3><p class="secsub">El nivel solidario es un factor más: tiene tope y se muestra con una etiqueta. Peso actual: '+fmtP(CFG.vis)+' (ajustable en la guía).</p>'+
+   '<div class="sortbar"><span>Ordenar:</span>'+[['rec','Recomendado'],['dist','Cercanía'],['price','Precio']].map(function(o){return '<button class="chip" data-act="msort" data-k="'+o[0]+'" aria-pressed="'+(S.msort===o[0])+'">'+o[1]+'</button>'}).join('')+'</div><div class="list" style="margin-top:8px">';
+  items.forEach(function(x,i){
+    h+='<div class="eneed"><span class="eneedmain"><span>'+(i+1)+'. '+esc(x.n)+(x.mine?' <span class="badge acc">Tu producto</span>':'')+'</span><small>'+esc(x.who)+' · '+x.d+' m · S/ '+x.price+' · ★ '+fmtP(x.r)+'</small>'+
+      (x.lv>=1?'<small><span class="badge '+(x.lv===3?'good':'acc')+'">'+LVN[x.lv]+'</span>'+(x.b>0?' Impulso solidario +'+fmtP(x.b)+(x.b>=CFG.visMax?' (tope)':''):'')+'</small>':'')+'</span></div>';
+  });
+  return h+'</div></section>';
+}
+function vecinos(){
+  var mine=S.needs.filter(function(n){return n.type==='prestamo'||n.type==='ayuda'});
+  var h='<section><h2 class="h1">'+L('neighTitle')+'</h2><p class="sub">Pide o ofrece ayuda sin necesidad de dinero. La reputación sale solo de lo que se confirma.</p></section>'+
+    '<button class="btn big" data-act="openComposer" data-k="prestamo">Pedir algo a un vecino</button>'+
+    '<div class="row2" style="flex-wrap:wrap"><button class="btn ghost" data-act="openWallOffer">Ofrecer algo al barrio</button><button class="btn ghost" data-act="openSell">Vender un producto</button></div>';
+  if(mine.length)h+='<section><h3 class="sec">Mis pedidos</h3><div class="list">'+mine.map(needItem).join('')+'</div></section>';
+  if(S.myOffers.length)h+='<section><h3 class="sec">Mis ofertas</h3><div class="list">'+S.myOffers.map(function(o){return ofrCard(o,true)}).join('')+'</div></section>';
+  h+='<section><div class="seg" role="group" aria-label="Muro de vecinos">'+[['req',L('requests')],['off',L('offers')]].map(function(o){return '<button data-act="wall" data-k="'+o[0]+'" aria-pressed="'+(S.wall===o[0])+'">'+o[1]+'</button>'}).join('')+'</div>'+
+    '<div class="chips" role="group" aria-label="Filtrar por modalidad">'+['Todas'].concat(MODS).map(function(m){return '<button class="chip" data-act="wfilt" data-k="'+m+'" aria-pressed="'+(S.filt===m)+'">'+m+'</button>'}).join('')+'</div></section>';
+  var src=S.wall==='req'?REQS:OFRS, lst=src.filter(function(x){return S.filt==='Todas'||x.mod===S.filt});
+  h+='<section><h3 class="sec">'+(S.wall==='req'?'Pedidos de tus vecinos':'Ofertas de tus vecinos')+'</h3><p class="secsub">'+(S.wall==='req'?'Tú también puedes ayudar: sumas puntos de nivel solidario si la ayuda se confirma.':'Si algo te sirve, toca "Lo quiero" y se prepara tu pedido.')+'</p><div class="list">'+
+    (lst.length?lst.map(function(x){return S.wall==='req'?reqCard(x):ofrCard(x,false)}).join(''):'<div class="card"><b>No hay publicaciones con esta modalidad por ahora</b><span class="note">Publica la primera para tu barrio.</span></div>')+'</div></section>';
+  h+=salesHTML();
+  h+=marketHTML();
+  return h;
+}
+function woPub(){
+  var w=S.wo;if(!w.mod||w.text.trim().length<3)return;
+  S.myOffers.unshift({id:'w'+(++uid),who:'Tú',text:w.text.trim(),d:'tu zona',mod:w.mod});
+  S.wall='off';S.filt='Todas';S.sheet=null;ev('wpub');toast('Oferta publicada. Tus vecinos la ven en el muro.');
+}
+
+/* Emergencias */
+function officialHTML(){
+  return '<section><h3 class="sec">Servicios oficiales primero</h3><p class="secsub">Llama a la institución antes de pedir ayuda a tus vecinos.</p><div class="list">'+OFFICIAL.map(function(o){return '<div class="eneed"><span class="eneedmain"><span>'+o[0]+'</span><small>'+o[2]+'</small></span><a class="btn sm ghost" href="tel:'+o[1]+'" aria-label="Llamar a '+o[0]+', número '+o[1]+'">'+o[1]+'</a></div>'}).join('')+'</div><p class="note warn" style="margin-top:8px">Números por verificar antes de la presentación.</p></section>';
+}
+function mineCard(p){
+  var t=et(p.k),badge=p.priv?['warn','Privado']:p.st==='pending'?['warn','Pendiente de envío']:p.st==='res'?['good','Resuelto']:['good','Publicado'];
+  var acc='';
+  if(p.acc&&p.st!=='res'){var f=p.acc.who.split(' ')[0];
+    acc='<div class="offer"><b>'+esc(p.acc.who)+' quiere ayudarte</b>'+(p.acc.shared?'<span class="badge good">Ubicación exacta compartida solo con '+esc(f)+', mientras dure la ayuda</span>':'<button class="btn sm" data-act="shareLoc" data-id="'+p.id+'">Compartir mi ubicación exacta con '+esc(f)+'</button>')+'<div class="row2" style="flex-wrap:wrap"><button class="btn sm ghost" data-act="openChat" data-key="'+p.id+'">Abrir chat</button><button class="btn sm ghost" data-act="postRes" data-id="'+p.id+'">Ya me ayudaron</button></div></div>'}
+  return '<article class="card"><div style="display:flex;justify-content:space-between;gap:8px;align-items:flex-start"><b>Tu pedido: '+t.n+'</b><span class="badge '+badge[0]+'">'+badge[1]+'</span></div><span>'+esc(p.why)+'</span>'+
+    (p.needs.length?'<div class="chips static" style="margin-top:0">'+p.needs.map(function(nd){return '<span class="chip">'+esc(nd)+'</span>'}).join('')+'</div>':'')+
+    '<span class="note">'+(p.priv?'Caso sensible: no aparece en el muro. Se avisó a contactos de confianza y brigadistas verificados.':'Se muestra tu zona aproximada, no tu dirección ni tu nombre.')+' Contacto oficial: '+t.off+' '+t.num+'</span>'+acc+'</article>';
+}
+function otherCard(x){
+  var t=et(x.k),cn=x.conf+(S.conf[x.id]?(solLevel()>=3?3:1):0);
+  return '<article class="card"><div style="display:flex;justify-content:space-between;gap:8px;align-items:flex-start"><b>'+esc(x.t)+'</b><span class="badge acc">'+t.n+'</span></div><span>'+esc(x.why)+'</span>'+
+    '<div class="chips static" style="margin-top:0">'+x.needs.map(function(nd){return '<span class="chip">'+esc(nd)+'</span>'}).join('')+'</div>'+
+    '<span class="note">'+x.d+' m aprox. · Reportado por '+cn+(cn===1?' vecino':' vecinos')+' · Contacto oficial: '+t.off+' '+t.num+'</span>'+hExtra(x.id,x.addr,x.who)+
+    '<div class="row2" style="flex-wrap:wrap">'+hBtn(x.id,x.who)+'<button class="btn sm ghost" data-act="conf" data-id="'+x.id+'" aria-pressed="'+!!S.conf[x.id]+'">'+(S.conf[x.id]?'Reporte confirmado':'Confirmar reporte')+'</button><button class="btn sm ghost" data-act="selNeed" data-id="'+x.id+'">Ver en mapa</button></div></article>';
+}
+function wallEmgHTML(){
+  var f=S.eFilt, mineL=S.posts.filter(function(p){return f==='Todas'||p.k===f}), oth=ENEEDS.filter(function(x){return f==='Todas'||x.k===f});
+  var h='<section><h3 class="sec">Muro de emergencia</h3><p class="secsub">Cada aviso dice qué pasó y qué se necesita. Solo zona aproximada; los casos sensibles no aparecen aquí.</p>'+
+   '<div class="chips" role="group" aria-label="Filtrar por situación" style="margin-top:0;margin-bottom:10px">'+[['Todas','Todas']].concat(ETYPES.map(function(e){return [e.k,e.n]})).map(function(o){return '<button class="chip" data-act="efilt" data-k="'+o[0]+'" aria-pressed="'+(f===o[0])+'">'+o[1]+'</button>'}).join('')+'</div><div class="list">';
+  h+=mineL.map(mineCard).join('')+oth.map(otherCard).join('');
+  if(!mineL.length&&!oth.length)h+='<div class="card"><b>No hay avisos de este tipo cerca</b><span class="note">Si necesitas ayuda, usa "Necesito ayuda".</span></div>';
+  return h+'</div></section>';
+}
+function allAcopios(){return S.acopios.concat(ACOP0)}
+function resourcesHTML(){
+  var lv=solLevel();
+  var h='<section><h3 class="sec">Recursos y donativos</h3><p class="secsub">Todo sin dinero. Se entrega en un punto de acopio, no en casas.</p><div class="list">'+RNEED.map(function(r){
+    var pl=S.pledge[r.id],have=r.have+(pl?pl.qty:0),pct=Math.min(100,Math.round(have/r.need*100));
+    return '<div class="card"><b>'+r.t+'</b><span class="note">Se necesitan '+r.need+' '+r.u+' · Cubierto '+pct+'%</span><div class="bar" role="progressbar" aria-label="'+r.t+'" aria-valuemin="0" aria-valuemax="100" aria-valuenow="'+pct+'"><i style="width:'+pct+'%"></i></div>'+
+      (pl?(pl.done?'<span class="badge good">Entrega confirmada en el punto de acopio</span>':'<span class="badge warn">Prometiste '+pl.qty+' '+r.u+' · '+esc(pl.ac)+'</span><button class="btn sm ghost" data-act="pledgeDone" data-id="'+r.id+'">Ya entregué (demo)</button>'):'<button class="btn sm" data-act="openDonate" data-id="'+r.id+'">Ofrecer donativo</button>')+'</div>'}).join('')+'</div>'+
+    '<h4 class="sec" style="margin:10px 0 6px">Puntos de acopio</h4><div class="list">'+allAcopios().map(function(a){return '<div class="eneed"><span class="eneedmain"><span>'+esc(a.n)+'</span><small>'+a.zone+' · recibe: '+esc(a.acc)+' · '+esc(a.by)+'</small></span></div>'}).join('')+'</div>'+
+    '<div style="margin-top:8px">'+(lv>=3?'<button class="btn ghost" data-act="openAcopio">Crear punto de acopio</button>':'<button class="btn ghost" disabled>Crear punto de acopio (desde Vecino solidario)</button>')+'</div></section>';
+  return h;
+}
+function sosSheet(head){
+  var o=S.sos,t=o.tipo?et(o.tipo):null;
+  var h=head('Pedir ayuda')+'<span class="lbl">¿Qué situación es?</span><div class="typegrid" role="group" aria-label="Situación">'+ETYPES.map(function(e){return '<button class="type'+(o.tipo===e.k?' sel':'')+'" data-act="sosPick" data-k="'+e.k+'" aria-pressed="'+(o.tipo===e.k)+'"><span>'+e.n+'</span>'+(e.priv?'<small>Caso sensible: privado</small>':'')+'</button>'}).join('')+'</div>';
+  if(!t)return h+'<p class="note">Elige una situación. No hace falta hablar ni llamar para pedir ayuda por aquí.</p>';
+  return h+'<div class="card warn"><b>Primero avisa a la institución: '+t.off+'</b><span>Número: '+t.num+' (por verificar)</span><button class="tog" role="switch" aria-checked="'+o.called+'" data-act="sosCalled"><span>Ya llamé o voy a llamar</span><span class="sw"></span></button></div>'+
+   '<label class="lbl" for="soswhy">¿Qué pasó? (lo verán quienes puedan ayudar)</label><textarea id="soswhy" rows="3" placeholder="Ej.: Se quemó la cocina, estamos bien pero necesitamos dónde dormir hoy">'+esc(o.why)+'</textarea>'+
+   '<span class="lbl">¿Qué necesitas?</span><div class="chips" style="margin-top:0" role="group" aria-label="Necesidades">'+t.needs.map(function(nd){return '<button class="chip" data-act="sosNeed" data-k="'+esc(nd)+'" aria-pressed="'+!!o.needs[nd]+'">'+nd+'</button>'}).join('')+'</div>'+
+   '<div class="card"><b>Qué se comparte</b><span class="note">'+(t.priv?'Caso sensible: no aparece en el muro. Se avisa solo a tus contactos de confianza y a brigadistas verificados.':'Se publica en el muro el tipo de situación, qué pasó y qué necesitas, con tu zona aproximada.')+' No se muestran tu nombre ni tu dirección exacta. Si alguien acepta ayudarte, hablan por el chat de la app y tú decides si compartes tu ubicación exacta con esa persona.</span></div>'+
+   (!S.online?'<p class="note warn">Sin internet: se guarda y se envía al volver. Mientras tanto, llama a la institución.</p>':'')+
+   '<button class="btn big alertbtn" data-act="sosSend"'+(o.why.trim().length>2?'':' disabled')+'>'+(t.priv?'Enviar en privado':(S.online?'Publicar pedido de ayuda':'Guardar sin internet'))+'</button>';
+}
+function sosSend(){
+  var o=S.sos,t=o.tipo?et(o.tipo):null;if(!t||o.why.trim().length<3)return;
+  var p={id:'m'+(++uid),k:t.k,why:o.why.trim(),needs:Object.keys(o.needs).filter(function(k){return o.needs[k]}),priv:t.priv,st:S.online?'pub':'pending',acc:null};
+  S.posts.unshift(p);S.estado='ayuda';S.mineSos=t.n+' · '+p.why;S.sos={tipo:null,why:'',needs:{},called:false};S.sheet=null;
+  ev('estado');ev('sos:pub');if(t.priv)ev('sos:priv');
+  if(S.online){postAccept(p);toast(t.priv?'Enviado en privado a tus contactos de confianza y brigadistas.':'Pedido publicado en el muro con tu zona aproximada.')}
+  else toast('Guardado sin internet. Se enviará al volver.');
+}
+function postAccept(p){
+  T.push(setTimeout(function(){
+    p.acc={who:p.priv?'Nelly Flores (brigadista)':'Marco Rivas',shared:false};
+    openChatFor(p.id,p.acc.who,'Quiere ayudarte','emg','Hola, vi tu aviso. ¿Estás a salvo? ¿En qué te ayudo primero?');
+    ev('sos:acc');toast(p.acc.who.split(' ')[0]+' quiere ayudarte. Hablen por el chat; tú decides si compartes tu ubicación exacta.');
+  },1800));
+}
+function flushPosts(){S.posts.forEach(function(p){if(p.st==='pending'){p.st='pub';postAccept(p)}})}
+
+/* Perfil */
+function solCard(){
+  var lv=solLevel(),s=S.sol,d=Object.keys(s.people).length,avg=s.ratedN?s.ratedSum/s.ratedN:0,nxt,pct;
+  if(lv<3){var need=CFG.lv[lv];nxt='Te faltan '+Math.max(0,need-s.helps)+' ayudas confirmadas para ser '+LVN[lv+1]+'.';pct=Math.min(100,Math.round(s.helps/need*100));
+    if(lv===2)nxt+=' Además: al menos '+CFG.minPeople+' personas distintas (llevas '+d+') y promedio de '+fmtP(CFG.minAvg)+' o más (llevas '+(avg?fmtP(avg):'—')+').'}
+  else{nxt='Llegaste al nivel máximo.';pct=100}
+  var rank=1+CFG.others.filter(function(o){return o>s.pts}).length;
+  var BEN=[['Perfil con capacidades visibles y "disponible ahora"',1],['Prioridad al pedir ayuda en pedidos no urgentes',2],['Ofertas destacadas en el muro',2],['Sello y más visibilidad de tus productos y servicios',3],['Confirmar reportes de emergencia con más peso',3],['Crear puntos de acopio',3],['Rol de brigadista vecinal',3],['Constancia de ayuda vecinal',3]];
+  return '<section class="card"><h3 class="sec" style="margin:0">Nivel solidario</h3>'+
+    '<div class="reprow"><span>Tu nivel</span><b>'+LVN[lv]+'</b></div>'+
+    '<div class="bar" role="progressbar" aria-label="Progreso al siguiente nivel" aria-valuemin="0" aria-valuemax="100" aria-valuenow="'+pct+'"><i style="width:'+pct+'%"></i></div><p class="note">'+nxt+'</p>'+
+    '<div class="card good"><b>Solo tú ves esto</b><div class="reprow"><span>Tus puntos</span><b>'+fmtP(s.pts)+'</b></div><div class="reprow"><span>Tu puesto en la zona</span><b>'+rank+' de '+(CFG.others.length+1)+'</b></div><span class="note">Los puntos nunca bajan. Quien no ayuda no pierde nada y nadie ve que está abajo.</span></div>'+
+    '<div class="reprow"><span>Así te ven los demás</span><b>'+(lv>=1?'<span class="badge '+(lv===3?'good':'acc')+'">'+LVN[lv]+'</span>':'Sin insignia todavía')+'</b></div>'+
+    '<h4 class="sec" style="margin:6px 0 0">Beneficios</h4>'+BEN.map(function(b){return '<div class="reprow"><span>'+b[0]+'</span><b>'+(lv>=b[1]?'Desbloqueado':'Desde '+LVN[b[1]])+'</b></div>'}).join('')+
+    '<p class="note">Solo cuentan ayudas confirmadas con código y calificadas con 4 o 5 estrellas. Nunca se bloquea nada básico ni de seguridad: pedir ayuda y los contactos de emergencia son para todos.</p>'+
+    (lv>=3?'<button class="btn" data-act="openCons">Ver mi constancia de ayuda vecinal</button>':'<button class="btn ghost" disabled>Constancia de ayuda vecinal (desde Vecino solidario)</button>')+'</section>';
+}
+function a11yCard(){
+  var tg=function(k,t){return '<button class="tog" role="switch" aria-checked="'+!!S[k]+'" data-act="tgl" data-k="'+k+'"><span>'+t+'</span><span class="sw"></span></button>'};
+  return '<section class="card"><h3 class="sec" style="margin:0">Idioma y accesibilidad</h3>'+
+    '<button class="item" data-act="openLang"><span class="itype">'+ic('globe',20)+'</span><span class="ibody"><span class="ititle">'+L('language')+'</span><span class="isub">'+langName()+'</span></span><span class="chev" aria-hidden="true">›</span></button>'+
+    tg('hc','Alto contraste')+tg('big','Texto grande')+tg('vis','Avisos con alerta visual y vibración')+
+    '<span class="lbl">Cómo prefiero comunicarme</span><div class="chips" style="margin-top:0" role="group" aria-label="Cómo prefiero comunicarme">'+COMMS.map(function(c){return '<button class="chip" data-act="comm" data-k="'+c[0]+'" aria-pressed="'+(S.comm===c[0])+'">'+c[1]+'</button>'}).join('')+'</div>'+
+    '<p class="note">Lo ve quien va a ayudarte o a prestarte un servicio. Todo funciona sin audio ni llamadas: chat de texto con frases rápidas, avisos visuales y videos con subtítulos.</p></section>';
+}
+function verifCard(){
+  return '<section class="card"><h3 class="sec" style="margin:0">Verificación de perfil</h3>'+(S.verified?'<span class="badge good">Perfil verificado (simulado)</span>':'<span class="badge warn">Sin verificar</span><button class="btn" data-act="openVerify">Verificar mi perfil</button>')+'<p class="note">En esta simulación no se consulta ninguna base de datos. En la versión real se validaría con RENIEC, con tu consentimiento.</p></section>';
+}
+function perfilExtra(){
+  var m=S.me;
+  return '<section class="card"><h3 class="sec" style="margin:0">Confianza como persona</h3>'+
+    '<div class="reprow"><span>Como cliente</span><b>'+(m.cli.n?'★ '+m.cli.r.toFixed(1)+' · '+m.cli.n+(m.cli.n===1?' servicio':' servicios'):'—')+'</b></div>'+
+    '<div class="reprow"><span>Cumplimiento</span><b>'+m.cumpl.pct+'%</b></div>'+
+    '<div class="reprow"><span>Ajustes de precio propuestos</span><b>'+m.adj.n+' · '+m.adj.ok+' aceptados</b></div>'+
+    '<div class="reprow"><span>Estado de la cuenta</span><b>'+sancLevel(m.unj)+'</b></div>'+
+    '<p class="note">Escala: aviso, menos visibilidad, suspensión temporal y baja, siempre con derecho a apelar. Se mira el patrón con distintos clientes, no un caso aislado.</p></section>'+
+    '<section class="card"><h3 class="sec" style="margin:0">Próximamente</h3><p class="note"><b>Seguimiento en vivo y tiempo de llegada.</b> Si el servicio es hoy, verás cuánto falta. Si es otro día, verás la fecha y hora acordadas. Tu ubicación se comparte solo con quien aceptaste y mientras está en camino.</p><p class="note"><b>Identidad oficial real</b> con RENIEC y tu consentimiento. <b>Pagos</b> dentro de la app. <b>Juntas vecinales y aliados</b> como co-firmantes de constancias.</p></section>';
+}
+function perfil(){
+  ev('solview');
+  var lv=solLevel();
+  return '<section style="display:flex;gap:14px;align-items:center"><span class="avatar big">Tú</span><div><h2 class="h1" style="margin:0">Tu perfil</h2><p class="sub" style="margin:0">'+(lv>=1?'<b>'+LVN[lv]+'</b>':'Vecino nuevo')+(S.verified?' · Verificado (simulado)':'')+'</p></div></section>'+
+    '<div class="tiles"><div class="tile"><b>'+S.resolved+'</b><span>Necesidades resueltas</span></div><div class="tile"><b>'+S.sol.helps+'</b><span>Ayudas confirmadas</span></div></div>'+
+    solCard()+a11yCard()+verifCard()+
+    '<section><h3 class="sec">Cómo uso la app</h3><div class="list">'+ROLES.map(function(r){return '<button class="type'+(S.role===r[0]?' sel':'')+'" data-act="setRole" data-k="'+r[0]+'" aria-pressed="'+(S.role===r[0])+'"><span>'+r[1]+'</span><small>'+r[2]+'</small></button>'}).join('')+'</div></section>'+
+    '<section class="card"><h3 class="sec" style="margin:0">Reputación contextual</h3><div class="reprow"><span>En servicios</span><b>'+(S.me.svc.n?'★ '+S.me.svc.r.toFixed(1)+' · '+S.me.svc.n+(S.me.svc.n===1?' trabajo':' trabajos'):'—')+'</b></div><div class="reprow"><span>Entre vecinos</span><b>'+(S.me.vec.n?'★ '+S.me.vec.r.toFixed(1)+' · '+S.me.vec.n+(S.me.vec.n===1?' interacción':' interacciones'):'—')+'</b></div><p class="note">La reputación de servicio (estrellas) y el nivel solidario son dos escalas separadas. Ser buen electricista no significa ser buen vecino prestador: cada contexto tiene su propia nota.</p></section>'+
+    (S.myComments.length?'<section class="card"><h3 class="sec" style="margin:0">Comentarios que recibiste</h3>'+S.myComments.map(cmtHTML).join('')+'</section>':'')+perfilExtra()+
+    '<section><h3 class="sec">Mapa vivo de capacidades</h3><p class="secsub">Así se ve un vecino con trayectoria.</p>'+dirItem('carlos')+'</section>'+
+    '<section class="card"><h3 class="sec" style="margin:0">Privacidad</h3><p class="note">Nunca se muestra tu dirección exacta, solo distancia aproximada. Puntos, puesto y estado de la cuenta son privados.</p></section>'+
+    '<button class="btn ghost" data-act="tutorial">Ver tutorial</button>';
+}
+function emergPrep(){
+  var lv=solLevel();
+  return '<section><h2 class="h1">Un barrio preparado</h2><p class="sub">No hace falta abrir la app durante los segundos críticos. Lo preparas antes y coordinas después.</p>'+
+    '<h3 class="sec">Qué puedes aportar si hay una emergencia</h3><div class="list">'+CAPS.map(function(c){return '<button class="tog" role="switch" aria-checked="'+S.caps[c[0]]+'" data-act="cap" data-k="'+c[0]+'"><span>'+c[1]+'</span><span class="sw"></span></button>'}).join('')+
+    '<button class="tog" role="switch" aria-checked="'+!!S.brig+'" data-act="brig"'+(lv>=3?'':' disabled')+'><span>Rol de brigadista vecinal'+(lv>=3?'':' (desde Vecino solidario)')+'</span><span class="sw"></span></button></div></section>'+
+    '<button class="btn big alertbtn" data-act="emgOn">Simular una emergencia</button>'+
+    officialHTML()+
+    '<section><h3 class="sec">Grupos de apoyo cerca</h3>'+groupsList()+'</section>'+
+    '<section><h3 class="sec">Recursos disponibles en el barrio</h3><div class="rchips">'+RCHIPS.map(function(r){return '<span>'+r+'</span>'}).join('')+'</div></section>';
+}
+function emergActive(){
+  var lab={bien:L('imok'),ayuda:L('needhelp'),puedo:L('canhelp')};
+  var h='<section><h3 class="sec">¿Cómo estás?</h3><div class="stateGrid">'+
+    '<button class="state good'+(S.estado==='bien'?' sel':'')+'" data-act="estado" data-k="bien"><b>'+L('imok')+'</b><small>Tus vecinos lo ven</small></button>'+
+    '<button class="state bad'+(S.estado==='ayuda'?' sel':'')+'" data-act="openSos"><b>'+L('needhelp')+'</b><small>Eliges la situación; compartes tu zona aproximada</small></button>'+
+    '<button class="state help'+(S.estado==='puedo'?' sel':'')+'" data-act="openPuedo"><b>'+L('canhelp')+'</b><small>Ofreces lo que sabes y tienes</small></button></div>'+
+    (S.estado?'<p class="yourstate">Tu estado: '+lab[S.estado]+'</p>':'')+'</section>';
+  h+=officialHTML()+wallEmgHTML()+resourcesHTML();
+  h+='<section><h3 class="sec">Mapa</h3>'+(!S.online?'<p class="note warn" style="margin-bottom:8px">Mapa guardado en tu teléfono.</p>':'')+mapSVG()+
+    '<div class="legend"><span><i class="lg-m"></i>Tú</span><span><i class="lg-n"></i>Necesidad</span><span><i class="lg-r"></i>Recurso</span><span><i class="lg-g"></i>Grupo de apoyo</span></div></section>';
+  h+='<section><h3 class="sec">Grupos de apoyo</h3>'+groupsList()+'</section>';
+  h+='<p class="note">Esta app no reemplaza a los servicios oficiales. En una urgencia grave, llama primero a la institución.</p>';
+  return h;
+}
+
+/* Hojas nuevas */
+function qrSVG(seed){
+  var n=21,x=seed*2654435761%4294967296,cells='';
+  var rnd=function(){x=(x*1664525+1013904223)%4294967296;return x/4294967296};
+  var fin=function(r,c){return (r<7&&c<7)||(r<7&&c>13)||(r>13&&c<7)};
+  for(var r=0;r<n;r++)for(var c=0;c<n;c++){if(!fin(r,c)&&rnd()>0.5)cells+='<rect x="'+c+'" y="'+r+'" width="1" height="1"/>'}
+  var f=function(ox,oy){return '<rect x="'+ox+'" y="'+oy+'" width="7" height="7"/><rect x="'+(ox+1)+'" y="'+(oy+1)+'" width="5" height="5" fill="#fff"/><rect x="'+(ox+2)+'" y="'+(oy+2)+'" width="3" height="3"/>'};
+  return '<svg viewBox="-1 -1 23 23" width="120" height="120" role="img" aria-label="Código QR de verificación (simulado)" shape-rendering="crispEdges" style="background:#fff;border-radius:8px;align-self:center"><g fill="#000">'+cells+f(0,0)+f(14,0)+f(0,14)+'</g></svg>';
+}
+function acReady(){var a=S.ac;return a.n.trim().length>2&&ACITEMS.some(function(k){return a.acc[k]})}
+function extraSheet(s,head){
+  var h;
+  if(s==='balance'){
+    var b=S.sol.lastBal,lv=solLevel(),d=Object.keys(S.sol.people).length;if(!b)return head('Balance')+'<p class="note">Aún no hay ayudas confirmadas.</p>';
+    h=head('Balance de tu ayuda')+(b.lvUp?'<div class="card good"><b>Subiste de nivel: '+b.lvUp+'</b><span class="note">Solo se hace público el nombre del nivel.</span></div>':'')+
+      '<div class="card"><b>Ayudaste a '+esc(b.who)+'</b><div class="reprow"><span>Tiempo</span><b>'+fmtDur(b.dur)+'</b></div><div class="reprow"><span>Su calificación</span><b>★ '+b.stars+'</b></div><div class="reprow"><span>Puntos de esta ayuda</span><b>+'+fmtP(b.pts)+'</b></div><span class="note">'+b.why+'</span></div>'+
+      '<div class="card"><b>Tu balance</b><div class="reprow"><span>Ayudas dadas</span><b>'+S.sol.helps+'</b></div><div class="reprow"><span>Personas distintas ayudadas</span><b>'+d+'</b></div><div class="reprow"><span>Ayudas recibidas</span><b>'+S.resolved+'</b></div><div class="reprow"><span>Tus puntos (solo tú)</span><b>'+fmtP(S.sol.pts)+'</b></div><div class="reprow"><span>Tu nivel</span><b>'+LVN[lv]+'</b></div></div>'+
+      '<p class="note">'+(b.stars>=4?'Gracias a ti, '+esc(b.who.split(' ')[0])+' resolvió su necesidad.':'Tu ayuda cuenta como gesto de buen vecino.')+' El balance es de ayudas, tiempo y puntos, no de dinero.</p><button class="btn big" data-act="closeOverlay">Cerrar</button>';
+    return h;
+  }
+  if(s==='lang'){
+    return head(L('language'))+'<div class="list">'+LANGS.map(function(l){return '<button class="type'+(S.lang===l[0]?' sel':'')+'" data-act="setLang" data-k="'+l[0]+'" aria-pressed="'+(S.lang===l[0])+'"><span>'+l[1]+'</span><small>'+l[2]+'</small></button>'}).join('')+'</div><p class="note">En esta simulación cada idioma traduce las pantallas principales (menús, títulos y estados); el resto sigue en español. La estructura permite agregar el resto sin tocar el diseño. El quechua es un ejemplo y debe revisarlo un hablante nativo.</p>';
+  }
+  if(s==='verify'){
+    var v=S.v,ok=v.dni.length===8&&v.consent&&v.selfie;
+    return head('Verificar mi perfil')+'<p class="note">Simulación: no se consulta ninguna base de datos. En la versión real se validaría con RENIEC, con tu consentimiento (Ley 29733).</p>'+
+      '<label class="lbl" for="vdni">Número de DNI (8 dígitos, ficticio)</label><input id="vdni" class="field" inputmode="numeric" maxlength="8" value="'+esc(v.dni)+'">'+
+      '<button class="tog" role="switch" aria-checked="'+v.consent+'" data-act="vConsent"><span>Acepto que mis datos se usen solo para verificar mi identidad</span><span class="sw"></span></button>'+
+      '<button class="btn ghost" data-act="vSelfie">'+(v.selfie?'Selfie tomada (simulada)':'Tomar selfie (simulada)')+'</button>'+
+      '<button class="btn big" data-act="vOk"'+(ok?'':' disabled')+'>Verificar</button>';
+  }
+  if(s==='cons'){
+    var cs=S.sol,cd=Object.keys(cs.people).length,avg=cs.ratedN?cs.ratedSum/cs.ratedN:0,seed=1000+(cs.helps*131+cd*17+Math.round(cs.pts*7))%9000,code='CAV-'+seed;
+    return head('Constancia de ayuda vecinal')+
+      '<div class="card"><b>Constancia de ayuda vecinal</b><span>'+(S.cons.name?'A nombre de: [tu nombre completo]':'Vecino solidario · identificado solo por código')+'</span>'+
+      '<div class="reprow"><span>Nivel</span><b>'+LVN[solLevel()]+'</b></div><div class="reprow"><span>Ayudas confirmadas</span><b>'+cs.helps+'</b></div><div class="reprow"><span>Personas distintas ayudadas</span><b>'+cd+'</b></div><div class="reprow"><span>Calificación media recibida</span><b>★ '+(avg?fmtP(avg):'—')+'</b></div><div class="reprow"><span>Emitida el</span><b>'+new Date().toLocaleDateString('es-PE')+'</b></div>'+
+      qrSVG(seed)+'<div class="reprow"><span>Código de verificación</span><b>'+code+'</b></div></div>'+
+      '<button class="tog" role="switch" aria-checked="'+S.cons.name+'" data-act="consName"><span>Mostrar mi nombre completo (si no, solo el código)</span><span class="sw"></span></button>'+
+      '<p class="note">Verificada por la plataforma; no es un documento oficial. Sirve para tu CV, becas o voluntariado. Juntas vecinales, municipalidad y aliados podrán co-firmarla a futuro.</p>';
+  }
+  if(s==='walloffer'){
+    var w=S.wo;
+    return head('Ofrecer algo al barrio')+'<span class="lbl">Modalidad</span><div class="chips" style="margin-top:0" role="group" aria-label="Modalidad">'+MODS.map(function(m){return '<button class="chip" data-act="woMod" data-k="'+m+'" aria-pressed="'+(w.mod===m)+'">'+m+'</button>'}).join('')+'</div>'+
+      '<label class="lbl" for="wotext">¿Qué ofreces?</label><textarea id="wotext" rows="3" placeholder="Ej.: Presto una escalera los fines de semana">'+esc(w.text)+'</textarea>'+
+      '<p class="note">Se publica con tu zona aproximada. Si alguien te la pide, coordinan por el chat y se confirma con código.</p>'+
+      '<button class="btn big" data-act="woPub"'+(w.mod&&w.text.trim().length>2?'':' disabled')+'>Publicar oferta</button>';
+  }
+  if(s.indexOf('donate:')===0){
+    var r=RNEED.filter(function(x){return x.id===s.slice(7)})[0],dn=S.don;
+    return head('Donativo: '+r.t)+'<p class="note">Sin dinero. Entregas en un punto de acopio, nunca en una casa.</p>'+
+      '<span class="lbl">Cantidad ('+r.u+')</span><div class="chips" style="margin-top:0" role="group" aria-label="Cantidad">'+[1,5,10].map(function(q){return '<button class="chip" data-act="donQ" data-k="'+q+'" aria-pressed="'+(dn.qty===q)+'">'+q+'</button>'}).join('')+'</div>'+
+      '<span class="lbl">Punto de acopio</span><div class="chips" style="margin-top:0" role="group" aria-label="Punto de acopio">'+allAcopios().map(function(a){return '<button class="chip" data-act="donA" data-k="'+esc(a.n)+'" aria-pressed="'+(dn.ac===a.n)+'">'+esc(a.n)+'</button>'}).join('')+'</div>'+
+      '<button class="btn big" data-act="donOk" data-id="'+r.id+'"'+(dn.ac?'':' disabled')+'>Confirmar donativo</button>';
+  }
+  if(s==='acopio'){
+    var a=S.ac;
+    return head('Crear punto de acopio')+'<p class="note">Disponible para Vecino solidario. Se muestra con zona aproximada y qué recibe.</p>'+
+      '<label class="lbl" for="acname">Nombre del punto</label><input id="acname" class="field" maxlength="40" value="'+esc(a.n)+'" placeholder="Ej.: Cochera de la familia Ruiz">'+
+      '<span class="lbl">¿Qué recibe?</span><div class="chips" style="margin-top:0" role="group" aria-label="Qué recibe">'+ACITEMS.map(function(k){return '<button class="chip" data-act="acAcc" data-k="'+k+'" aria-pressed="'+!!a.acc[k]+'">'+k+'</button>'}).join('')+'</div>'+
+      '<button class="btn big" data-act="acOk"'+(acReady()?'':' disabled')+'>Crear punto de acopio</button>';
+  }
+  return null;
+}
+function modHTML(c){
+  if(c.type!=='prestamo'&&c.type!=='ayuda')return '';
+  return '<span class="lbl">Modalidad (opcional)</span><div class="chips" style="margin-top:0" role="group" aria-label="Modalidad">'+MODS.map(function(m){return '<button class="chip" data-act="cmod" data-k="'+m+'" aria-pressed="'+(c.mod===m)+'">'+m+'</button>'}).join('')+'</div>';
+}
+
+/* Vistas */
+function chromeHTML(){
+  var h='<div class="appbar"><div><p class="appname">'+(S.emergency?L('appnameEmg'):L('appname'))+'</p><p class="zone">'+L('zone')+'</p></div><div style="display:flex;gap:6px;align-items:center">'+
+    '<button class="net langb" data-act="openLang" aria-label="'+L('language')+': '+langName()+'">'+ic('globe',16)+' '+S.lang.toUpperCase()+'</button>'+
+    '<button class="net '+(S.online?'on':'off')+'" data-act="net" aria-label="Conexión simulada: '+(S.online?'con internet. Tocar para quitar internet':'sin internet. Tocar para restaurar')+'"><span class="dot"></span>'+(S.online?L('online'):L('offline'))+'</button></div></div>';
+  if(!S.online)h+='<div class="banner warn">Sin internet. Ves lo último guardado y tus solicitudes quedan pendientes.</div>';
+  if(S.emergency)h+='<div class="banner emg"><span>Simulación de sismo. La red del barrio cambió de reglas.</span><button class="linkbtn" data-act="emgOff">Salir</button></div>';
+  return h;
+}
+function tabHTML(){
+  var tabs=[['inicio',L('home'),'home'],['vecinos',L('neighbors'),'swap'],['mensajes',L('messages'),'chat'],['emergencia',L('emergency'),'alert'],['perfil',L('profile'),'user']];
+  return tabs.map(function(t){return '<button data-act="tab" data-k="'+t[0]+'"'+(S.tab===t[0]?' aria-current="page"':'')+'>'+ic(t[2],24)+'<span>'+t[1]+'</span></button>'}).join('');
+}
+function statusInfo(n){
+  if(n.status==='pending')return {cls:'warn',txt:'Pendiente de sincronización'};
+  if(n.status==='syncing')return {cls:'warn',txt:'Sincronizando…'};
+  if(n.status==='open')return n.arrived<3?{cls:'acc',txt:'Recibiendo propuestas'}:{cls:'acc',txt:'3 propuestas'};
+  if(n.status==='done')return {cls:'good',txt:'Resuelta'};
+  if(n.status==='cancelled')return {cls:'warn',txt:'Cancelada'};
+  if(n.status==='waiting')return {cls:'warn',txt:'Esperando calificación'};
+  return {cls:'acc',txt:CAT[n.type].steps[n.stage]};
+}
+function needItem(n){
+  var st=statusInfo(n);
+  return '<button class="item" data-act="openNeed" data-id="'+n.id+'"><span class="itype">'+ic(ICON[n.type],20)+'</span><span class="ibody"><span class="ititle">'+esc(n.text)+'</span><span class="isub">'+CAT[n.type].label+(n.mod?' · '+n.mod:'')+' · Para: '+esc(n.when)+' · <span class="badge '+st.cls+'">'+st.txt+'</span>'+(solLevel()>=2&&n.when!=='Ahora mismo'&&n.status==='open'?' <span class="badge acc">Prioridad solidaria</span>':'')+'</span></span><span class="chev" aria-hidden="true">›</span></button>';
+}
+function dirItem(id){
+  var p=PROV[id];
+  return '<button class="item" data-act="profile" data-id="'+id+'"><span class="avatar">'+initials(p.name)+'</span><span class="ibody"><span class="ititle">'+esc(p.name)+'</span><span class="isub">'+p.role+' · Visto Bueno de '+p.vb+' vecinos</span></span><span class="chev" aria-hidden="true">›</span></button>';
+}
+function inicio(){
+  var mine=S.needs.filter(function(n){return n.type==='servicio'||n.type==='producto'});
+  var h='';
+  if(S.tip)h+='<div class="tip"><span><b>¿Primera vez?</b> Aprende a usar la app en 3 pasos.</span><div class="row"><button class="btn sm" data-act="tutorial">Ver tutorial</button><button class="btn sm ghost" data-act="tipClose">Ahora no</button></div></div>';
+  if(S.role==='ambos')h+=segHTML();
+  if(S.mode==='oferta')return h+ofertaHome();
+  h+='<section><h2 class="h1">'+L('needq')+'</h2><p class="sub">'+L('needsub')+'</p>'+
+    '<button class="ask" data-act="openComposer" data-k=""><span>'+L('askph')+'</span>'+ic('swap')+'</button>'+
+    '<div class="chips">'+QUICK.map(function(q,i){return '<button class="chip" data-act="quick" data-i="'+i+'">'+q.l+'</button>'}).join('')+'</div></section>';
+  if(mine.length)h+='<section><h3 class="sec">Mis necesidades</h3><div class="list">'+mine.map(needItem).join('')+'</div></section>';
+  h+='<section><h3 class="sec">Recomendados por tu barrio</h3><p class="secsub">Visto Bueno Vecinal: lo que dicen vecinos de tu misma zona.</p><div class="list">'+DIR.map(dirItem).join('')+'</div></section>';
+  return h;
+}
+function propCard(n,x){
+  var p=PROV[x.id], c=CAT[n.type], isS=n.type==='servicio', lbl=(n.type==='prestamo'||n.type==='ayuda')?'Modalidad':(isS?'Precio estimado':'Precio'), ex='';
+  if(isS){var a=p.adj;ex='<span class="note'+(a.unj>=2?' warn':'')+'">Ajustó el precio en '+a.n+' de '+a.of+' trabajos · Estado: '+sancLevel(a.unj)+'</span>'+(x.diag?'<span class="badge acc">Ofrece visita de diagnóstico: S/ '+x.diag+' (se descuenta)</span>':'')}
+  return '<article class="prop"><div class="phead"><span class="avatar">'+initials(p.name)+'</span><div class="pname"><button class="namebtn" data-act="profile" data-id="'+x.id+'">'+esc(p.name)+'</button><span class="role">'+p.role+' · '+p.vb+' Vistos Buenos</span></div><span class="rate" aria-label="Reputación '+headline(p).toFixed(1)+' de 5">★ '+headline(p).toFixed(1)+'</span></div>'+
+    '<dl class="facts"><div><dt>Distancia</dt><dd>'+x.d+'</dd></div><div><dt>'+lbl+'</dt><dd>'+x.p+'</dd></div><div><dt>Disponible</dt><dd>'+x.a+'</dd></div></dl>'+ex+
+    (ETA[x.id]<=limitH(n.when)?'<span class="badge good">Llega a tiempo para: '+esc(n.when)+'</span>':'<span class="badge warn">Después de tu plazo ('+esc(n.when)+')</span>')+
+    '<button class="btn" data-act="accept" data-pid="'+x.id+'">Aceptar propuesta</button></article>';
+}
+function adjNeedHTML(n,x,p){
+  var f=esc(p.name.split(' ')[0]), a=n.adj;
+  if(!a)return '<button class="btn ghost" data-act="simAdj">Simular: '+f+' propone otro precio</button>';
+  if(a.state==='pending')return '<div class="card warn"><b>'+f+' propone S/ '+a.to+' (antes S/ '+a.from+')</b><span>Motivo: '+esc(a.motive)+'</span><img class="thumb" alt="Foto que adjuntó el proveedor" src="'+EXPH+'"><span class="note">El precio solo cambia si tú aceptas. Puedes rechazar y seguir con S/ '+a.from+', contraofertar o cancelar sin penalización. Queda registrado en el historial del proveedor.</span><div class="row2"><button class="btn sm" data-act="adjAcc">Aceptar S/ '+a.to+'</button><button class="btn sm ghost" data-act="adjCtr">Contraofertar S/ '+Math.round((a.from+a.to)/2)+'</button></div><button class="btn ghost" data-act="adjRej">Rechazar</button></div>';
+  if(a.state==='accepted')return '<span class="badge good">Precio acordado entre ambos: S/ '+n.price+'</span>';
+  if(a.state==='countered')return '<span class="badge warn">Esperando respuesta de '+f+' a tu contraoferta…</span>';
+  return '<div class="card"><b>Sin acuerdo: se mantiene S/ '+a.from+'</b><span class="note">Puedes seguir con el precio original o cancelar sin penalización.</span>'+(a.reported?'<span class="badge good">Ajuste reportado</span>':'<button class="btn ghost" data-act="adjReport">Reportar ajuste injustificado</button>')+'</div>';
+}
+function needAdj(a){
+  var n=getNeed(S.activeNeed);if(!n)return;var x=CAT[n.type].props.filter(function(q){return q.id===n.chosen})[0], pv=PROV[n.chosen], f=pv.name.split(' ')[0];
+  if(a==='simAdj'&&!n.adj){n.adj={state:'pending',from:x.pv,to:Math.round(x.pv*1.5),motive:MOTIVES[0]};pv.adj.n++;pv.adj.of++;render()}
+  else if(!n.adj){return}
+  else if(a==='adjAcc'){n.price=n.adj.to;n.adj.state='accepted';ev('adjn');toast('Aceptaste S/ '+n.price+'. El cambio queda registrado.')}
+  else if(a==='adjCtr'){var mid=Math.round((n.adj.from+n.adj.to)/2);n.price=mid;n.adj.state='countered';render();
+    T.push(setTimeout(function(){n.adj.state='accepted';ev('adjn');toast(f+' aceptó tu contraoferta: S/ '+mid+'.')},1400))}
+  else if(a==='adjRej'){n.adj.state='rejected';n.price=n.adj.from;ev('adjn');toast('Rechazaste el ajuste. Se mantiene S/ '+n.adj.from+'.')}
+  else if(a==='adjReport'){n.adj.reported=true;pv.adj.unj++;toast('Reporte enviado. Con varios reportes de distintos clientes: aviso, menos visibilidad, suspensión y baja con apelación. Estado de '+f+': '+sancLevel(pv.adj.unj)+'.')}
+}
+function needDetail(n){
+  var c=CAT[n.type];
+  var h='<div class="detailhead"><button class="iconbtn" data-act="backNeed" aria-label="Volver">'+ic('back')+'</button><div><p class="eyebrow">'+c.label+'</p><h2 class="h2">'+esc(n.text)+'</h2><span class="badge acc">Para: '+esc(n.when)+'</span></div></div>';
+  if(n.det)h+='<div class="card">'+detHTML(n.det)+'<span class="note">Solo lo ven quienes te proponen.</span></div>';
+  if(n.status==='pending'){
+    h+='<div class="card warn"><b>Pendiente de sincronización</b><span>Se guardó en tu teléfono. Cuando vuelva el internet se envía sola y empiezan a llegar propuestas.</span></div>';
+    if(!S.online)h+='<button class="btn" data-act="net">Restaurar internet (simulación)</button>';
+    return h;
+  }
+  if(n.status==='syncing')return h+'<div class="card warn"><b>Sincronizando…</b><span>Enviando tu solicitud al barrio.</span></div>';
+  if(n.status==='open'){
+    var arr=c.props.slice(0,n.arrived).slice();
+    var key={rep:function(a,b){return headline(PROV[b.id])-headline(PROV[a.id])},dist:function(a,b){return a.dm-b.dm},precio:function(a,b){return a.pv-b.pv}}[n.sort];
+    arr.sort(key);
+    h+='<div class="sortbar" role="group" aria-label="Ordenar propuestas"><span>Ordenar por</span>'+[['rep','Reputación'],['dist','Cercanía'],['precio','Precio']].map(function(o){return '<button class="chip" data-act="sort" data-s="'+o[0]+'" aria-pressed="'+(n.sort===o[0])+'">'+o[1]+'</button>'}).join('')+'</div>';
+    h+=arr.map(function(x){return propCard(n,x)}).join('');
+    for(var i=n.arrived;i<3;i++)h+='<div class="skel" aria-hidden="true"></div>';
+    if(n.arrived<3)h+='<p class="note">Tu barrio está respondiendo…</p>';
+    if(n.type==='servicio')h+='<p class="note">Los precios son estimados. Si el problema resulta distinto, el proveedor puede proponer otro precio, pero solo cambia si tú lo aceptas.</p>';
+    return h;
+  }
+  var x=c.props.filter(function(q){return q.id===n.chosen})[0], p=PROV[n.chosen], f1=esc(p.name.split(' ')[0]), isS=n.type==='servicio';
+  var pr=isS?'S/ '+curPrice(n,x)+(n.adj&&n.adj.state==='accepted'?' (acordado)':' (estimado)'):x.p;
+  h+='<div class="card"><div class="phead"><span class="avatar">'+initials(p.name)+'</span><div class="pname"><button class="namebtn" data-act="profile" data-id="'+n.chosen+'">'+esc(p.name)+'</button><span class="role">'+x.d+' · '+pr+' · '+x.a+'</span></div></div></div>';
+  if(n.status==='cancelled')return h+'<div class="card warn"><b>Cancelada</b><span>'+esc(n.cancelNote||'')+'</span></div><button class="btn ghost" data-act="backNeed">Volver</button>';
+  h+='<ol class="timeline" aria-label="Avance">'+c.steps.map(function(s,i){return '<li class="'+(i<=n.stage?'done':'')+(i===n.stage&&n.status!=='done'?' cur':'')+'">'+s+'</li>'}).join('')+'</ol>';
+  var last=n.stage>=c.steps.length-1;
+  if(n.status==='accepted'){
+    if(n.verified){
+      h+='<span class="badge good">Encuentro confirmado con código</span>';
+      if(!last)h+='<div class="card"><b>En curso</b><span class="timer" data-since="'+n.startedAt+'">'+fmtClock(Date.now()-n.startedAt)+'</span><span class="note">Tiempo desde que se validó el código. Es informativo, no un cobro.</span><button class="btn sm ghost" data-act="skipTime" data-k="n" data-id="'+n.id+'">Demo: avanzar 45 min</button></div>';
+      if(isS&&!last)h+=adjNeedHTML(n,x,p);
+    }else{
+      h+='<div class="card"><b>Tu código de encuentro</b><span class="codebig" aria-label="Código '+n.code.split('').join(' ')+'">'+n.code+'</span><span class="note">Díselo a '+f1+' cuando llegue. Así confirmamos que se encontraron de verdad y la interacción cuenta para la reputación.</span><button class="btn ghost" data-act="simCode">Simular: '+f1+' ingresa el código</button></div>'+
+        '<button class="btn ghost" data-act="noShow" data-k="n" data-id="'+n.id+'" data-ready="'+(n.accAt+NOSHOW)+'"'+(Date.now()<n.accAt+NOSHOW?' disabled':'')+'>¿No llegó?<span class="cd">'+cdText(n.accAt+NOSHOW)+'</span></button><span class="note">Tras la espera (demo: 15 s) puedes cancelar sin penalización.</span>';
+    }
+    h+='<button class="btn ghost big" data-act="openChat" data-key="n'+n.id+'">'+ic('chat',20)+' Escribir a '+f1+'</button>';
+    if(!last){
+      h+='<button class="btn big" data-act="next"'+((n.verified&&!(n.adj&&n.adj.state==='pending'))?'':' disabled')+'>'+c.acts[n.stage]+'</button>';
+      if(!S.online)h+='<p class="note warn">Sin internet no se puede confirmar. Restaura la conexión.</p>';
+      h+='<button class="btn ghost" data-act="openCancel" data-k="n" data-id="'+n.id+'">Cancelar</button>';
+    }else{
+      h+='<div class="card"><b>'+DONEL[n.type]+' en '+fmtDur(n.dur||1000)+'. Califica el nivel de servicio y deja tus comentarios</b><span class="note">¿Cómo te fue con '+esc(p.name)+'? Él también te califica; se muestra cuando ambos terminan.</span><div class="stars" role="group" aria-label="Valoración">'+[1,2,3,4,5].map(function(q){return '<button data-act="star" data-n="'+q+'" aria-label="'+q+(q===1?' estrella':' estrellas')+'" aria-pressed="'+(n.rating>=q)+'">'+ic('star',22)+'</button>'}).join('')+'</div>'+
+        '<span class="lbl">Toca para sumar a tu comentario</span><div class="chips" style="margin-top:0">'+TAGS.map(function(t){return '<button class="chip" data-act="tag" data-k="'+t+'">'+t+'</button>'}).join('')+'</div>'+
+        '<label class="lbl" for="ccomment">Comentario (opcional)</label><textarea id="ccomment" rows="2" placeholder="Cuéntales a tus vecinos cómo te fue">'+esc(n.comment||'')+'</textarea>'+
+        '<button class="btn" data-act="rate"'+(n.rating?'':' disabled')+'>Enviar valoración</button></div>';
+    }
+  }else if(n.status==='waiting'){
+    h+='<div class="card"><b>'+DONEL[n.type]+' en '+fmtDur(n.dur||1000)+'</b><span class="note">Tu calificación se envió. Se muestra cuando '+f1+' también te califique, así nadie califica por represalia…</span></div>';
+  }else if(n.status==='done'){
+    var L=n.repLog;
+    h+='<div class="card good"><b>Interacción verificada</b>'+
+      '<div class="reprow"><span>'+DONEL[n.type]+' en</span><b>'+fmtDur(n.dur||1000)+'</b></div>'+
+      (isS?'<div class="reprow"><span>Precio final</span><b>S/ '+curPrice(n,x)+'</b></div>':'')+
+      '<div class="reprow"><span>Reputación de '+f1+' en '+c.ctxName+'</span><b>★ '+L.b.toFixed(2)+' → ★ '+L.a.toFixed(2)+'</b></div>'+
+      '<div class="reprow"><span>Interacciones verificadas en '+c.ctxName+'</span><b>'+L.nb+' → '+L.na+'</b></div>'+
+      (n.comment?'<div class="reprow"><span>Tu comentario</span><b style="font-weight:600;text-align:right">'+esc(n.comment)+'</b></div>':'')+
+      '<div class="reprow"><span>'+f1+' te calificó como cliente</span><b>★ '+n.cliR+'</b></div>'+
+      '<div class="reprow"><span>Su comentario</span><b style="font-weight:600;text-align:right">'+esc(n.cliT)+'</b></div>'+
+      '<div class="reprow"><span>Tu reputación como cliente</span><b>★ '+S.me.cli.r.toFixed(1)+' · '+S.me.cli.n+(S.me.cli.n===1?' servicio':' servicios')+'</b></div>'+
+      '<div class="reprow"><span>Necesidades resueltas</span><b>'+S.resolved+'</b></div>'+
+      (c.ctx==='vec'?'<div class="reprow"><span>Tu reputación entre vecinos</span><b>★ '+S.me.vec.r.toFixed(1)+' · '+S.me.vec.n+(S.me.vec.n===1?' interacción':' interacciones')+'</b></div>':'')+
+      '<p class="quote">Cada necesidad resuelta hace que el barrio esté mejor preparado para la siguiente.</p></div>'+
+      '<button class="btn ghost" data-act="backNeed">Volver</button>';
+  }
+  return h;
+}
+function mapSVG(){
+  var cx=170,cy=150,R=130;
+  var pt=function(d,a){return [cx+d/750*R*Math.cos(a*Math.PI/180),cy-d/750*R*Math.sin(a*Math.PI/180)]};
+  var s='<svg class="map" viewBox="0 0 340 300" role="img" aria-label="Mapa esquemático de tu zona con necesidades, recursos y grupos de apoyo">';
+  [250,500,750].forEach(function(d){var r=d/750*R;s+='<circle class="ring" cx="'+cx+'" cy="'+cy+'" r="'+r+'"/><text class="rl" x="'+(cx+r*0.707+3)+'" y="'+(cy-r*0.707-3)+'">'+d+' m</text>'});
+  ERES.forEach(function(r){var p=pt(r.d,r.ang);s+='<rect class="rs" x="'+(p[0]-6)+'" y="'+(p[1]-6)+'" width="12" height="12" rx="3"/>'});
+  EGROUPS.forEach(function(g){var p=pt(g.d,g.ang);s+='<polygon class="gp" points="'+p[0]+','+(p[1]-8)+' '+(p[0]+8)+','+(p[1]+6)+' '+(p[0]-8)+','+(p[1]+6)+'"/>'});
+  ENEEDS.forEach(function(e,i){var p=pt(e.d,e.ang),sel=S.selNeed===e.id;
+    s+='<circle class="nd" cx="'+p[0]+'" cy="'+p[1]+'" r="'+(sel?13:10)+'"/><text class="nt" x="'+p[0]+'" y="'+(p[1]+4)+'">'+(i+1)+'</text>';
+    if(sel)s+='<text class="sl" x="'+p[0]+'" y="'+(p[1]-18)+'" text-anchor="middle">'+e.d+' m</text>'});
+  if(S.mineSos)s+='<circle cx="'+cx+'" cy="'+cy+'" r="16" fill="none" stroke="var(--alert)" stroke-width="2.5" stroke-dasharray="4 3"/>';
+  s+='<circle class="me" cx="'+cx+'" cy="'+cy+'" r="8"/><text class="sl" x="'+cx+'" y="'+(cy+26)+'" text-anchor="middle">Tú</text></svg>';
+  return s;
+}
+function groupsList(){
+  return '<div class="list">'+EGROUPS.slice().sort(function(a,b){return a.d-b.d}).map(function(g){return '<div class="eneed"><span class="eneedmain"><span>'+g.n+'</span><small>'+g.d+' m · contacto guardado en tu teléfono</small></span></div>'}).join('')+'</div>';
+}
+function screenHTML(){
+  if(S.activeNeed){var n=getNeed(S.activeNeed);if(n)return needDetail(n)}
+  if(S.tab==='vecinos')return vecinos();
+  if(S.tab==='mensajes')return mensajes();
+  if(S.tab==='emergencia')return S.emergency?emergActive():emergPrep();
+  if(S.tab==='perfil')return perfil();
+  return inicio();
+}
+
+/* Hojas */
+function composerHTML(){
+  var c=S.composer, ready=c.type&&c.text.trim().length>2, clicks=composerClicks(c);
+  return '<div class="scrim" data-act="closeOverlay"></div><div class="sheet" role="dialog" aria-modal="true" aria-label="Publicar una necesidad" tabindex="-1">'+
+    '<div class="sheethead"><h3>¿Qué necesitas?</h3><button class="iconbtn" data-act="closeOverlay" aria-label="Cerrar">'+ic('close')+'</button></div>'+
+    '<p class="steps3"><span class="'+(c.type?'ok':'')+'">1 Tipo</span><span class="'+(c.textTouched?'ok':'')+'">2 Descripción</span><span>3 Publicar</span><span class="count">Clics: '+clicks+' de 3</span></p>'+
+    '<div class="typegrid" role="group" aria-label="Tipo de necesidad">'+Object.keys(CAT).map(function(k){return '<button class="type'+(c.type===k?' sel':'')+'" data-act="pickType" data-k="'+k+'" aria-pressed="'+(c.type===k)+'">'+ic(ICON[k],22)+'<span>'+CAT[k].label+'</span><small>'+CAT[k].hint+'</small></button>'}).join('')+'</div>'+
+    '<label class="lbl" for="ctext">Describe qué necesitas</label><textarea id="ctext" rows="3" placeholder="Ej.: Necesito un taladro por una hora">'+esc(c.text)+'</textarea>'+
+    (c.type?'<div class="suggs">'+CAT[c.type].sugg.map(function(s,i){return '<button class="chip" data-act="pickSugg" data-i="'+i+'">'+esc(s)+'</button>'}).join('')+'</div>':'')+
+    detComposer(c)+modHTML(c)+
+    '<span class="lbl">¿Para cuándo lo necesitas?</span><div class="chips" style="margin-top:0" role="group" aria-label="Plazo">'+WHENS.map(function(w){return '<button class="chip" data-act="pickWhen" data-k="'+w[0]+'" aria-pressed="'+(S.cw===w[0])+'">'+w[0]+'</button>'}).join('')+'</div>'+
+    (!S.online?'<p class="note warn">Sin internet: se guarda en tu teléfono y se envía al volver.</p>':'')+
+    '<button class="btn big" id="pubbtn" data-act="publish"'+(ready?'':' disabled')+'>'+(S.online?'Publicar y ver propuestas':'Guardar sin internet')+'</button></div>';
+}
+function sheetHTML(){
+  var head=function(t){return '<div class="sheethead"><h3>'+t+'</h3><button class="iconbtn" data-act="closeOverlay" aria-label="Cerrar">'+ic('close')+'</button></div>'};
+  var w='<div class="scrim" data-act="closeOverlay"></div>', s=S.sheet, h='';
+  if(s.indexOf('profile:')===0){
+    var p=PROV[s.slice(8)], hl=headline(p);
+    h=head(esc(p.name))+'<p class="note" style="margin-top:-6px">'+p.role+' · Visto Bueno de '+p.vb+' vecinos de tu zona</p>'+
+      '<div class="card"><div class="reprow"><span>Reputación general</span><b>'+(hl?'★ '+hl.toFixed(1):'—')+'</b></div>'+
+      '<div class="reprow"><span>En servicios</span><b>'+(p.svc.n?'★ '+p.svc.r.toFixed(1)+' · '+p.svc.n+' completados':'—')+'</b></div>'+
+      '<div class="reprow"><span>Entre vecinos</span><b>'+(p.vec.n?'★ '+p.vec.r.toFixed(1)+' · '+p.vec.n+' interacciones':'—')+'</b></div>'+
+      '<div class="reprow"><span>Interacciones verificadas</span><b>'+(p.svc.n+p.vec.n)+'</b></div></div>'+
+      '<ul style="margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px"><li>'+p.zone+' interacciones en tu zona</li><li>'+p.ayudas+' ayudas vecinales</li><li>'+p.caps+'</li></ul>'+
+      '<h4 class="sec" style="margin:4px 0 0">Comentarios de vecinos</h4><div>'+getComments(s.slice(8)).slice(0,4).map(cmtHTML).join('')+'</div>'+
+      (p.prev?'<p class="note">Te ayudó antes. La app se lo recuerda a ambos, sin obligar a nadie.</p>':'')+
+      '<p class="note">Reputación contextual: cada contexto tiene su propia nota. Solo cuentan interacciones confirmadas. Datos ficticios.</p>';
+  }else if(s==='role'){
+    h=head('¿Cómo quieres usar la app?')+'<div class="list">'+ROLES.map(function(r){return '<button class="type'+(S.role===r[0]?' sel':'')+'" data-act="setRole" data-k="'+r[0]+'" aria-pressed="'+(S.role===r[0])+'"><span>'+r[1]+'</span><small>'+r[2]+'</small></button>'}).join('')+'</div><p class="note">Puedes cambiarlo cuando quieras en Perfil.</p>';
+  }else if(s==='offer'){
+    var od=S.od;
+    h=head('Publica tu servicio')+'<span class="lbl">¿Qué haces?</span><div class="chips" style="margin-top:0" role="group" aria-label="Servicio">'+SVCS.map(function(k){return '<button class="chip" data-act="odK" data-k="'+k+'" aria-pressed="'+(od.k===k)+'">'+k+'</button>'}).join('')+'</div>'+
+      '<label class="lbl" for="offprice">¿Cuánto cobras?</label><input id="offprice" class="field" type="text" maxlength="16" value="'+esc(od.price)+'">'+
+      '<span class="lbl">¿Cuándo puedes?</span><div class="chips" style="margin-top:0" role="group" aria-label="Disponibilidad">'+AVS.map(function(k){return '<button class="chip" data-act="odA" data-k="'+k+'" aria-pressed="'+(od.av===k)+'">'+k+'</button>'}).join('')+'</div>'+
+      '<button class="btn big" data-act="offerPublish"'+(od.k?'':' disabled')+'>Publicar servicio</button>';
+  }else if(s==='sos'){h=sosSheet(head);
+  }else if(s==='puedo'){
+    var any=CAPS.some(function(c){return S.caps[c[0]]});
+    h=head('¿Qué puedes ofrecer?')+'<div class="list">'+CAPS.map(function(c){return '<button class="tog" role="switch" aria-checked="'+S.caps[c[0]]+'" data-act="cap" data-k="'+c[0]+'"><span>'+c[1]+'</span><span class="sw"></span></button>'}).join('')+'</div>'+
+      '<button class="btn big" data-act="puedoSend"'+(any?'':' disabled')+'>Ofrecer ayuda</button>';
+  }else if(s.indexOf('propose:')===0){
+    var pj=jobById(s.slice(8)), pf=pj.who.split(' ')[0];
+    h=head('Solicitud de '+esc(pf))+
+      '<div class="card"><b>'+esc(pj.text)+'</b><span class="note">A ~'+pj.d+' (distancia aproximada; la dirección exacta se ve solo si te aceptan) · Lo necesita: '+esc(pj.when)+'</span>'+detHTML(pj.det)+
+      '<div class="reprow"><span>Cliente</span><b>★ '+pj.cr.r.toFixed(1)+' · '+pj.cr.n+' servicios · cumple '+pj.cr.c+'%</b></div><div class="reprow"><span>Cómo prefiere comunicarse</span><b>'+COMMN[pj.comm||'voz']+'</b></div></div>'+
+      (pj.more==='done'?'<span class="badge good">'+esc(pf)+' añadió más detalles</span>':'<button class="btn ghost" data-act="askMore" data-id="'+pj.id+'"'+(pj.more?' disabled':'')+'>'+(pj.more==='asked'?'Pedido enviado…':'Pedir más detalles')+'</button>')+
+      '<label class="lbl" for="pprice">Tu precio estimado (S/)</label><input id="pprice" class="field" inputmode="numeric" maxlength="5" value="'+pj.pnum+'">'+
+      '<button class="tog" role="switch" aria-checked="'+!!pj.diag+'" data-act="togDiag"><span>Incluir visita de diagnóstico (S/ 10, se descuenta si te contratan)</span><span class="sw"></span></button>'+
+      '<p class="note">Es un precio estimado. Si al ver el problema es otro, puedes proponer un ajuste con motivo; solo cambia si el cliente acepta.</p>'+
+      '<button class="btn big" data-act="sendProposal" data-id="'+pj.id+'">Enviar propuesta</button>';
+  }else if(s.indexOf('adjust:')===0){
+    var aj=jobById(s.slice(7)), af=aj.who.split(' ')[0];
+    h=head('Proponer otro precio')+'<p class="note">Precio actual: S/ '+aj.pnum+'. Solo cambia si '+esc(af)+' acepta. Si no hay acuerdo, cualquiera puede cancelar sin penalización.</p>'+
+      '<label class="lbl" for="adjprice">Nuevo precio (S/)</label><input id="adjprice" class="field" inputmode="numeric" maxlength="5" value="'+esc(S.adj.price)+'">'+
+      '<span class="lbl">Motivo (obligatorio)</span><div class="chips" style="margin-top:0" role="group" aria-label="Motivo">'+MOTIVES.map(function(m,i){return '<button class="chip" data-act="adjMot" data-i="'+i+'" aria-pressed="'+(S.adj.motive===i)+'">'+m+'</button>'}).join('')+'</div>'+
+      '<div class="row2"><label class="btn ghost sm">Adjuntar foto<input id="aphoto" type="file" accept="image/*" hidden></label><button class="btn ghost sm" data-act="adjEx">Foto de ejemplo</button></div>'+(S.adj.photo?'<img class="thumb" alt="Foto adjunta" src="'+S.adj.photo+'">':'')+
+      '<p class="note">Cada ajuste queda en tu historial y lo ve el cliente. Los ajustes repetidos o sin justificar aplican consecuencias.</p>'+
+      '<button class="btn big" data-act="adjSend" data-id="'+aj.id+'"'+(S.adj.motive===null?' disabled':'')+'>Enviar propuesta de precio</button>';
+  }else if(s.indexOf('cancel:')===0){
+    var cp=s.split(':'), crec=cancelRec(cp[1],cp[2]), cwho=cp[1]==='n'?PROV[crec.chosen].name:crec.who, ci=S.cx.reason, inf=ci!==null?cancelInfo(crec,ci<3):null;
+    h=head('Cancelar con '+esc(cwho.split(' ')[0]))+'<p class="note">Sin pagos, lo que cuida la confianza es tu cumplimiento. Cancelar con causa no te penaliza.</p>'+
+      '<span class="lbl">¿Por qué cancelas?</span><div class="chips" style="margin-top:0" role="group" aria-label="Motivo">'+RS.map(function(r,i){return '<button class="chip" data-act="cxr" data-i="'+i+'" aria-pressed="'+(ci===i)+'">'+r+'</button>'}).join('')+'</div>'+
+      (inf?'<div class="card '+(inf.pen?'warn':'good')+'"><span>'+inf.txt+'</span></div>':'')+
+      '<p class="note">No pidas ni aceptes cancelar fuera de la app: se reporta y afecta ambas cuentas.</p>'+
+      '<button class="btn big" data-act="doCancel" data-k="'+cp[1]+'" data-id="'+cp[2]+'"'+(ci===null?' disabled':'')+'>Confirmar cancelación</button>';
+  }else if(s==='sell'){
+    h=head('Vender un producto')+'<p class="note">Fija tu precio de lista. Los vecinos pueden comprarlo o proponerte uno menor; tú decides.</p>'+
+      '<div class="row2"><label class="btn ghost sm">Subir foto<input id="sphoto" type="file" accept="image/*" hidden></label><button class="btn ghost sm" data-act="sellEx">Foto de ejemplo</button></div>'+(S.sell.photo?'<img class="thumb" alt="Foto del producto" src="'+S.sell.photo+'">':'')+
+      '<label class="lbl" for="stext">Describe tu producto</label><textarea id="stext" rows="3" placeholder="Ej.: Bicicleta de paseo, aro 26, poco uso">'+esc(S.sell.text)+'</textarea>'+
+      '<label class="lbl" for="sprice">Precio de lista (S/)</label><input id="sprice" class="field" inputmode="numeric" maxlength="5" value="'+esc(S.sell.price)+'">'+
+      '<button class="btn big" data-act="sellPublish"'+(sellReady()?'':' disabled')+'>Publicar producto</button>';
+  }else if(extraSheet(s,head)!==null){h=extraSheet(s,head);
+  }else if(s==='tutorial'){
+    var t=TUT[S.tut];
+    h=head('Tutorial')+'<div class="slides"><h4 class="h2" style="margin-bottom:8px">'+t[0]+'</h4><p>'+t[1]+'</p></div>'+
+      '<div class="dots" aria-label="Paso '+(S.tut+1)+' de '+TUT.length+'">'+TUT.map(function(_,i){return '<i class="'+(i===S.tut?'on':'')+'"></i>'}).join('')+'</div>'+
+      '<div class="row2">'+(S.tut>0?'<button class="btn ghost" data-act="tutPrev">Atrás</button>':'')+'<button class="btn" data-act="tutNext">'+(S.tut<TUT.length-1?'Siguiente':'Listo')+'</button></div>';
+  }
+  return w+'<div class="sheet" role="dialog" aria-modal="true" aria-label="Detalle" tabindex="-1">'+h+'</div>';
+}
+function overlayHTML(){return S.chatOpen?chatHTML():(S.composer.open?composerHTML():(S.sheet?sheetHTML():''))}
+
+/* Guía */
+function guideHTML(){
+  var c=CASES[S.caseIdx];
+  return '<section><h2>Guía de demo</h2><p class="lead" style="margin:0">Elige un caso, prepáralo y recorre los pasos en el teléfono. Cada paso se marca solo al hacerlo.</p></section>'+
+    '<div class="cases" role="group" aria-label="Casos de demo">'+CASES.map(function(k,i){return '<button class="casebtn" data-act="case" data-i="'+i+'" aria-pressed="'+(i===S.caseIdx)+'">'+k.t+'</button>'}).join('')+'</div>'+
+    '<div class="casebody"><h3>'+c.t+'</h3><p>'+c.g+'</p><ol class="steps">'+c.steps.map(function(s){var ok=S.done.has(s[1]);return '<li class="'+(ok?'ok':'')+'"><span class="box" aria-hidden="true">'+(ok?'✓':'')+'</span><span>'+s[0]+(ok?' (hecho)':'')+'</span></li>'}).join('')+'</ol>'+
+      '<p class="say"><b>Qué decir:</b> '+c.say+'</p><div class="row2"><button class="btn sm" data-act="prep">Preparar este caso</button><button class="btn sm ghost" data-act="reset">Reiniciar todo</button></div></div>'+
+    '<div class="casebody"><h3>Parámetros ajustables (equipo)</h3><label class="rng" for="pvis"><span>Peso de la visibilidad solidaria</span><b>'+fmtP(CFG.vis)+'</b></label><input id="pvis" type="range" min="0" max="1" step="0.1" value="'+CFG.vis+'"><label class="rng" for="pcap"><span>Tope diario de puntos</span><b>'+CFG.cap+'</b></label><input id="pcap" type="range" min="2" max="12" step="1" value="'+CFG.cap+'"><div class="row2" style="flex-wrap:wrap"><button class="btn sm ghost" data-act="solSeed" data-n="9" data-d="5">Atajo: casi Colaborador</button><button class="btn sm ghost" data-act="solSeed" data-n="24" data-d="8">Atajo: casi Solidario</button></div><p class="note">Los atajos agregan ayudas ficticias para la demo; no existen en la versión real. Umbrales de nivel y valores de puntos son propuestas por validar.</p></div>'+
+    '<div class="gmetrics"><div class="tile"><b>'+S.resolved+'</b><span>Necesidades resueltas (métrica principal)</span></div><div class="tile"><b>'+(S.lastClicks===null?'—':S.lastClicks+' de 3')+'</b><span>Clics de la última publicación</span></div><div class="tile"><b>'+(S.online?'Online':'Offline')+'</b><span>Conexión simulada</span></div></div>'+
+    '<div class="mvp"><div class="f"><h4>Funciona en la simulación</h4><ul><li>Necesidad, propuestas, elección, resolución y calificación de dos vías</li><li>Detalles con foto y video, y preguntas guiadas</li><li>Precio estimado: se cambia solo por acuerdo mutuo, con motivo e historial</li><li>Cronómetro, cancelaciones con ventana de gracia y cumplimiento</li><li>Vender un producto con contraoferta</li><li>Modo emergencia y cola sin internet</li><li>Nivel solidario con puntos y puesto privados, balance y constancia</li><li>Muro de pedidos y ofertas con filtro por modalidad</li><li>Emergencias: tipo de situación, institución primero, muro, ubicación controlada y donativos</li><li>Idiomas (pantallas principales) y accesibilidad</li></ul></div>'+
+      '<div class="s"><h4>Simulado y se dice</h4><ul><li>Vecinos, precios y propuestas</li><li>Ubicaciones, distancias, fotos y mapa</li><li>Verificación de identidad (pantalla simulada)</li><li>Idiomas: solo pantallas principales; quechua de ejemplo</li><li>Números de emergencia: por verificar</li><li>Puntos y ranking: cifras de ejemplo</li><li>Sanciones: se muestran, no se aplican de verdad</li></ul></div>'+
+      '<div class="l"><h4>Queda para después</h4><ul><li>Seguimiento en vivo y tiempo de llegada (solo el mismo día)</li><li>RENIEC real con consentimiento (Ley 29733)</li><li>Pagos y cobros por cancelación</li><li>Moderación completa y apelaciones</li><li>Comunicación sin red entre celulares</li></ul></div></div>';
+}
+
+/* Render */
+function render(){
+  var ph=$('#phone');ph.dataset.emg=S.emergency?'1':'0';ph.dataset.hc=S.hc?'1':'0';ph.dataset.big=S.big?'1':'0';document.documentElement.lang=S.lang;
+  $('#chrome').innerHTML=chromeHTML();
+  var sc=$('#screen'), key=[S.tab,S.activeNeed,S.emergency].join('|'), top=key===lastKey?sc.scrollTop:0;
+  sc.innerHTML=screenHTML();sc.scrollTop=top;lastKey=key;
+  $('#tabbar').innerHTML=tabHTML();
+  var ae=document.activeElement, keep=!!(ae&&ae.id==='chatin');
+  var ov=overlayHTML();$('#overlay').innerHTML=ov;
+  if(ov&&!hadOverlay){var sh=$('#overlay .sheet,#overlay .chatpanel');if(sh)sh.focus()}
+  if(S.chatOpen){var ml=$('#msgs');if(ml)ml.scrollTop=ml.scrollHeight;if(keep){var cin=$('#chatin');if(cin){cin.focus();var L=cin.value.length;cin.setSelectionRange(L,L)}}}
+  hadOverlay=!!ov;
+  $('#guide').innerHTML=guideHTML();
+  renderToast();
+}
+
+/* Acciones */
+function openComposer(type,text,chip){
+  S.composer=newComposer(true,type,text,chip);
+  S.cw='Hoy';S.sheet=null;render();
+}
+function publish(){
+  var c=S.composer;if(!c.type||c.text.trim().length<3)return;
+  var clicks=composerClicks(c)+1;
+  var n={id:++uid,type:c.type,text:c.text.trim(),status:S.online?'open':'pending',arrived:0,sort:'rep',stage:0,chosen:null,rating:0,repLog:null,when:S.cw,det:mkDet(c),mod:c.mod};
+  S.needs.unshift(n);S.lastClicks=clicks;
+  S.composer=newComposer(false,null,'',false);
+  ev('pub:'+n.type);
+  S.tab=(n.type==='prestamo'||n.type==='ayuda')?'vecinos':'inicio';
+  if(S.online){S.activeNeed=n.id;startArrival(n);toast('Publicado en '+clicks+(clicks===1?' clic':' clics')+'. Tu barrio ya está respondiendo.')}
+  else{S.activeNeed=n.id;ev('pend');toast('Guardada sin internet. Pendiente de sincronización.')}
+}
+function accept(pid){
+  var n=getNeed(S.activeNeed);if(!n)return;
+  n.chosen=pid;n.status='accepted';n.stage=0;ev('acc:'+n.type);
+  n.code=String(1000+Math.floor(Math.random()*9000));n.verified=false;n.accAt=Date.now();
+  openChatFor('n'+n.id,PROV[pid].name,PROV[pid].role+' · tu pedido','prov',GREET[n.type]);
+  toast('Propuesta aceptada. Ya puedes escribirle para coordinar.');
+}
+function nextStage(){
+  var n=getNeed(S.activeNeed);if(!n)return;
+  if(!S.online){toast('Sin internet: restaura la conexión para confirmar.');return}
+  n.stage++;if(n.stage===CAT[n.type].steps.length-1&&n.startedAt&&!n.dur)n.dur=Date.now()-n.startedAt;ev('stage:'+n.type+':'+n.stage);render();
+}
+function rate(){
+  var n=getNeed(S.activeNeed);if(!n||!n.rating)return;
+  var c=CAT[n.type], p=PROV[n.chosen], o=p[c.ctx];
+  var b=o.r, nb=o.n, a=(o.r*o.n+n.rating)/(o.n+1);
+  o.r=a;o.n=o.n+1;
+  n.repLog={b:b,a:a,nb:nb,na:nb+1};
+  var cm=(n.comment||'').trim();n.comment=cm;if(cm)getComments(n.chosen).unshift({w:'Tú',s:n.rating,t:cm});
+  if(c.ctx==='vec'){var m=S.me.vec;m.r=(m.r*m.n+5)/(m.n+1);m.n++}
+  n.status='waiting';S.resolved++;ev('rate:'+n.type);
+  toast('Calificación enviada. Se muestra cuando '+p.name.split(' ')[0]+' también te califique.');
+  T.push(setTimeout(function(){
+    n.cliR=5;n.cliT='Cliente claro y puntual.';var cm2=S.me.cli;cm2.r=(cm2.r*cm2.n+5)/(cm2.n+1);cm2.n++;
+    n.status='done';ev('rated2');toast(p.name.split(' ')[0]+' te calificó como cliente: 5 estrellas.');
+  },1500));
+}
+function seedAccepted(){
+  var n={id:++uid,type:'servicio',text:'Necesito un gasfitero para arreglar una fuga',status:'accepted',arrived:3,sort:'rep',stage:0,chosen:'carlos',rating:0,repLog:null,when:'Hoy',det:null,code:String(1000+Math.floor(Math.random()*9000)),verified:false,accAt:Date.now()};
+  S.needs.unshift(n);S.activeNeed=n.id;S.tab='inicio';
+  openChatFor('n'+n.id,PROV.carlos.name,PROV.carlos.role+' · tu pedido','prov',GREET.servicio);
+}
+function prep(){
+  var i=S.caseIdx;clearTimers();S=fresh(i);S.tip=false;
+  if(i===1)S.tab='vecinos';
+  if(i===2){S.tab='emergencia';S.emergency=true;ev('emg')}
+  if(i===3){S.online=false;ev('off')}
+  if(i===4){S.tab='perfil'}
+  if(i===5)seedAccepted();
+  if(i===6){S.role='ambos';S.mode='oferta';S.tab='inicio'}
+  if(i===7){S.tab='vecinos';solSeedRaw(24,8);S.sales=[{id:'s0',text:'Bicicleta de paseo, aro 26',price:120,photo:null,status:'open',offers:[]}]}
+  if(i===8){S.tab='emergencia';S.emergency=true;ev('emg')}
+  if(i===9){S.tab='vecinos'}
+  render();
+}
+function act(a,d){
+  switch(a){
+    case 'tab':S.tab=d.k;S.activeNeed=null;S.sheet=null;render();break;
+    case 'net':setOnline(!S.online);break;
+    case 'openComposer':openComposer(d.k||null,'',false);break;
+    case 'quick':var q=QUICK[+d.i];openComposer(q.k,q.t,true);break;
+    case 'pickType':if(S.composer.type!==d.k)S.composer.det.q={};S.composer.type=d.k;render();break;
+    case 'pickSugg':S.composer.text=CAT[S.composer.type].sugg[+d.i];S.composer.textTouched=true;render();break;
+    case 'publish':publish();break;
+    case 'closeOverlay':S.composer.open=false;S.sheet=null;render();break;
+    case 'openNeed':S.activeNeed=+d.id;render();break;
+    case 'backNeed':S.activeNeed=null;render();break;
+    case 'sort':var nn=getNeed(S.activeNeed);nn.sort=d.s;ev('cmp:'+nn.type);render();break;
+    case 'accept':accept(d.pid);break;
+    case 'next':nextStage();break;
+    case 'star':var sn=getNeed(S.activeNeed);sn.rating=+d.n;render();break;
+    case 'rate':rate();break;
+    case 'profile':if(S.activeNeed){var pn=getNeed(S.activeNeed);if(pn)ev('cmp:'+pn.type)}S.sheet='profile:'+d.id;render();break;
+    case 'tutorial':S.tut=0;S.sheet='tutorial';render();break;
+    case 'tutNext':if(S.tut<TUT.length-1){S.tut++}else{S.sheet=null}render();break;
+    case 'tutPrev':S.tut=Math.max(0,S.tut-1);render();break;
+    case 'tipClose':S.tip=false;render();break;
+    case 'offer':case 'hStart':case 'helpNeed':hStart(d.id);break;
+    case 'emgOn':S.emergency=true;S.tab='emergencia';ev('emg');render();break;
+    case 'emgOff':S.emergency=false;render();break;
+    case 'estado':S.estado=d.k;ev('estado');toast('Marcaste: Estoy bien. Tus vecinos lo ven.'+(S.online?'':' Se enviará al volver el internet.'));break;
+    case 'openSos':S.sheet='sos';render();break;
+    case 'sosPick':S.sos.tipo=d.k;S.sos.needs={};ev('sos:pick');render();break;
+    case 'sosSend':sosSend();break;
+    case 'openPuedo':S.sheet='puedo';render();break;
+    case 'cap':S.caps[d.k]=!S.caps[d.k];render();break;
+    case 'puedoSend':S.estado='puedo';S.sheet=null;ev('estado');toast('Listo: tus vecinos ven que puedes ayudar.');break;
+    case 'selNeed':S.selNeed=d.id;ev('mapa');render();break;
+    case 'helpNeed':S.helped[d.id]=true;ev('ayudo');toast('Ayuda en camino. La app media el contacto; no se comparte tu dirección.');break;
+    case 'case':S.caseIdx=+d.i;render();break;
+    case 'prep':prep();break;
+    case 'reset':var ci=S.caseIdx;clearTimers();S=fresh(ci);render();break;
+    case 'setRole':setRole(d.k);break;
+    case 'pickWhen':S.cw=d.k;render();break;
+    case 'simCode':var sn2=getNeed(S.activeNeed);if(sn2){sn2.verified=true;sn2.startedAt=Date.now();ev('code');toast('Código validado. Encuentro confirmado.')}break;
+    case 'verifyJob':var vj=S.jobs.filter(function(x){return x.id===d.id})[0],vi=document.getElementById('jc'+d.id);
+      if(vj&&vi){if(vi.value.trim()===vj.code){vj.verified=true;vj.err=false;vj.startedAt=Date.now();ev('code');toast('Código validado. Encuentro confirmado.')}else{vj.err=true;render()}}break;
+    case 'mode':S.mode=d.k;render();break;
+    case 'openOffer':S.od={k:null,price:'S/ 35',av:'Hoy'};S.sheet='offer';render();break;
+    case 'odK':S.od.k=d.k;render();break;
+    case 'odA':S.od.av=d.k;render();break;
+    case 'offerPublish':publishOffer();break;
+    case 'sendProposal':sendProposal(d.id);break;
+    case 'jobDone':jobDone(d.id);break;
+    case 'jrate':jobRate(d.id);break;
+    case 'jstar':var jx=jobById(d.id);if(jx){jx.myRate=+d.n;render()}break;
+    case 'jtag':var jy=jobById(d.id);if(jy){jy.myComment=(jy.myComment?jy.myComment+' ':'')+d.k+'.';render()}break;
+    case 'openPropose':S.sheet='propose:'+d.id;render();break;
+    case 'askMore':askMore(d.id);break;
+    case 'togDiag':var dj=jobById(S.sheet.slice(8));if(dj){dj.diag=!dj.diag;render()}break;
+    case 'openAdjust':var oj=jobById(d.id);S.adj={price:oj.pnum+10,motive:null,photo:null};S.sheet='adjust:'+d.id;render();break;
+    case 'adjMot':S.adj.motive=+d.i;render();break;
+    case 'adjEx':S.adj.photo=EXPH;render();break;
+    case 'adjSend':adjSend(d.id);break;
+    case 'adjAccC':adjAccC(d.id);break;
+    case 'adjRejC':var rj=jobById(d.id);if(rj){rj.adjState='rejected';render()}break;
+    case 'reportRej':var rr=jobById(d.id);if(rr){rr.adjReported=true;toast('Reporte enviado. Si un cliente rechaza sin motivo con frecuencia, también recibe avisos y menos visibilidad.')}break;
+    case 'openCancel':S.cx={reason:null};S.sheet='cancel:'+d.k+':'+d.id;render();break;
+    case 'cxr':S.cx.reason=+d.i;render();break;
+    case 'doCancel':doCancel(d.k,d.id);break;
+    case 'noShow':noShow(d.k,d.id);break;
+    case 'skipTime':var sr=cancelRec(d.k,d.id);if(sr){sr.startedAt-=45*60000;render()}break;
+    case 'togDet':S.composer.detOpen=!S.composer.detOpen;render();break;
+    case 'dq':S.composer.det.q[+d.q]=d.a;render();break;
+    case 'dex':var dd=S.composer.det;dd.photoUrl=EXPH;dd.video='ejemplo-fuga.mp4 (12 s)';if(!dd.text)dd.text='Gotea debajo del lavadero y la pared está húmeda.';render();break;
+    case 'simAdj':case 'adjAcc':case 'adjCtr':case 'adjRej':case 'adjReport':needAdj(a);break;
+    case 'openSell':S.sell={text:'',price:'',photo:null};S.sheet='sell';render();break;
+    case 'sellEx':S.sell.photo=EXPH;render();break;
+    case 'sellPublish':sellPublish();break;
+    case 'offAcc':case 'offRej':case 'offCtr':offerAct(a,d.id);break;
+    case 'openChat':S.chatOpen=d.key;render();break;
+    case 'closeChat':S.chatOpen=null;render();break;
+    case 'sendChat':sendChat();break;
+    case 'quickMsg':sendChat(chatChips(S.chats[S.chatOpen])[+d.i]);break;
+    case 'hCode':hCode(d.id);break;
+    case 'hDone':hDone(d.id);break;
+    case 'wall':S.wall=d.k;if(d.k==='off')ev('wofr');render();break;
+    case 'wfilt':S.filt=d.k;ev('wfilt');render();break;
+    case 'want':var wx=OFRS.filter(function(x){return x.id===d.id})[0];if(wx){var wt=WMODMAP[wx.mod]||'ayuda';openComposer(wt,'Quiero: '+wx.text.toLowerCase(),true);S.composer.mod=wx.mod}break;
+    case 'openWallOffer':S.wo={mod:null,text:''};S.sheet='walloffer';render();break;
+    case 'woMod':S.wo.mod=d.k;render();break;
+    case 'woPub':woPub();break;
+    case 'cmod':S.composer.mod=S.composer.mod===d.k?null:d.k;render();break;
+    case 'msort':S.msort=d.k;render();break;
+    case 'openLang':S.sheet='lang';render();break;
+    case 'setLang':S.lang=d.k;ev('lang');render();break;
+    case 'tgl':if(['hc','big','vis'].indexOf(d.k)>=0){S[d.k]=!S[d.k];ev('a11y');if(d.k==='vis'&&S.vis)flash();render()}break;
+    case 'comm':S.comm=d.k;ev('comm');render();break;
+    case 'openVerify':S.sheet='verify';render();break;
+    case 'vConsent':S.v.consent=!S.v.consent;render();break;
+    case 'vSelfie':S.v.selfie=true;render();break;
+    case 'vOk':S.verified=true;S.sheet=null;ev('verify');toast('Perfil verificado (simulado).');break;
+    case 'openCons':S.sheet='cons';ev('cons');render();break;
+    case 'consName':S.cons.name=!S.cons.name;render();break;
+    case 'sosCalled':S.sos.called=!S.sos.called;render();break;
+    case 'sosNeed':S.sos.needs[d.k]=!S.sos.needs[d.k];render();break;
+    case 'efilt':S.eFilt=d.k;ev('efilt');render();break;
+    case 'conf':S.conf[d.id]=!S.conf[d.id];ev('conf');toast(S.conf[d.id]?(solLevel()>=3?'Confirmaste el reporte. Pesa más por tu nivel Vecino solidario.':'Confirmaste el reporte. Más confirmaciones lo hacen más confiable.'):'Quitaste tu confirmación.');break;
+    case 'shareLoc':var sp=S.posts.filter(function(x){return x.id===d.id})[0];if(sp&&sp.acc){sp.acc.shared=true;ev('sos:share');toast('Compartiste tu ubicación exacta solo con '+sp.acc.who.split(' ')[0]+', mientras dure la ayuda.')}break;
+    case 'postRes':var pr=S.posts.filter(function(x){return x.id===d.id})[0];if(pr){pr.st='res';toast('Qué bueno. Marcaste tu pedido como resuelto.')}break;
+    case 'openDonate':S.don={qty:5,ac:null};S.sheet='donate:'+d.id;render();break;
+    case 'donQ':S.don.qty=+d.k;render();break;
+    case 'donA':S.don.ac=d.k;render();break;
+    case 'donOk':S.pledge[d.id]={qty:S.don.qty,ac:S.don.ac,done:false};S.sheet=null;ev('don');toast('Donativo prometido. Entrégalo en el punto de acopio.');break;
+    case 'pledgeDone':var pl=S.pledge[d.id];if(pl&&!pl.done){pl.done=true;registerHelp(pl.ac,'corta',5,60000);S.sheet='balance';render()}break;
+    case 'openAcopio':S.ac={n:'',acc:{}};S.sheet='acopio';render();break;
+    case 'acAcc':S.ac.acc[d.k]=!S.ac.acc[d.k];render();break;
+    case 'acOk':if(acReady()){S.acopios.unshift({id:'x'+(++uid),n:S.ac.n.trim(),zone:'cerca de tu zona (aprox.)',acc:ACITEMS.filter(function(k){return S.ac.acc[k]}).join(', '),by:'Tú · Vecino solidario'});S.sheet=null;ev('acopio');toast('Punto de acopio creado.')}break;
+    case 'brig':S.brig=!S.brig;render();break;
+    case 'solSeed':solSeedRaw(+d.n,+d.d);toast('Atajo de demo: agregaste '+d.n+' ayudas ficticias confirmadas.');break;
+    case 'tag':var tn=getNeed(S.activeNeed);tn.comment=(tn.comment?tn.comment+' ':'')+d.k+'.';render();break;
+  }
+}
+document.addEventListener('click',function(e){
+  var t=e.target.closest('[data-act]');if(!t||t.disabled)return;
+  act(t.dataset.act,t.dataset);
+});
+document.addEventListener('input',function(e){
+  var tid=e.target.id;
+  if(tid==='chatin'){S.chatDraft=e.target.value;return}
+  if(tid==='ccomment'){var cn=getNeed(S.activeNeed);if(cn)cn.comment=e.target.value;return}
+  if(tid==='offprice'){S.od.price=e.target.value;return}
+  if(tid==='dtext'){S.composer.det.text=e.target.value;return}
+  if(tid==='pprice'){var pjx=jobById(String(S.sheet).slice(8));if(pjx&&e.target.value.trim())pjx.pnum=num(e.target.value);return}
+  if(tid==='adjprice'){S.adj.price=e.target.value;return}
+  if(tid==='stext'||tid==='sprice'){if(tid==='stext')S.sell.text=e.target.value;else S.sell.price=e.target.value;var sb=document.querySelector('[data-act="sellPublish"]');if(sb)sb.disabled=!sellReady();return}
+  if(tid.indexOf('jcm')===0){var jjx=jobById(tid.slice(3));if(jjx)jjx.myComment=e.target.value;return}
+  if(tid==='soswhy'){S.sos.why=e.target.value;var sb2=document.querySelector('[data-act="sosSend"]');if(sb2)sb2.disabled=S.sos.why.trim().length<3;return}
+  if(tid==='vdni'){S.v.dni=e.target.value.replace(/\D/g,'');var vb=document.querySelector('[data-act="vOk"]');if(vb)vb.disabled=!(S.v.dni.length===8&&S.v.consent&&S.v.selfie);return}
+  if(tid==='wotext'){S.wo.text=e.target.value;var wb=document.querySelector('[data-act="woPub"]');if(wb)wb.disabled=!(S.wo.mod&&S.wo.text.trim().length>2);return}
+  if(tid==='acname'){S.ac.n=e.target.value;var ab=document.querySelector('[data-act="acOk"]');if(ab)ab.disabled=!acReady();return}
+  if(tid!=='ctext')return;
+  var c=S.composer;c.text=e.target.value;
+  var first=!c.textTouched;
+  if(first)c.textTouched=true;
+  var ready=c.type&&c.text.trim().length>2, b=$('#pubbtn');
+  if(b)b.disabled=!ready;
+  if(first){var pos=e.target.selectionStart;$('#overlay').innerHTML=composerHTML();var ta=$('#ctext');ta.focus();ta.setSelectionRange(pos,pos)}
+});
+document.addEventListener('change',function(e){
+  var t0=e.target;
+  if(t0.id==='pvis'){CFG.vis=parseFloat(t0.value);render();return}
+  if(t0.id==='pcap'){CFG.cap=parseInt(t0.value,10);render();return}
+  var t=e.target,f=t.files&&t.files[0];if(!f)return;
+  if(t.id==='dphoto'){S.composer.det.photoUrl=URL.createObjectURL(f);render()}
+  else if(t.id==='dvideo'){if(f.size>20*1024*1024){toast('El video pesa más de 20 MB. Elige uno más corto.');return}S.composer.det.video=f.name;render()}
+  else if(t.id==='aphoto'){S.adj.photo=URL.createObjectURL(f);render()}
+  else if(t.id==='sphoto'){S.sell.photo=URL.createObjectURL(f);render()}
+});
+setInterval(function(){
+  var now=Date.now();
+  document.querySelectorAll('.timer[data-since]').forEach(function(el){el.textContent=fmtClock(now-(+el.dataset.since))});
+  document.querySelectorAll('[data-ready]').forEach(function(b){var l=(+b.dataset.ready)-now;if(b.disabled!==(l>0))b.disabled=l>0;var sp=b.querySelector('.cd');if(sp)sp.textContent=cdText(+b.dataset.ready)});
+},1000);
+document.addEventListener('keydown',function(e){
+  if(e.key==='Enter'&&e.target.id==='chatin'){e.preventDefault();sendChat();return}
+  if(e.key==='Escape'&&(S.chatOpen||S.composer.open||S.sheet)){S.chatOpen=null;S.composer.open=false;S.sheet=null;render()}
+});
+
+S=fresh(0);S.sheet='role';render();
+})();
+</script>
+
+</body></html>
