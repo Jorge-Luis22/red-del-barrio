@@ -1,5 +1,5 @@
 import { all, count, one, persist, run, sizeBytes, wipeDb } from '../db/sqlite';
-import { distanceKm, jitter, roundZone, type Point } from '../lib/geo';
+import { distanceKm, getCurrentPoint, jitter, roundZone, type Point } from '../lib/geo';
 import { hashMeetCode, meetCode as makeMeetCode, txnId, uid } from '../lib/ids';
 import { chat } from '../lib/matrix';
 import { enqueue, pendingOutbox } from '../lib/outbox';
@@ -184,8 +184,9 @@ export function listUsers(): User[] {
   return all<UserRow>(`SELECT * FROM users ORDER BY display_name`).map(toUser);
 }
 
+/** Posición real del GPS si el usuario la permitió; si no, el punto de ejemplo. */
 export function defaultPoint(): Point {
-  return DEFAULT_POINT;
+  return getCurrentPoint() ?? DEFAULT_POINT;
 }
 
 export async function saveProfile(userId: string, patch: { name?: string; zone?: string }): Promise<void> {
@@ -713,4 +714,140 @@ export function dbBytes(): number {
 
 export async function resetAll(): Promise<void> {
   await wipeDb();
+}
+
+/* ------------------------------------------------------------------ */
+/* Completar el trato y calificar (dos vías)                           */
+/* ------------------------------------------------------------------ */
+
+export interface DealState {
+  id: string;
+  status: 'acordado' | 'en_curso' | 'completado' | 'cancelado';
+  otherId: string;
+  otherName: string;
+  iConfirmed: boolean;
+  otherConfirmed: boolean;
+  iRated: boolean;
+  myStars: number | null;
+}
+
+interface DealRow {
+  id: string;
+  need_id: string;
+  requester_id: string;
+  provider_id: string;
+  status: DealState['status'];
+  confirmed_by_requester: number;
+  confirmed_by_provider: number;
+}
+
+function dealRow(interactionId: string): DealRow | null {
+  return one<DealRow>(`SELECT * FROM interactions WHERE id = ?`, [interactionId]);
+}
+
+export function getDealState(interactionId: string, userId: string): DealState | null {
+  const row = dealRow(interactionId);
+  if (!row) return null;
+  const isRequester = row.requester_id === userId;
+  if (!isRequester && row.provider_id !== userId) return null;
+  const otherId = isRequester ? row.provider_id : row.requester_id;
+  const other = getUser(otherId);
+  const rating = one<{ stars: number }>(
+    `SELECT stars FROM ratings WHERE interaction_id = ? AND from_user = ?`,
+    [interactionId, userId],
+  );
+  return {
+    id: row.id,
+    status: row.status,
+    otherId,
+    otherName: other?.name ?? 'tu vecino',
+    iConfirmed: Boolean(isRequester ? row.confirmed_by_requester : row.confirmed_by_provider),
+    otherConfirmed: Boolean(isRequester ? row.confirmed_by_provider : row.confirmed_by_requester),
+    iRated: rating !== null,
+    myStars: rating ? Number(rating.stars) : null,
+  };
+}
+
+/**
+ * Cada parte confirma que el trato se hizo. Cuando confirman las dos,
+ * el trato queda completado y la necesidad se cierra.
+ */
+export async function confirmDone(
+  interactionId: string,
+  userId: string,
+): Promise<'esperando' | 'completado'> {
+  const row = dealRow(interactionId);
+  if (!row) throw new Error('Trato no encontrado');
+  const isRequester = row.requester_id === userId;
+  if (!isRequester && row.provider_id !== userId) throw new Error('No participas en este trato');
+  if (row.status === 'completado') return 'completado';
+  if (row.status === 'cancelado') throw new Error('Este trato fue cancelado');
+
+  run(
+    isRequester
+      ? `UPDATE interactions SET confirmed_by_requester = 1, status = 'en_curso' WHERE id = ?`
+      : `UPDATE interactions SET confirmed_by_provider = 1, status = 'en_curso' WHERE id = ?`,
+    [interactionId],
+  );
+  const after = dealRow(interactionId)!;
+  const both = Boolean(after.confirmed_by_requester) && Boolean(after.confirmed_by_provider);
+  const stamp = now();
+  const who = getUser(userId)?.name ?? 'Un vecino';
+
+  if (both) {
+    run(`UPDATE interactions SET status = 'completado' WHERE id = ?`, [interactionId]);
+    run(`UPDATE needs SET status = 'cerrada' WHERE id = ?`, [row.need_id]);
+  }
+  run(
+    `INSERT INTO messages (id, interaction_id, room_id, sender_id, body, txn_id, status, created_at)
+     SELECT ?, id, COALESCE(room_id, ''), 'system', ?, ?, 'enviado', ? FROM interactions WHERE id = ?`,
+    [
+      uid('m'),
+      both
+        ? 'Trato completado: las dos partes confirmaron. Ahora pueden calificarse.'
+        : `${who} confirmó que el trato se hizo. Falta la confirmación de la otra parte.`,
+      txnId(),
+      stamp,
+      interactionId,
+    ],
+  );
+  enqueue({
+    entity: 'interaction',
+    entityId: interactionId,
+    op: 'confirm_done',
+    txnId: txnId(),
+    payload: { userId, completed: both },
+  });
+  await persist();
+  return both ? 'completado' : 'esperando';
+}
+
+/** Califica a la otra parte (1 a 5). Solo trato completado, una vez por persona. */
+export async function rateInteraction(
+  interactionId: string,
+  fromUser: string,
+  stars: number,
+  comment: string,
+): Promise<void> {
+  const row = dealRow(interactionId);
+  if (!row) throw new Error('Trato no encontrado');
+  if (row.status !== 'completado') throw new Error('El trato todavía no está completado');
+  const isRequester = row.requester_id === fromUser;
+  if (!isRequester && row.provider_id !== fromUser) throw new Error('No participas en este trato');
+  const toUser = isRequester ? row.provider_id : row.requester_id;
+  const value = Math.min(5, Math.max(1, Math.round(stars)));
+  const ratingId = uid('r');
+  run(
+    `INSERT OR IGNORE INTO ratings (id, interaction_id, from_user, to_user, stars, comment, created_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?)`,
+    [ratingId, interactionId, fromUser, toUser, value, comment.trim().slice(0, 200), now()],
+  );
+  enqueue({
+    entity: 'rating',
+    entityId: ratingId,
+    op: 'create',
+    txnId: txnId(),
+    payload: { interactionId, fromUser, toUser, stars: value },
+  });
+  await persist();
 }

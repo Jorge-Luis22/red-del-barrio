@@ -41,3 +41,36 @@ export function jitter(point: Point, meters = 40): Point {
   const dLng = (Math.random() - 0.5) * (meters / (111_320 * Math.cos(toRad(point.lat))));
   return { lat: point.lat + dLat, lng: point.lng + dLng };
 }
+
+/* ---------- GPS real ---------- */
+
+export type GpsStatus = 'pendiente' | 'ok' | 'denegado' | 'no_disponible';
+
+let currentPoint: Point | null = null;
+
+/** Última posición real conocida (null si el GPS no respondió). */
+export function getCurrentPoint(): Point | null {
+  return currentPoint;
+}
+
+export function setCurrentPoint(point: Point | null): void {
+  currentPoint = point;
+}
+
+/** Pide la posición al navegador. Resuelve con el estado final, nunca lanza. */
+export function requestPosition(): Promise<GpsStatus> {
+  return new Promise((resolve) => {
+    if (typeof navigator === 'undefined' || !('geolocation' in navigator)) {
+      resolve('no_disponible');
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        currentPoint = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+        resolve('ok');
+      },
+      (err) => resolve(err.code === 1 ? 'denegado' : 'no_disponible'),
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 60000 },
+    );
+  });
+}

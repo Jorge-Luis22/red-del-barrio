@@ -6,7 +6,7 @@ import { useApp } from '../state/app';
 const mb = (bytes: number) => `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 
 export default function Perfil() {
-  const { me, version, bump, switchUser } = useApp();
+  const { me, version, bump, switchUser, gps, refreshGps } = useApp();
   const [name, setName] = useState('');
   const [zone, setZone] = useState('');
   const [saved, setSaved] = useState(false);
@@ -60,6 +60,19 @@ export default function Perfil() {
         <p>
           Chat: {chat.label} · Base local: {mb(dbBytes())}
         </p>
+      </section>
+
+      <section className="card">
+        <h3>Mi ubicación</h3>
+        <p>
+          {gps === 'ok' && 'GPS real activo. Las publicaciones muestran solo una zona aproximada (unos 100 m).'}
+          {gps === 'pendiente' && 'Buscando tu ubicación…'}
+          {gps === 'denegado' && 'No diste permiso de ubicación. Se usa un punto de ejemplo.'}
+          {gps === 'no_disponible' && 'No se pudo obtener el GPS. Se usa un punto de ejemplo.'}
+        </p>
+        <button type="button" className="btn small" onClick={() => void refreshGps()} disabled={gps === 'pendiente'}>
+          {gps === 'ok' ? 'Actualizar ubicación' : 'Activar ubicación'}
+        </button>
       </section>
 
       <form className="panel" onSubmit={save}>

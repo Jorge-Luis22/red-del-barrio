@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { getUser } from '../db/repo';
+import { requestPosition, type GpsStatus } from '../lib/geo';
 import { openDb } from '../db/sqlite';
 import type { Tab, User } from '../types';
 
@@ -14,6 +15,8 @@ interface AppState {
   tab: Tab;
   screen: Screen;
   version: number;
+  gps: GpsStatus;
+  refreshGps(): Promise<void>;
   setTab(t: Tab): void;
   go(s: Screen): void;
   bump(): void;
@@ -30,6 +33,18 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [tab, setTabState] = useState<Tab>('inicio');
   const [screen, setScreen] = useState<Screen>({ name: 'none' });
   const [version, setVersion] = useState(0);
+  const [gps, setGps] = useState<GpsStatus>('pendiente');
+
+  const refreshGps = async () => {
+    setGps('pendiente');
+    const status = await requestPosition();
+    setGps(status);
+    setVersion((v) => v + 1);
+  };
+
+  useEffect(() => {
+    void refreshGps();
+  }, []);
 
   useEffect(() => {
     let alive = true;
@@ -57,6 +72,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       tab,
       screen,
       version,
+      gps,
+      refreshGps,
       setTab: (t) => {
         setTabState(t);
         setScreen({ name: 'none' });
@@ -73,7 +90,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         setVersion((v) => v + 1);
       },
     }),
-    [ready, me, tab, screen, version],
+    [ready, me, tab, screen, version, gps],
   );
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;

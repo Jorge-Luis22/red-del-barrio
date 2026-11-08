@@ -1,11 +1,22 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
-import { getConversation, listMessages, retryPending, sendChatMessage } from '../db/repo';
+import {
+  confirmDone,
+  getConversation,
+  getDealState,
+  listMessages,
+  rateInteraction,
+  retryPending,
+  sendChatMessage,
+} from '../db/repo';
 import { chat } from '../lib/matrix';
 import { useApp } from '../state/app';
 
 export default function ChatView({ conversationId }: { conversationId: string }) {
   const { me, version, bump, go } = useApp();
   const [text, setText] = useState('');
+  const [stars, setStars] = useState(0);
+  const [comment, setComment] = useState('');
+  const [busy, setBusy] = useState(false);
   const logRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -44,6 +55,30 @@ export default function ChatView({ conversationId }: { conversationId: string })
   }
 
   const pending = messages.filter((m) => m.status === 'pendiente').length;
+  const deal = getDealState(conversationId, me.id);
+
+  async function markDone() {
+    setBusy(true);
+    try {
+      await confirmDone(conversationId, me!.id);
+    } finally {
+      setBusy(false);
+      bump();
+    }
+  }
+
+  async function sendRating() {
+    if (stars < 1) return;
+    setBusy(true);
+    try {
+      await rateInteraction(conversationId, me!.id, stars, comment);
+      setStars(0);
+      setComment('');
+    } finally {
+      setBusy(false);
+      bump();
+    }
+  }
 
   return (
     <div className="chat">
@@ -68,6 +103,62 @@ export default function ChatView({ conversationId }: { conversationId: string })
           </button>
         )}
       </header>
+
+      {deal && deal.status !== 'cancelado' && (
+        <section className="card" aria-live="polite" style={{ margin: '8px 12px' }}>
+          {deal.status !== 'completado' && !deal.iConfirmed && (
+            <>
+              <h3 style={{ marginTop: 0 }}>¿Ya se hizo el trato?</h3>
+              <p>Cuando se cumpla, confirma aquí. El trato se completa cuando confirman los dos.</p>
+              <button type="button" className="btn block" onClick={markDone} disabled={busy}>
+                Sí, ya se hizo
+              </button>
+            </>
+          )}
+          {deal.status !== 'completado' && deal.iConfirmed && (
+            <p style={{ margin: 0 }}>
+              Ya confirmaste. Falta que {deal.otherName} confirme para completar el trato.
+            </p>
+          )}
+          {deal.status === 'completado' && !deal.iRated && (
+            <>
+              <h3 style={{ marginTop: 0 }}>Trato completado. Califica a {deal.otherName}</h3>
+              <div className="meta" role="group" aria-label="Estrellas">
+                {[1, 2, 3, 4, 5].map((n) => (
+                  <button
+                    key={n}
+                    type="button"
+                    className={n <= stars ? 'btn small' : 'btn small ghost'}
+                    aria-pressed={n <= stars}
+                    aria-label={`${n} ${n === 1 ? 'estrella' : 'estrellas'}`}
+                    onClick={() => setStars(n)}
+                  >
+                    ★
+                  </button>
+                ))}
+              </div>
+              <label htmlFor="rate-comment">Comentario (opcional)</label>
+              <input
+                id="rate-comment"
+                value={comment}
+                onChange={(e) => setComment(e.target.value)}
+                maxLength={200}
+                placeholder="Puntual, buen trato…"
+              />
+              <p>
+                <button type="button" className="btn block" onClick={sendRating} disabled={busy || stars < 1}>
+                  Enviar calificación
+                </button>
+              </p>
+            </>
+          )}
+          {deal.status === 'completado' && deal.iRated && (
+            <p style={{ margin: 0 }}>
+              Trato completado. Calificaste a {deal.otherName} con {deal.myStars} ★. Gracias.
+            </p>
+          )}
+        </section>
+      )}
 
       <div className="chat-log" ref={logRef}>
         {messages.map((m) => (
