@@ -3603,6 +3603,765 @@ class AppSettingsKvCompanion extends UpdateCompanion<SettingRow> {
   }
 }
 
+class $PersonProfileTable extends PersonProfile
+    with TableInfo<$PersonProfileTable, ProfileRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $PersonProfileTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _usernameMeta = const VerificationMeta(
+    'username',
+  );
+  @override
+  late final GeneratedColumn<String> username = GeneratedColumn<String>(
+    'username',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _emailMeta = const VerificationMeta('email');
+  @override
+  late final GeneratedColumn<String> email = GeneratedColumn<String>(
+    'email',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [id, username, email, createdAt];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'person_profile';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<ProfileRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('username')) {
+      context.handle(
+        _usernameMeta,
+        username.isAcceptableOrUnknown(data['username']!, _usernameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_usernameMeta);
+    }
+    if (data.containsKey('email')) {
+      context.handle(
+        _emailMeta,
+        email.isAcceptableOrUnknown(data['email']!, _emailMeta),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  ProfileRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ProfileRow(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      username: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}username'],
+      )!,
+      email: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}email'],
+      ),
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+    );
+  }
+
+  @override
+  $PersonProfileTable createAlias(String alias) {
+    return $PersonProfileTable(attachedDatabase, alias);
+  }
+}
+
+class ProfileRow extends DataClass implements Insertable<ProfileRow> {
+  final String id;
+  final String username;
+  final String? email;
+  final DateTime createdAt;
+  const ProfileRow({
+    required this.id,
+    required this.username,
+    this.email,
+    required this.createdAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['username'] = Variable<String>(username);
+    if (!nullToAbsent || email != null) {
+      map['email'] = Variable<String>(email);
+    }
+    map['created_at'] = Variable<DateTime>(createdAt);
+    return map;
+  }
+
+  PersonProfileCompanion toCompanion(bool nullToAbsent) {
+    return PersonProfileCompanion(
+      id: Value(id),
+      username: Value(username),
+      email: email == null && nullToAbsent
+          ? const Value.absent()
+          : Value(email),
+      createdAt: Value(createdAt),
+    );
+  }
+
+  factory ProfileRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ProfileRow(
+      id: serializer.fromJson<String>(json['id']),
+      username: serializer.fromJson<String>(json['username']),
+      email: serializer.fromJson<String?>(json['email']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'username': serializer.toJson<String>(username),
+      'email': serializer.toJson<String?>(email),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+    };
+  }
+
+  ProfileRow copyWith({
+    String? id,
+    String? username,
+    Value<String?> email = const Value.absent(),
+    DateTime? createdAt,
+  }) => ProfileRow(
+    id: id ?? this.id,
+    username: username ?? this.username,
+    email: email.present ? email.value : this.email,
+    createdAt: createdAt ?? this.createdAt,
+  );
+  ProfileRow copyWithCompanion(PersonProfileCompanion data) {
+    return ProfileRow(
+      id: data.id.present ? data.id.value : this.id,
+      username: data.username.present ? data.username.value : this.username,
+      email: data.email.present ? data.email.value : this.email,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ProfileRow(')
+          ..write('id: $id, ')
+          ..write('username: $username, ')
+          ..write('email: $email, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, username, email, createdAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ProfileRow &&
+          other.id == this.id &&
+          other.username == this.username &&
+          other.email == this.email &&
+          other.createdAt == this.createdAt);
+}
+
+class PersonProfileCompanion extends UpdateCompanion<ProfileRow> {
+  final Value<String> id;
+  final Value<String> username;
+  final Value<String?> email;
+  final Value<DateTime> createdAt;
+  final Value<int> rowid;
+  const PersonProfileCompanion({
+    this.id = const Value.absent(),
+    this.username = const Value.absent(),
+    this.email = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  PersonProfileCompanion.insert({
+    required String id,
+    required String username,
+    this.email = const Value.absent(),
+    required DateTime createdAt,
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       username = Value(username),
+       createdAt = Value(createdAt);
+  static Insertable<ProfileRow> custom({
+    Expression<String>? id,
+    Expression<String>? username,
+    Expression<String>? email,
+    Expression<DateTime>? createdAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (username != null) 'username': username,
+      if (email != null) 'email': email,
+      if (createdAt != null) 'created_at': createdAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  PersonProfileCompanion copyWith({
+    Value<String>? id,
+    Value<String>? username,
+    Value<String?>? email,
+    Value<DateTime>? createdAt,
+    Value<int>? rowid,
+  }) {
+    return PersonProfileCompanion(
+      id: id ?? this.id,
+      username: username ?? this.username,
+      email: email ?? this.email,
+      createdAt: createdAt ?? this.createdAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (username.present) {
+      map['username'] = Variable<String>(username.value);
+    }
+    if (email.present) {
+      map['email'] = Variable<String>(email.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PersonProfileCompanion(')
+          ..write('id: $id, ')
+          ..write('username: $username, ')
+          ..write('email: $email, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $PersonAddressesTable extends PersonAddresses
+    with TableInfo<$PersonAddressesTable, AddressRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $PersonAddressesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _referenceMeta = const VerificationMeta(
+    'reference',
+  );
+  @override
+  late final GeneratedColumn<String> reference = GeneratedColumn<String>(
+    'reference',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  static const VerificationMeta _latMeta = const VerificationMeta('lat');
+  @override
+  late final GeneratedColumn<double> lat = GeneratedColumn<double>(
+    'lat',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _lngMeta = const VerificationMeta('lng');
+  @override
+  late final GeneratedColumn<double> lng = GeneratedColumn<double>(
+    'lng',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _isActiveMeta = const VerificationMeta(
+    'isActive',
+  );
+  @override
+  late final GeneratedColumn<bool> isActive = GeneratedColumn<bool>(
+    'is_active',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_active" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    name,
+    reference,
+    lat,
+    lng,
+    createdAt,
+    isActive,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'person_addresses';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<AddressRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('reference')) {
+      context.handle(
+        _referenceMeta,
+        reference.isAcceptableOrUnknown(data['reference']!, _referenceMeta),
+      );
+    }
+    if (data.containsKey('lat')) {
+      context.handle(
+        _latMeta,
+        lat.isAcceptableOrUnknown(data['lat']!, _latMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_latMeta);
+    }
+    if (data.containsKey('lng')) {
+      context.handle(
+        _lngMeta,
+        lng.isAcceptableOrUnknown(data['lng']!, _lngMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_lngMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('is_active')) {
+      context.handle(
+        _isActiveMeta,
+        isActive.isAcceptableOrUnknown(data['is_active']!, _isActiveMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  AddressRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return AddressRow(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      reference: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}reference'],
+      )!,
+      lat: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}lat'],
+      )!,
+      lng: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}lng'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      isActive: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_active'],
+      )!,
+    );
+  }
+
+  @override
+  $PersonAddressesTable createAlias(String alias) {
+    return $PersonAddressesTable(attachedDatabase, alias);
+  }
+}
+
+class AddressRow extends DataClass implements Insertable<AddressRow> {
+  final String id;
+  final String name;
+  final String reference;
+  final double lat;
+  final double lng;
+  final DateTime createdAt;
+  final bool isActive;
+  const AddressRow({
+    required this.id,
+    required this.name,
+    required this.reference,
+    required this.lat,
+    required this.lng,
+    required this.createdAt,
+    required this.isActive,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['name'] = Variable<String>(name);
+    map['reference'] = Variable<String>(reference);
+    map['lat'] = Variable<double>(lat);
+    map['lng'] = Variable<double>(lng);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['is_active'] = Variable<bool>(isActive);
+    return map;
+  }
+
+  PersonAddressesCompanion toCompanion(bool nullToAbsent) {
+    return PersonAddressesCompanion(
+      id: Value(id),
+      name: Value(name),
+      reference: Value(reference),
+      lat: Value(lat),
+      lng: Value(lng),
+      createdAt: Value(createdAt),
+      isActive: Value(isActive),
+    );
+  }
+
+  factory AddressRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return AddressRow(
+      id: serializer.fromJson<String>(json['id']),
+      name: serializer.fromJson<String>(json['name']),
+      reference: serializer.fromJson<String>(json['reference']),
+      lat: serializer.fromJson<double>(json['lat']),
+      lng: serializer.fromJson<double>(json['lng']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      isActive: serializer.fromJson<bool>(json['isActive']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'name': serializer.toJson<String>(name),
+      'reference': serializer.toJson<String>(reference),
+      'lat': serializer.toJson<double>(lat),
+      'lng': serializer.toJson<double>(lng),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'isActive': serializer.toJson<bool>(isActive),
+    };
+  }
+
+  AddressRow copyWith({
+    String? id,
+    String? name,
+    String? reference,
+    double? lat,
+    double? lng,
+    DateTime? createdAt,
+    bool? isActive,
+  }) => AddressRow(
+    id: id ?? this.id,
+    name: name ?? this.name,
+    reference: reference ?? this.reference,
+    lat: lat ?? this.lat,
+    lng: lng ?? this.lng,
+    createdAt: createdAt ?? this.createdAt,
+    isActive: isActive ?? this.isActive,
+  );
+  AddressRow copyWithCompanion(PersonAddressesCompanion data) {
+    return AddressRow(
+      id: data.id.present ? data.id.value : this.id,
+      name: data.name.present ? data.name.value : this.name,
+      reference: data.reference.present ? data.reference.value : this.reference,
+      lat: data.lat.present ? data.lat.value : this.lat,
+      lng: data.lng.present ? data.lng.value : this.lng,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      isActive: data.isActive.present ? data.isActive.value : this.isActive,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('AddressRow(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('reference: $reference, ')
+          ..write('lat: $lat, ')
+          ..write('lng: $lng, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('isActive: $isActive')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(id, name, reference, lat, lng, createdAt, isActive);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is AddressRow &&
+          other.id == this.id &&
+          other.name == this.name &&
+          other.reference == this.reference &&
+          other.lat == this.lat &&
+          other.lng == this.lng &&
+          other.createdAt == this.createdAt &&
+          other.isActive == this.isActive);
+}
+
+class PersonAddressesCompanion extends UpdateCompanion<AddressRow> {
+  final Value<String> id;
+  final Value<String> name;
+  final Value<String> reference;
+  final Value<double> lat;
+  final Value<double> lng;
+  final Value<DateTime> createdAt;
+  final Value<bool> isActive;
+  final Value<int> rowid;
+  const PersonAddressesCompanion({
+    this.id = const Value.absent(),
+    this.name = const Value.absent(),
+    this.reference = const Value.absent(),
+    this.lat = const Value.absent(),
+    this.lng = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.isActive = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  PersonAddressesCompanion.insert({
+    required String id,
+    required String name,
+    this.reference = const Value.absent(),
+    required double lat,
+    required double lng,
+    required DateTime createdAt,
+    this.isActive = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       name = Value(name),
+       lat = Value(lat),
+       lng = Value(lng),
+       createdAt = Value(createdAt);
+  static Insertable<AddressRow> custom({
+    Expression<String>? id,
+    Expression<String>? name,
+    Expression<String>? reference,
+    Expression<double>? lat,
+    Expression<double>? lng,
+    Expression<DateTime>? createdAt,
+    Expression<bool>? isActive,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (name != null) 'name': name,
+      if (reference != null) 'reference': reference,
+      if (lat != null) 'lat': lat,
+      if (lng != null) 'lng': lng,
+      if (createdAt != null) 'created_at': createdAt,
+      if (isActive != null) 'is_active': isActive,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  PersonAddressesCompanion copyWith({
+    Value<String>? id,
+    Value<String>? name,
+    Value<String>? reference,
+    Value<double>? lat,
+    Value<double>? lng,
+    Value<DateTime>? createdAt,
+    Value<bool>? isActive,
+    Value<int>? rowid,
+  }) {
+    return PersonAddressesCompanion(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      reference: reference ?? this.reference,
+      lat: lat ?? this.lat,
+      lng: lng ?? this.lng,
+      createdAt: createdAt ?? this.createdAt,
+      isActive: isActive ?? this.isActive,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (reference.present) {
+      map['reference'] = Variable<String>(reference.value);
+    }
+    if (lat.present) {
+      map['lat'] = Variable<double>(lat.value);
+    }
+    if (lng.present) {
+      map['lng'] = Variable<double>(lng.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (isActive.present) {
+      map['is_active'] = Variable<bool>(isActive.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PersonAddressesCompanion(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('reference: $reference, ')
+          ..write('lat: $lat, ')
+          ..write('lng: $lng, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('isActive: $isActive, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -3617,6 +4376,10 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     this,
   );
   late final $AppSettingsKvTable appSettingsKv = $AppSettingsKvTable(this);
+  late final $PersonProfileTable personProfile = $PersonProfileTable(this);
+  late final $PersonAddressesTable personAddresses = $PersonAddressesTable(
+    this,
+  );
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -3631,6 +4394,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     emergencyPosts,
     collectionPoints,
     appSettingsKv,
+    personProfile,
+    personAddresses,
   ];
 }
 
@@ -5654,6 +6419,445 @@ typedef $$AppSettingsKvTableProcessedTableManager =
       SettingRow,
       PrefetchHooks Function()
     >;
+typedef $$PersonProfileTableCreateCompanionBuilder =
+    PersonProfileCompanion Function({
+      required String id,
+      required String username,
+      Value<String?> email,
+      required DateTime createdAt,
+      Value<int> rowid,
+    });
+typedef $$PersonProfileTableUpdateCompanionBuilder =
+    PersonProfileCompanion Function({
+      Value<String> id,
+      Value<String> username,
+      Value<String?> email,
+      Value<DateTime> createdAt,
+      Value<int> rowid,
+    });
+
+class $$PersonProfileTableFilterComposer
+    extends Composer<_$AppDatabase, $PersonProfileTable> {
+  $$PersonProfileTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get username => $composableBuilder(
+    column: $table.username,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get email => $composableBuilder(
+    column: $table.email,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$PersonProfileTableOrderingComposer
+    extends Composer<_$AppDatabase, $PersonProfileTable> {
+  $$PersonProfileTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get username => $composableBuilder(
+    column: $table.username,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get email => $composableBuilder(
+    column: $table.email,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$PersonProfileTableAnnotationComposer
+    extends Composer<_$AppDatabase, $PersonProfileTable> {
+  $$PersonProfileTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get username =>
+      $composableBuilder(column: $table.username, builder: (column) => column);
+
+  GeneratedColumn<String> get email =>
+      $composableBuilder(column: $table.email, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+}
+
+class $$PersonProfileTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $PersonProfileTable,
+          ProfileRow,
+          $$PersonProfileTableFilterComposer,
+          $$PersonProfileTableOrderingComposer,
+          $$PersonProfileTableAnnotationComposer,
+          $$PersonProfileTableCreateCompanionBuilder,
+          $$PersonProfileTableUpdateCompanionBuilder,
+          (
+            ProfileRow,
+            BaseReferences<_$AppDatabase, $PersonProfileTable, ProfileRow>,
+          ),
+          ProfileRow,
+          PrefetchHooks Function()
+        > {
+  $$PersonProfileTableTableManager(_$AppDatabase db, $PersonProfileTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$PersonProfileTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$PersonProfileTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$PersonProfileTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> username = const Value.absent(),
+                Value<String?> email = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => PersonProfileCompanion(
+                id: id,
+                username: username,
+                email: email,
+                createdAt: createdAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String username,
+                Value<String?> email = const Value.absent(),
+                required DateTime createdAt,
+                Value<int> rowid = const Value.absent(),
+              }) => PersonProfileCompanion.insert(
+                id: id,
+                username: username,
+                email: email,
+                createdAt: createdAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$PersonProfileTable, ProfileRow>(table),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $PersonProfileTable,
+                    ProfileRow
+                  >(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$PersonProfileTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $PersonProfileTable,
+      ProfileRow,
+      $$PersonProfileTableFilterComposer,
+      $$PersonProfileTableOrderingComposer,
+      $$PersonProfileTableAnnotationComposer,
+      $$PersonProfileTableCreateCompanionBuilder,
+      $$PersonProfileTableUpdateCompanionBuilder,
+      (
+        ProfileRow,
+        BaseReferences<_$AppDatabase, $PersonProfileTable, ProfileRow>,
+      ),
+      ProfileRow,
+      PrefetchHooks Function()
+    >;
+typedef $$PersonAddressesTableCreateCompanionBuilder =
+    PersonAddressesCompanion Function({
+      required String id,
+      required String name,
+      Value<String> reference,
+      required double lat,
+      required double lng,
+      required DateTime createdAt,
+      Value<bool> isActive,
+      Value<int> rowid,
+    });
+typedef $$PersonAddressesTableUpdateCompanionBuilder =
+    PersonAddressesCompanion Function({
+      Value<String> id,
+      Value<String> name,
+      Value<String> reference,
+      Value<double> lat,
+      Value<double> lng,
+      Value<DateTime> createdAt,
+      Value<bool> isActive,
+      Value<int> rowid,
+    });
+
+class $$PersonAddressesTableFilterComposer
+    extends Composer<_$AppDatabase, $PersonAddressesTable> {
+  $$PersonAddressesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get reference => $composableBuilder(
+    column: $table.reference,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get lat => $composableBuilder(
+    column: $table.lat,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get lng => $composableBuilder(
+    column: $table.lng,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isActive => $composableBuilder(
+    column: $table.isActive,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$PersonAddressesTableOrderingComposer
+    extends Composer<_$AppDatabase, $PersonAddressesTable> {
+  $$PersonAddressesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get reference => $composableBuilder(
+    column: $table.reference,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get lat => $composableBuilder(
+    column: $table.lat,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get lng => $composableBuilder(
+    column: $table.lng,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isActive => $composableBuilder(
+    column: $table.isActive,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$PersonAddressesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $PersonAddressesTable> {
+  $$PersonAddressesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<String> get reference =>
+      $composableBuilder(column: $table.reference, builder: (column) => column);
+
+  GeneratedColumn<double> get lat =>
+      $composableBuilder(column: $table.lat, builder: (column) => column);
+
+  GeneratedColumn<double> get lng =>
+      $composableBuilder(column: $table.lng, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<bool> get isActive =>
+      $composableBuilder(column: $table.isActive, builder: (column) => column);
+}
+
+class $$PersonAddressesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $PersonAddressesTable,
+          AddressRow,
+          $$PersonAddressesTableFilterComposer,
+          $$PersonAddressesTableOrderingComposer,
+          $$PersonAddressesTableAnnotationComposer,
+          $$PersonAddressesTableCreateCompanionBuilder,
+          $$PersonAddressesTableUpdateCompanionBuilder,
+          (
+            AddressRow,
+            BaseReferences<_$AppDatabase, $PersonAddressesTable, AddressRow>,
+          ),
+          AddressRow,
+          PrefetchHooks Function()
+        > {
+  $$PersonAddressesTableTableManager(
+    _$AppDatabase db,
+    $PersonAddressesTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$PersonAddressesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$PersonAddressesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$PersonAddressesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> name = const Value.absent(),
+                Value<String> reference = const Value.absent(),
+                Value<double> lat = const Value.absent(),
+                Value<double> lng = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<bool> isActive = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => PersonAddressesCompanion(
+                id: id,
+                name: name,
+                reference: reference,
+                lat: lat,
+                lng: lng,
+                createdAt: createdAt,
+                isActive: isActive,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String name,
+                Value<String> reference = const Value.absent(),
+                required double lat,
+                required double lng,
+                required DateTime createdAt,
+                Value<bool> isActive = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => PersonAddressesCompanion.insert(
+                id: id,
+                name: name,
+                reference: reference,
+                lat: lat,
+                lng: lng,
+                createdAt: createdAt,
+                isActive: isActive,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$PersonAddressesTable, AddressRow>(table),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $PersonAddressesTable,
+                    AddressRow
+                  >(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$PersonAddressesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $PersonAddressesTable,
+      AddressRow,
+      $$PersonAddressesTableFilterComposer,
+      $$PersonAddressesTableOrderingComposer,
+      $$PersonAddressesTableAnnotationComposer,
+      $$PersonAddressesTableCreateCompanionBuilder,
+      $$PersonAddressesTableUpdateCompanionBuilder,
+      (
+        AddressRow,
+        BaseReferences<_$AppDatabase, $PersonAddressesTable, AddressRow>,
+      ),
+      AddressRow,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -5676,4 +6880,8 @@ class $AppDatabaseManager {
       $$CollectionPointsTableTableManager(_db, _db.collectionPoints);
   $$AppSettingsKvTableTableManager get appSettingsKv =>
       $$AppSettingsKvTableTableManager(_db, _db.appSettingsKv);
+  $$PersonProfileTableTableManager get personProfile =>
+      $$PersonProfileTableTableManager(_db, _db.personProfile);
+  $$PersonAddressesTableTableManager get personAddresses =>
+      $$PersonAddressesTableTableManager(_db, _db.personAddresses);
 }

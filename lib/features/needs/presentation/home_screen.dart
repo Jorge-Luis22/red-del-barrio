@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../app/di/providers.dart';
 import '../../../app/l10n.dart';
 import '../../../app/ui/components.dart';
 import '../../explore/presentation/explore_section.dart';
@@ -18,16 +19,19 @@ class HomeScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final loc = ref.watch(locationControllerProvider);
+    final address = ref.watch(activeAddressProvider);
 
     return Scaffold(
       body: CustomScrollView(
         slivers: [
-          SliverToBoxAdapter(child: HomeHero(loc: loc)),
+          SliverToBoxAdapter(
+            child: HomeHero(loc: loc, address: address),
+          ),
           SliverPadding(
             padding: const EdgeInsets.fromLTRB(16, 24, 16, 0),
             sliver: SliverList.list(
               children: [
-                if (locationNeedsBanner(loc)) ...[
+                if (address == null && locationNeedsBanner(loc)) ...[
                   LocationBanner(state: loc),
                   const SizedBox(height: 24),
                 ],

@@ -2443,6 +2443,318 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Todo enviado'**
   String get connSynced;
+
+  /// No description provided for @profTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Mi perfil'**
+  String get profTitle;
+
+  /// No description provided for @profNone.
+  ///
+  /// In es, this message translates to:
+  /// **'Aún no tienes perfil'**
+  String get profNone;
+
+  /// No description provided for @profNoneHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Crea uno para que tu barrio sepa cómo llamarte.'**
+  String get profNoneHint;
+
+  /// No description provided for @profCreate.
+  ///
+  /// In es, this message translates to:
+  /// **'Crear mi perfil'**
+  String get profCreate;
+
+  /// No description provided for @profEdit.
+  ///
+  /// In es, this message translates to:
+  /// **'Editar perfil'**
+  String get profEdit;
+
+  /// No description provided for @profLocalNote.
+  ///
+  /// In es, this message translates to:
+  /// **'Tu perfil se guarda solo en este teléfono. Todavía no hay cuentas: no sirve para entrar desde otro celular.'**
+  String get profLocalNote;
+
+  /// No description provided for @profUsername.
+  ///
+  /// In es, this message translates to:
+  /// **'Usuario'**
+  String get profUsername;
+
+  /// No description provided for @profUsernameHelp.
+  ///
+  /// In es, this message translates to:
+  /// **'De 3 a 20 letras, números, punto o guion bajo'**
+  String get profUsernameHelp;
+
+  /// No description provided for @profEmail.
+  ///
+  /// In es, this message translates to:
+  /// **'Correo (opcional)'**
+  String get profEmail;
+
+  /// No description provided for @profEmailHelp.
+  ///
+  /// In es, this message translates to:
+  /// **'Por ahora solo se guarda en tu teléfono; no se verifica.'**
+  String get profEmailHelp;
+
+  /// No description provided for @profConsent.
+  ///
+  /// In es, this message translates to:
+  /// **'Entiendo que mi usuario y mi zona de ~1 km pueden verlos mis vecinos, y que mi dirección exacta nunca sale de mi teléfono.'**
+  String get profConsent;
+
+  /// No description provided for @profSave.
+  ///
+  /// In es, this message translates to:
+  /// **'Guardar'**
+  String get profSave;
+
+  /// No description provided for @profSaved.
+  ///
+  /// In es, this message translates to:
+  /// **'Perfil guardado'**
+  String get profSaved;
+
+  /// No description provided for @welcomeTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'¡Bienvenido al barrio!'**
+  String get welcomeTitle;
+
+  /// No description provided for @welcomeStep1.
+  ///
+  /// In es, this message translates to:
+  /// **'Paso 1 de 2 · Tu perfil'**
+  String get welcomeStep1;
+
+  /// No description provided for @welcomeStep2.
+  ///
+  /// In es, this message translates to:
+  /// **'Paso 2 de 2 · Dónde estás'**
+  String get welcomeStep2;
+
+  /// No description provided for @welcomeSkip.
+  ///
+  /// In es, this message translates to:
+  /// **'Ahora no'**
+  String get welcomeSkip;
+
+  /// No description provided for @welcomeFinish.
+  ///
+  /// In es, this message translates to:
+  /// **'Terminar'**
+  String get welcomeFinish;
+
+  /// No description provided for @welcomeWhere.
+  ///
+  /// In es, this message translates to:
+  /// **'Marca dónde estás para ver lo que hay cerca. Puedes cambiarlo cuando quieras.'**
+  String get welcomeWhere;
+
+  /// No description provided for @welcomeMark.
+  ///
+  /// In es, this message translates to:
+  /// **'Marcar dónde estoy'**
+  String get welcomeMark;
+
+  /// No description provided for @welcomeDone.
+  ///
+  /// In es, this message translates to:
+  /// **'Listo, ya marcaste dónde estás.'**
+  String get welcomeDone;
+
+  /// No description provided for @addrTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Mis direcciones'**
+  String get addrTitle;
+
+  /// No description provided for @addrSubtitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Las distancias se miden desde la dirección activa.'**
+  String get addrSubtitle;
+
+  /// No description provided for @addrAdd.
+  ///
+  /// In es, this message translates to:
+  /// **'Agregar dirección'**
+  String get addrAdd;
+
+  /// No description provided for @addrActive.
+  ///
+  /// In es, this message translates to:
+  /// **'Activa'**
+  String get addrActive;
+
+  /// No description provided for @addrUse.
+  ///
+  /// In es, this message translates to:
+  /// **'Usar esta'**
+  String get addrUse;
+
+  /// No description provided for @addrDelete.
+  ///
+  /// In es, this message translates to:
+  /// **'Eliminar'**
+  String get addrDelete;
+
+  /// No description provided for @addrEmpty.
+  ///
+  /// In es, this message translates to:
+  /// **'Aún no marcaste dónde estás'**
+  String get addrEmpty;
+
+  /// No description provided for @addrEmptyHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Usa tu ubicación y ponle un nombre, como Casa o Trabajo.'**
+  String get addrEmptyHint;
+
+  /// No description provided for @addrNameLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Nombre (Casa, Trabajo…)'**
+  String get addrNameLabel;
+
+  /// No description provided for @addrHome.
+  ///
+  /// In es, this message translates to:
+  /// **'Casa'**
+  String get addrHome;
+
+  /// No description provided for @addrWork.
+  ///
+  /// In es, this message translates to:
+  /// **'Trabajo'**
+  String get addrWork;
+
+  /// No description provided for @addrOther.
+  ///
+  /// In es, this message translates to:
+  /// **'Otra'**
+  String get addrOther;
+
+  /// No description provided for @addrRef.
+  ///
+  /// In es, this message translates to:
+  /// **'Referencia (opcional)'**
+  String get addrRef;
+
+  /// No description provided for @addrRefHelp.
+  ///
+  /// In es, this message translates to:
+  /// **'Por ejemplo: frente al parque, 2.º piso'**
+  String get addrRefHelp;
+
+  /// No description provided for @addrGetLocation.
+  ///
+  /// In es, this message translates to:
+  /// **'Usar mi ubicación actual'**
+  String get addrGetLocation;
+
+  /// No description provided for @addrRelocate.
+  ///
+  /// In es, this message translates to:
+  /// **'Volver a marcar'**
+  String get addrRelocate;
+
+  /// No description provided for @addrGot.
+  ///
+  /// In es, this message translates to:
+  /// **'Ubicación marcada · {zone}'**
+  String addrGot(String zone);
+
+  /// No description provided for @addrPrivacy.
+  ///
+  /// In es, this message translates to:
+  /// **'La dirección exacta se queda en tu teléfono. Los vecinos solo ven tu zona de ~1 km.'**
+  String get addrPrivacy;
+
+  /// No description provided for @addrSave.
+  ///
+  /// In es, this message translates to:
+  /// **'Guardar dirección'**
+  String get addrSave;
+
+  /// No description provided for @addrSaved.
+  ///
+  /// In es, this message translates to:
+  /// **'Dirección guardada'**
+  String get addrSaved;
+
+  /// No description provided for @addrDeleted.
+  ///
+  /// In es, this message translates to:
+  /// **'Dirección eliminada'**
+  String get addrDeleted;
+
+  /// No description provided for @addrDeleteTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Eliminar \"{name}\"?'**
+  String addrDeleteTitle(String name);
+
+  /// No description provided for @addrDeleteBody.
+  ///
+  /// In es, this message translates to:
+  /// **'Se borra de tu teléfono. Podrás volver a marcarla cuando quieras.'**
+  String get addrDeleteBody;
+
+  /// No description provided for @addrHeroLine.
+  ///
+  /// In es, this message translates to:
+  /// **'{name} · {zone}'**
+  String addrHeroLine(String name, String zone);
+
+  /// No description provided for @failUsername.
+  ///
+  /// In es, this message translates to:
+  /// **'El usuario debe tener de 3 a 20 letras, números, punto o guion bajo.'**
+  String get failUsername;
+
+  /// No description provided for @failEmail.
+  ///
+  /// In es, this message translates to:
+  /// **'Escribe un correo válido o déjalo vacío.'**
+  String get failEmail;
+
+  /// No description provided for @failAddressName.
+  ///
+  /// In es, this message translates to:
+  /// **'Ponle un nombre a la dirección.'**
+  String get failAddressName;
+
+  /// No description provided for @failAddressNoLocation.
+  ///
+  /// In es, this message translates to:
+  /// **'Primero marca tu ubicación.'**
+  String get failAddressNoLocation;
+
+  /// No description provided for @failSaveProfile.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudo guardar tu perfil.'**
+  String get failSaveProfile;
+
+  /// No description provided for @failSaveAddress.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudo guardar la dirección.'**
+  String get failSaveAddress;
+
+  /// No description provided for @failUpdateAddress.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudo actualizar la dirección.'**
+  String get failUpdateAddress;
 }
 
 class _AppLocalizationsDelegate

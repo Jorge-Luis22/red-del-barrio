@@ -37,5 +37,13 @@ String messageText(AppLocalizations l, String message) => switch (message) {
     l.failLocationBlocked,
   'Sin permiso de ubicación. Puedes elegir tu zona a mano.' =>
     l.failLocationPermission,
+  'El usuario debe tener de 3 a 20 letras, números, punto o guion bajo.' =>
+    l.failUsername,
+  'Escribe un correo válido o déjalo vacío.' => l.failEmail,
+  'Ponle un nombre a la dirección.' => l.failAddressName,
+  'Primero marca tu ubicación.' => l.failAddressNoLocation,
+  'No se pudo guardar tu perfil.' => l.failSaveProfile,
+  'No se pudo guardar la dirección.' => l.failSaveAddress,
+  'No se pudo actualizar la dirección.' => l.failUpdateAddress,
   _ => message,
 };

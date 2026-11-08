@@ -706,5 +706,81 @@
       }
     }
   },
-  "connSynced": "Todo enviado"
+  "connSynced": "Todo enviado",
+  "profTitle": "Mi perfil",
+  "profNone": "Aún no tienes perfil",
+  "profNoneHint": "Crea uno para que tu barrio sepa cómo llamarte.",
+  "profCreate": "Crear mi perfil",
+  "profEdit": "Editar perfil",
+  "profLocalNote": "Tu perfil se guarda solo en este teléfono. Todavía no hay cuentas: no sirve para entrar desde otro celular.",
+  "profUsername": "Usuario",
+  "profUsernameHelp": "De 3 a 20 letras, números, punto o guion bajo",
+  "profEmail": "Correo (opcional)",
+  "profEmailHelp": "Por ahora solo se guarda en tu teléfono; no se verifica.",
+  "profConsent": "Entiendo que mi usuario y mi zona de ~1 km pueden verlos mis vecinos, y que mi dirección exacta nunca sale de mi teléfono.",
+  "profSave": "Guardar",
+  "profSaved": "Perfil guardado",
+  "welcomeTitle": "¡Bienvenido al barrio!",
+  "welcomeStep1": "Paso 1 de 2 · Tu perfil",
+  "welcomeStep2": "Paso 2 de 2 · Dónde estás",
+  "welcomeSkip": "Ahora no",
+  "welcomeFinish": "Terminar",
+  "welcomeWhere": "Marca dónde estás para ver lo que hay cerca. Puedes cambiarlo cuando quieras.",
+  "welcomeMark": "Marcar dónde estoy",
+  "welcomeDone": "Listo, ya marcaste dónde estás.",
+  "addrTitle": "Mis direcciones",
+  "addrSubtitle": "Las distancias se miden desde la dirección activa.",
+  "addrAdd": "Agregar dirección",
+  "addrActive": "Activa",
+  "addrUse": "Usar esta",
+  "addrDelete": "Eliminar",
+  "addrEmpty": "Aún no marcaste dónde estás",
+  "addrEmptyHint": "Usa tu ubicación y ponle un nombre, como Casa o Trabajo.",
+  "addrNameLabel": "Nombre (Casa, Trabajo…)",
+  "addrHome": "Casa",
+  "addrWork": "Trabajo",
+  "addrOther": "Otra",
+  "addrRef": "Referencia (opcional)",
+  "addrRefHelp": "Por ejemplo: frente al parque, 2.º piso",
+  "addrGetLocation": "Usar mi ubicación actual",
+  "addrRelocate": "Volver a marcar",
+  "addrGot": "Ubicación marcada · {zone}",
+  "@addrGot": {
+    "placeholders": {
+      "zone": {
+        "type": "String"
+      }
+    }
+  },
+  "addrPrivacy": "La dirección exacta se queda en tu teléfono. Los vecinos solo ven tu zona de ~1 km.",
+  "addrSave": "Guardar dirección",
+  "addrSaved": "Dirección guardada",
+  "addrDeleted": "Dirección eliminada",
+  "addrDeleteTitle": "¿Eliminar \"{name}\"?",
+  "@addrDeleteTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "addrDeleteBody": "Se borra de tu teléfono. Podrás volver a marcarla cuando quieras.",
+  "addrHeroLine": "{name} · {zone}",
+  "@addrHeroLine": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "zone": {
+        "type": "String"
+      }
+    }
+  },
+  "failUsername": "El usuario debe tener de 3 a 20 letras, números, punto o guion bajo.",
+  "failEmail": "Escribe un correo válido o déjalo vacío.",
+  "failAddressName": "Ponle un nombre a la dirección.",
+  "failAddressNoLocation": "Primero marca tu ubicación.",
+  "failSaveProfile": "No se pudo guardar tu perfil.",
+  "failSaveAddress": "No se pudo guardar la dirección.",
+  "failUpdateAddress": "No se pudo actualizar la dirección."
 }

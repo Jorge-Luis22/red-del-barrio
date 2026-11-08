@@ -15,6 +15,7 @@ class AppSettings {
     this.useLocation = false,
     this.lastZoneLat,
     this.lastZoneLng,
+    this.welcomeDone = false,
   });
 
   /// 1.0 normal · 1.15 grande · 1.3 muy grande.
@@ -43,6 +44,9 @@ class AppSettings {
   final double? lastZoneLat;
   final double? lastZoneLng;
 
+  /// La bienvenida (perfil y ubicación) ya se mostró o se saltó: no se vuelve a insistir.
+  final bool welcomeDone;
+
   AppSettings copyWith({
     double? textScale,
     bool? highContrast,
@@ -57,6 +61,7 @@ class AppSettings {
     double? lastZoneLat,
     double? lastZoneLng,
     bool clearLastZone = false,
+    bool? welcomeDone,
   }) => AppSettings(
     textScale: textScale ?? this.textScale,
     highContrast: highContrast ?? this.highContrast,
@@ -71,6 +76,7 @@ class AppSettings {
     useLocation: useLocation ?? this.useLocation,
     lastZoneLat: clearLastZone ? null : (lastZoneLat ?? this.lastZoneLat),
     lastZoneLng: clearLastZone ? null : (lastZoneLng ?? this.lastZoneLng),
+    welcomeDone: welcomeDone ?? this.welcomeDone,
   );
 }
 

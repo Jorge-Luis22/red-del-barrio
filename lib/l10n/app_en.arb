@@ -706,5 +706,81 @@
       }
     }
   },
-  "connSynced": "Everything sent"
+  "connSynced": "Everything sent",
+  "profTitle": "My profile",
+  "profNone": "You don’t have a profile yet",
+  "profNoneHint": "Create one so your neighborhood knows what to call you.",
+  "profCreate": "Create my profile",
+  "profEdit": "Edit profile",
+  "profLocalNote": "Your profile is saved only on this phone. There are no accounts yet: it cannot be used to sign in from another phone.",
+  "profUsername": "Username",
+  "profUsernameHelp": "3 to 20 letters, numbers, dots or underscores",
+  "profEmail": "Email (optional)",
+  "profEmailHelp": "For now it is only saved on your phone; it is not verified.",
+  "profConsent": "I understand that my neighbors can see my username and my ~1 km area, and that my exact address never leaves my phone.",
+  "profSave": "Save",
+  "profSaved": "Profile saved",
+  "welcomeTitle": "Welcome to the neighborhood!",
+  "welcomeStep1": "Step 1 of 2 · Your profile",
+  "welcomeStep2": "Step 2 of 2 · Where you are",
+  "welcomeSkip": "Not now",
+  "welcomeFinish": "Finish",
+  "welcomeWhere": "Mark where you are to see what is nearby. You can change it any time.",
+  "welcomeMark": "Mark where I am",
+  "welcomeDone": "All set, you marked where you are.",
+  "addrTitle": "My addresses",
+  "addrSubtitle": "Distances are measured from the active address.",
+  "addrAdd": "Add address",
+  "addrActive": "Active",
+  "addrUse": "Use this one",
+  "addrDelete": "Delete",
+  "addrEmpty": "You haven’t marked where you are yet",
+  "addrEmptyHint": "Use your location and give it a name, such as Home or Work.",
+  "addrNameLabel": "Name (Home, Work…)",
+  "addrHome": "Home",
+  "addrWork": "Work",
+  "addrOther": "Other",
+  "addrRef": "Landmark (optional)",
+  "addrRefHelp": "For example: across from the park, 2nd floor",
+  "addrGetLocation": "Use my current location",
+  "addrRelocate": "Mark again",
+  "addrGot": "Location marked · {zone}",
+  "@addrGot": {
+    "placeholders": {
+      "zone": {
+        "type": "String"
+      }
+    }
+  },
+  "addrPrivacy": "Your exact address stays on your phone. Neighbors only see your ~1 km area.",
+  "addrSave": "Save address",
+  "addrSaved": "Address saved",
+  "addrDeleted": "Address deleted",
+  "addrDeleteTitle": "Delete \"{name}\"?",
+  "@addrDeleteTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "addrDeleteBody": "It is removed from your phone. You can mark it again any time.",
+  "addrHeroLine": "{name} · {zone}",
+  "@addrHeroLine": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "zone": {
+        "type": "String"
+      }
+    }
+  },
+  "failUsername": "The username must be 3 to 20 letters, numbers, dots or underscores.",
+  "failEmail": "Enter a valid email or leave it empty.",
+  "failAddressName": "Give the address a name.",
+  "failAddressNoLocation": "Mark your location first.",
+  "failSaveProfile": "Your profile could not be saved.",
+  "failSaveAddress": "The address could not be saved.",
+  "failUpdateAddress": "The address could not be updated."
 }

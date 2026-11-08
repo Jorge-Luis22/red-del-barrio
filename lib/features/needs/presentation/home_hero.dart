@@ -5,13 +5,17 @@ import '../../../app/theme/brand.dart';
 import '../../../app/ui/illustrations.dart';
 import '../../location/presentation/location_banner.dart';
 import '../../location/presentation/location_controller.dart';
+import '../../profile/domain/profile.dart';
 import 'composer_sheet.dart';
 
 /// Cabecera violeta: marca, zona, pregunta principal y el botón grande de pedir.
 class HomeHero extends StatelessWidget {
-  const HomeHero({super.key, required this.loc});
+  const HomeHero({super.key, required this.loc, this.address});
 
   final LocationState loc;
+
+  /// Dirección activa: si existe, la cabecera muestra su nombre y su zona.
+  final SavedAddress? address;
 
   @override
   Widget build(BuildContext context) {
@@ -66,7 +70,15 @@ class HomeHero extends StatelessWidget {
                     const SizedBox(width: 4),
                     Expanded(
                       child: Text(
-                        zoneLine(context, loc),
+                        address == null
+                            ? zoneLine(context, loc)
+                            : context.l.addrHeroLine(
+                                address!.name,
+                                context.l.zonaAprox1Km(
+                                  address!.zone.lat.toStringAsFixed(2),
+                                  address!.zone.lng.toStringAsFixed(2),
+                                ),
+                              ),
                         style: context.tt.bodySmall?.copyWith(color: soft),
                       ),
                     ),

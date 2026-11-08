@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../features/location/presentation/location_controller.dart';
+import '../features/settings/domain/app_settings.dart';
 import '../features/settings/presentation/tutorial_sheet.dart';
 import '../features/sync/presentation/connection_banner_bar.dart';
 import '../features/sync/presentation/sync_controller.dart';
@@ -32,6 +33,18 @@ class _ShellScaffoldState extends ConsumerState<ShellScaffold> {
     },
   );
 
+  /// Primer arranque: tutorial y, después, crear el perfil y marcar dónde está (se puede saltar).
+  Future<void> _firstRun(AppSettings settings) async {
+    if (!mounted) return;
+    if (!settings.tutorialSeen) await showTutorial(context);
+    if (!mounted || settings.welcomeDone) return;
+    final profile = await ref
+        .read(profileRepositoryProvider)
+        .watchProfile()
+        .first;
+    if (profile == null && mounted) context.push('/bienvenida');
+  }
+
   @override
   void dispose() {
     _lifecycle.dispose();
@@ -46,11 +59,7 @@ class _ShellScaffoldState extends ConsumerState<ShellScaffold> {
       final settings = next.value;
       if (settings == null || _tutorialChecked) return;
       _tutorialChecked = true;
-      if (!settings.tutorialSeen) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (mounted) showTutorial(context);
-        });
-      }
+      WidgetsBinding.instance.addPostFrameCallback((_) => _firstRun(settings));
     });
     final emergency = context.tones.emergency;
     return Scaffold(

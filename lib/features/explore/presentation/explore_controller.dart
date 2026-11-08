@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../app/di/providers.dart';
 import '../../directory/domain/listing.dart';
 import '../../location/presentation/location_controller.dart';
+import '../../profile/domain/profile.dart';
 import '../domain/explore_nearby.dart';
 
 class ExploreFilters {
@@ -45,7 +46,11 @@ final exploreFiltersProvider =
 /// Se recalcula al cambiar filtros, ubicación o interacciones (Visto Bueno).
 final exploreItemsProvider = FutureProvider<List<ExploreItem>>((ref) async {
   final filters = ref.watch(exploreFiltersProvider);
-  final location = ref.watch(locationControllerProvider).location;
+  // Las distancias se miden desde la dirección activa; sin ella, desde el GPS.
+  final location = pickOrigin(
+    active: ref.watch(activeAddressProvider),
+    gps: ref.watch(locationControllerProvider).location,
+  );
   ref.watch(interactionsStreamProvider);
   return ref.watch(exploreNearbyProvider)(
     kind: filters.kind,

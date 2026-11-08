@@ -5,6 +5,7 @@ import '../features/deals_chat/presentation/mensajes_screen.dart';
 import '../features/emergency/presentation/emergencia_screen.dart';
 import '../features/explore/presentation/explore_section.dart';
 import '../features/needs/presentation/home_screen.dart';
+import '../features/profile/presentation/welcome_screen.dart';
 import '../features/needs/presentation/my_needs_screen.dart';
 import '../features/proposals/presentation/need_detail_screen.dart';
 import '../features/settings/presentation/perfil_screen.dart';
@@ -16,6 +17,7 @@ import 'shell_scaffold.dart';
 final GoRouter appRouter = GoRouter(
   initialLocation: '/',
   routes: [
+    GoRoute(path: '/bienvenida', builder: (_, _) => const WelcomeScreen()),
     StatefulShellRoute.indexedStack(
       builder: (context, state, shell) => ShellScaffold(shell: shell),
       branches: [

@@ -12,6 +12,7 @@ export 'directory_providers.dart';
 export 'emergency_providers.dart';
 export 'location_providers.dart';
 export 'needs_providers.dart';
+export 'profile_providers.dart';
 export 'settings_providers.dart';
 export 'solidarity_providers.dart';
 export 'sync_providers.dart';

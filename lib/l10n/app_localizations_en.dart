@@ -1354,4 +1354,176 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get connSynced => 'Everything sent';
+
+  @override
+  String get profTitle => 'My profile';
+
+  @override
+  String get profNone => 'You don’t have a profile yet';
+
+  @override
+  String get profNoneHint =>
+      'Create one so your neighborhood knows what to call you.';
+
+  @override
+  String get profCreate => 'Create my profile';
+
+  @override
+  String get profEdit => 'Edit profile';
+
+  @override
+  String get profLocalNote =>
+      'Your profile is saved only on this phone. There are no accounts yet: it cannot be used to sign in from another phone.';
+
+  @override
+  String get profUsername => 'Username';
+
+  @override
+  String get profUsernameHelp =>
+      '3 to 20 letters, numbers, dots or underscores';
+
+  @override
+  String get profEmail => 'Email (optional)';
+
+  @override
+  String get profEmailHelp =>
+      'For now it is only saved on your phone; it is not verified.';
+
+  @override
+  String get profConsent =>
+      'I understand that my neighbors can see my username and my ~1 km area, and that my exact address never leaves my phone.';
+
+  @override
+  String get profSave => 'Save';
+
+  @override
+  String get profSaved => 'Profile saved';
+
+  @override
+  String get welcomeTitle => 'Welcome to the neighborhood!';
+
+  @override
+  String get welcomeStep1 => 'Step 1 of 2 · Your profile';
+
+  @override
+  String get welcomeStep2 => 'Step 2 of 2 · Where you are';
+
+  @override
+  String get welcomeSkip => 'Not now';
+
+  @override
+  String get welcomeFinish => 'Finish';
+
+  @override
+  String get welcomeWhere =>
+      'Mark where you are to see what is nearby. You can change it any time.';
+
+  @override
+  String get welcomeMark => 'Mark where I am';
+
+  @override
+  String get welcomeDone => 'All set, you marked where you are.';
+
+  @override
+  String get addrTitle => 'My addresses';
+
+  @override
+  String get addrSubtitle => 'Distances are measured from the active address.';
+
+  @override
+  String get addrAdd => 'Add address';
+
+  @override
+  String get addrActive => 'Active';
+
+  @override
+  String get addrUse => 'Use this one';
+
+  @override
+  String get addrDelete => 'Delete';
+
+  @override
+  String get addrEmpty => 'You haven’t marked where you are yet';
+
+  @override
+  String get addrEmptyHint =>
+      'Use your location and give it a name, such as Home or Work.';
+
+  @override
+  String get addrNameLabel => 'Name (Home, Work…)';
+
+  @override
+  String get addrHome => 'Home';
+
+  @override
+  String get addrWork => 'Work';
+
+  @override
+  String get addrOther => 'Other';
+
+  @override
+  String get addrRef => 'Landmark (optional)';
+
+  @override
+  String get addrRefHelp => 'For example: across from the park, 2nd floor';
+
+  @override
+  String get addrGetLocation => 'Use my current location';
+
+  @override
+  String get addrRelocate => 'Mark again';
+
+  @override
+  String addrGot(String zone) {
+    return 'Location marked · $zone';
+  }
+
+  @override
+  String get addrPrivacy =>
+      'Your exact address stays on your phone. Neighbors only see your ~1 km area.';
+
+  @override
+  String get addrSave => 'Save address';
+
+  @override
+  String get addrSaved => 'Address saved';
+
+  @override
+  String get addrDeleted => 'Address deleted';
+
+  @override
+  String addrDeleteTitle(String name) {
+    return 'Delete \"$name\"?';
+  }
+
+  @override
+  String get addrDeleteBody =>
+      'It is removed from your phone. You can mark it again any time.';
+
+  @override
+  String addrHeroLine(String name, String zone) {
+    return '$name · $zone';
+  }
+
+  @override
+  String get failUsername =>
+      'The username must be 3 to 20 letters, numbers, dots or underscores.';
+
+  @override
+  String get failEmail => 'Enter a valid email or leave it empty.';
+
+  @override
+  String get failAddressName => 'Give the address a name.';
+
+  @override
+  String get failAddressNoLocation => 'Mark your location first.';
+
+  @override
+  String get failSaveProfile => 'Your profile could not be saved.';
+
+  @override
+  String get failSaveAddress => 'The address could not be saved.';
+
+  @override
+  String get failUpdateAddress => 'The address could not be updated.';
 }

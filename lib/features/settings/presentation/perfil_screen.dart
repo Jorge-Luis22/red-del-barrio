@@ -5,6 +5,7 @@ import '../../../app/l10n.dart';
 import '../../../app/theme/brand.dart';
 import '../../../app/ui/components.dart';
 import '../../../app/ui/section_header.dart';
+import '../../profile/presentation/my_profile_section.dart';
 import 'data_actions.dart';
 import 'help_summary.dart';
 import 'settings_panel.dart';
@@ -34,6 +35,8 @@ class PerfilScreen extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                const MyProfileSection(),
+                const SizedBox(height: 28),
                 BvSectionTitle(l.tuAyudaAlBarrio2, subtitle: l.soloTuVesEste),
                 const SizedBox(height: 12),
                 HelpGrid(help: help),

@@ -137,6 +137,37 @@ class AppSettingsKv extends Table {
   Set<Column> get primaryKey => {key};
 }
 
+@DataClassName('ProfileRow')
+class PersonProfile extends Table {
+  @override
+  String get tableName => 'person_profile';
+
+  TextColumn get id => text()();
+  TextColumn get username => text()();
+  TextColumn get email => text().nullable()();
+  DateTimeColumn get createdAt => dateTime()();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
+@DataClassName('AddressRow')
+class PersonAddresses extends Table {
+  @override
+  String get tableName => 'person_addresses';
+
+  TextColumn get id => text()();
+  TextColumn get name => text()();
+  TextColumn get reference => text().withDefault(const Constant(''))();
+  RealColumn get lat => real()();
+  RealColumn get lng => real()();
+  DateTimeColumn get createdAt => dateTime()();
+  BoolColumn get isActive => boolean().withDefault(const Constant(false))();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
 @DriftDatabase(
   tables: [
     Needs,
@@ -148,6 +179,8 @@ class AppSettingsKv extends Table {
     EmergencyPosts,
     CollectionPoints,
     AppSettingsKv,
+    PersonProfile,
+    PersonAddresses,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -159,7 +192,7 @@ class AppDatabase extends _$AppDatabase {
   /// Versión del esquema. Cada cambio exige subirla y escribir su migración + prueba (R28).
   /// 1: needs, outbox_ops · 2: + deals, interactions
   @override
-  int get schemaVersion => 4;
+  int get schemaVersion => 5;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -168,6 +201,10 @@ class AppDatabase extends _$AppDatabase {
       if (from < 2) {
         await m.createTable(deals);
         await m.createTable(interactions);
+      }
+      if (from < 5) {
+        await m.createTable(personProfile);
+        await m.createTable(personAddresses);
       }
       if (from < 4) {
         await m.createTable(offers);

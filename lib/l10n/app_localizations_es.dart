@@ -1353,4 +1353,176 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get connSynced => 'Todo enviado';
+
+  @override
+  String get profTitle => 'Mi perfil';
+
+  @override
+  String get profNone => 'Aún no tienes perfil';
+
+  @override
+  String get profNoneHint => 'Crea uno para que tu barrio sepa cómo llamarte.';
+
+  @override
+  String get profCreate => 'Crear mi perfil';
+
+  @override
+  String get profEdit => 'Editar perfil';
+
+  @override
+  String get profLocalNote =>
+      'Tu perfil se guarda solo en este teléfono. Todavía no hay cuentas: no sirve para entrar desde otro celular.';
+
+  @override
+  String get profUsername => 'Usuario';
+
+  @override
+  String get profUsernameHelp =>
+      'De 3 a 20 letras, números, punto o guion bajo';
+
+  @override
+  String get profEmail => 'Correo (opcional)';
+
+  @override
+  String get profEmailHelp =>
+      'Por ahora solo se guarda en tu teléfono; no se verifica.';
+
+  @override
+  String get profConsent =>
+      'Entiendo que mi usuario y mi zona de ~1 km pueden verlos mis vecinos, y que mi dirección exacta nunca sale de mi teléfono.';
+
+  @override
+  String get profSave => 'Guardar';
+
+  @override
+  String get profSaved => 'Perfil guardado';
+
+  @override
+  String get welcomeTitle => '¡Bienvenido al barrio!';
+
+  @override
+  String get welcomeStep1 => 'Paso 1 de 2 · Tu perfil';
+
+  @override
+  String get welcomeStep2 => 'Paso 2 de 2 · Dónde estás';
+
+  @override
+  String get welcomeSkip => 'Ahora no';
+
+  @override
+  String get welcomeFinish => 'Terminar';
+
+  @override
+  String get welcomeWhere =>
+      'Marca dónde estás para ver lo que hay cerca. Puedes cambiarlo cuando quieras.';
+
+  @override
+  String get welcomeMark => 'Marcar dónde estoy';
+
+  @override
+  String get welcomeDone => 'Listo, ya marcaste dónde estás.';
+
+  @override
+  String get addrTitle => 'Mis direcciones';
+
+  @override
+  String get addrSubtitle =>
+      'Las distancias se miden desde la dirección activa.';
+
+  @override
+  String get addrAdd => 'Agregar dirección';
+
+  @override
+  String get addrActive => 'Activa';
+
+  @override
+  String get addrUse => 'Usar esta';
+
+  @override
+  String get addrDelete => 'Eliminar';
+
+  @override
+  String get addrEmpty => 'Aún no marcaste dónde estás';
+
+  @override
+  String get addrEmptyHint =>
+      'Usa tu ubicación y ponle un nombre, como Casa o Trabajo.';
+
+  @override
+  String get addrNameLabel => 'Nombre (Casa, Trabajo…)';
+
+  @override
+  String get addrHome => 'Casa';
+
+  @override
+  String get addrWork => 'Trabajo';
+
+  @override
+  String get addrOther => 'Otra';
+
+  @override
+  String get addrRef => 'Referencia (opcional)';
+
+  @override
+  String get addrRefHelp => 'Por ejemplo: frente al parque, 2.º piso';
+
+  @override
+  String get addrGetLocation => 'Usar mi ubicación actual';
+
+  @override
+  String get addrRelocate => 'Volver a marcar';
+
+  @override
+  String addrGot(String zone) {
+    return 'Ubicación marcada · $zone';
+  }
+
+  @override
+  String get addrPrivacy =>
+      'La dirección exacta se queda en tu teléfono. Los vecinos solo ven tu zona de ~1 km.';
+
+  @override
+  String get addrSave => 'Guardar dirección';
+
+  @override
+  String get addrSaved => 'Dirección guardada';
+
+  @override
+  String get addrDeleted => 'Dirección eliminada';
+
+  @override
+  String addrDeleteTitle(String name) {
+    return '¿Eliminar \"$name\"?';
+  }
+
+  @override
+  String get addrDeleteBody =>
+      'Se borra de tu teléfono. Podrás volver a marcarla cuando quieras.';
+
+  @override
+  String addrHeroLine(String name, String zone) {
+    return '$name · $zone';
+  }
+
+  @override
+  String get failUsername =>
+      'El usuario debe tener de 3 a 20 letras, números, punto o guion bajo.';
+
+  @override
+  String get failEmail => 'Escribe un correo válido o déjalo vacío.';
+
+  @override
+  String get failAddressName => 'Ponle un nombre a la dirección.';
+
+  @override
+  String get failAddressNoLocation => 'Primero marca tu ubicación.';
+
+  @override
+  String get failSaveProfile => 'No se pudo guardar tu perfil.';
+
+  @override
+  String get failSaveAddress => 'No se pudo guardar la dirección.';
+
+  @override
+  String get failUpdateAddress => 'No se pudo actualizar la dirección.';
 }
