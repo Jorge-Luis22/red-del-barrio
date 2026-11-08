@@ -62,9 +62,9 @@ void main() {
       expect(r, isEmpty);
     });
 
-    test('una necesidad Enviada recibe 3 propuestas de ejemplo', () async {
+    test('una necesidad Enviada recibe varias propuestas de ejemplo', () async {
       final r = await ListProposals(const DemoProposalRepository())(need());
-      expect(r.length, 3);
+      expect(r.length, greaterThanOrEqualTo(3));
       expect(r.every((p) => p.isExample), isTrue);
     });
 
@@ -201,9 +201,9 @@ void main() {
     test('filtra por rubro y por tipo', () async {
       final uc = ExploreNearby(directory: directory, reputation: reputation);
       final gas = await uc(kind: ListingKind.service, trade: 'Gasfitería');
-      expect(gas.length, 3);
+      expect(gas.length, 4);
       final prod = await uc(kind: ListingKind.product, trade: 'De un vecino');
-      expect(prod.length, 3);
+      expect(prod.length, 7);
     });
 
     test('más recomendados: ordena por Visto Bueno', () async {

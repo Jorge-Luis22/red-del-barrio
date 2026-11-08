@@ -6,6 +6,7 @@ import '../../../app/l10n.dart';
 import '../../../app/theme/brand.dart';
 import '../../../app/ui/components.dart';
 import '../../settings/domain/app_settings.dart';
+import '../../assistant/presentation/tr.dart';
 import 'sos_labels.dart';
 
 /// "Un barrio preparado": qué podría ofrecer la persona y si es brigadista voluntaria.
@@ -55,6 +56,11 @@ class PreparednessSection extends ConsumerWidget {
                   style: context.tt.titleSmall,
                 ),
                 subtitle: Text(l.sinVerificarSoloQueda),
+                secondary: BvPill(
+                  tr(context, 'Sin verificar', 'Unverified'),
+                  icon: Icons.help_outline_rounded,
+                  tone: BvTone.sun,
+                ),
                 value: settings.volunteer,
                 onChanged: (v) => repo.update((s) => s.copyWith(volunteer: v)),
               ),

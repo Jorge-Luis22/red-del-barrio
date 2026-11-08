@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../app/l10n.dart';
@@ -7,16 +8,18 @@ import '../../../app/ui/components.dart';
 import '../domain/deal.dart';
 import 'deal_stage_cards.dart';
 import 'deal_timeline.dart';
+import 'price_review.dart';
+import '../../assistant/presentation/tr.dart';
 
 /// Panel del trato: quién es, línea de tiempo y la tarjeta de la etapa en que va.
 /// Aceptada → En curso → Falta calificar → Resuelta.
-class DealPanel extends StatelessWidget {
+class DealPanel extends ConsumerWidget {
   const DealPanel({super.key, required this.deal});
 
   final Deal deal;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final d = deal;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -51,8 +54,10 @@ class DealPanel extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 20),
-        DealTimeline(current: d.status.index),
-        const SizedBox(height: 20),
+        if (d.status != DealStatus.cancelled) ...[
+          DealTimeline(current: d.status.index),
+          const SizedBox(height: 20),
+        ],
         switch (d.status) {
           DealStatus.accepted => MeetingCodeCard(deal: d),
           DealStatus.inProgress => InProgressCard(deal: d),
@@ -65,7 +70,27 @@ class DealPanel extends StatelessWidget {
               ClientRatingCard(deal: d),
             ],
           ),
+          DealStatus.cancelled => CancelledCard(deal: d),
         },
+        if (d.status == DealStatus.inProgress) ...[
+          const SizedBox(height: 16),
+          PriceReviewSection(deal: d),
+        ],
+        if (d.status == DealStatus.accepted ||
+            d.status == DealStatus.inProgress) ...[
+          const SizedBox(height: 12),
+          Center(
+            child: TextButton.icon(
+              onPressed: () => askCancelDeal(context, ref, d),
+              style: TextButton.styleFrom(
+                foregroundColor: context.tones.emergency,
+                minimumSize: const Size(48, 48),
+              ),
+              icon: const Icon(Icons.cancel_outlined),
+              label: Text(tr(context, 'Cancelar trato', 'Cancel deal')),
+            ),
+          ),
+        ],
       ],
     );
   }

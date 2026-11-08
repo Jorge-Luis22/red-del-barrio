@@ -10,7 +10,7 @@ class AppLocalizationsEs extends AppLocalizations {
   AppLocalizationsEs([String locale = 'es']) : super(locale);
 
   @override
-  String get appName => 'Red del barrio';
+  String get appName => 'Mi Cuadra';
 
   @override
   String get inicio => 'Inicio';
@@ -1659,7 +1659,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get smsFooter =>
-      'Enviado desde Red del barrio. Si es grave, llama a emergencias.';
+      'Enviado desde Mi Cuadra. Si es grave, llama a emergencias.';
 
   @override
   String get failContactName => 'Escribe el nombre del contacto.';

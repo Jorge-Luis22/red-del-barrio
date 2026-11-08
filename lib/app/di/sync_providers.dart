@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../features/bids/domain/usecases/place_bid.dart';
 import '../../features/deals_chat/domain/usecases/send_message.dart';
 import '../../features/emergency/domain/usecases/emergency_usecases.dart';
+import '../../features/solidarity/domain/post_response.dart';
 import '../../features/solidarity/domain/usecases/publish_offer.dart';
 import '../../features/sync/domain/connectivity_monitor.dart';
 import '../../features/sync/domain/outbox_queue.dart';
@@ -42,6 +43,9 @@ final flushOutboxProvider = Provider<FlushOutbox>(
     statusUpdaters: {
       PlaceBid.opType: ref.watch(bidRepositoryProvider).updateStatus,
       PublishOffer.opType: ref.watch(offerRepositoryProvider).updateStatus,
+      SendPostResponse.opType: ref
+          .watch(postResponseRepositoryProvider)
+          .updateStatus,
       SendMessage.opType: ref.watch(chatRepositoryProvider).updateStatus,
       PublishSos.opType: ref
           .watch(emergencyRepositoryProvider)

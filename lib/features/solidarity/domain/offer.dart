@@ -29,6 +29,7 @@ class WallEntry {
     required this.text,
     required this.isRequest,
     required this.isExample,
+    this.textEn,
     this.modality,
     this.tag,
     this.distanceMeters,
@@ -38,6 +39,9 @@ class WallEntry {
   final String id;
   final String author;
   final String text;
+
+  /// Texto en inglés de los mensajes de ejemplo (los propios no lo llevan).
+  final String? textEn;
 
   /// Modalidad elegida; las entradas propias que vienen de un pedido no la tienen.
   final Modality? modality;

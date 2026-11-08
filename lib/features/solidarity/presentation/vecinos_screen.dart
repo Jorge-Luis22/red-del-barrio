@@ -15,6 +15,9 @@ import '../domain/wall_demo.dart';
 import 'modality_labels.dart';
 import 'wall_text.dart';
 import 'offer_sheet.dart';
+import 'respond_sheet.dart';
+import '../domain/post_response.dart';
+import '../../assistant/presentation/tr.dart';
 import '../../../app/l10n.dart';
 
 /// Muro de favores entre vecinos, sin dinero por defecto: se pide, se ofrece, se presta.
@@ -199,7 +202,10 @@ class _WallRow extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final myBid = ref.watch(myBidForProvider(entry.id));
-    final canOffer = entry.isRequest && entry.isExample;
+    final canOffer =
+        entry.isRequest && entry.isExample && entry.modality == Modality.rent;
+    final kind = classifyOffer(entry);
+    final myResponse = ref.watch(myResponseForProvider(entry.id));
     final m = entry.modality;
     final status = entry.syncStatus;
     final badge = status == null ? null : syncBadge(context.l, status);
@@ -306,6 +312,73 @@ class _WallRow extends ConsumerWidget {
                             ),
                             Text(
                               context.l.bidChangeProposal,
+                              style: context.tt.labelMedium?.copyWith(
+                                decoration: TextDecoration.underline,
+                                color: context.cs.onSurface,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                ],
+                if (kind != null) ...[
+                  const SizedBox(height: 8),
+                  if (myResponse == null)
+                    OutlinedButton.icon(
+                      onPressed: () => showRespondSheet(context, entry, kind),
+                      style: OutlinedButton.styleFrom(
+                        minimumSize: const Size(64, 48),
+                      ),
+                      icon: Icon(actionIcon(kind)),
+                      label: Text(actionLabel(context, kind)),
+                    )
+                  else
+                    InkWell(
+                      borderRadius: BorderRadius.circular(14),
+                      onTap: () =>
+                          showResponseStatus(context, entry, myResponse),
+                      child: Container(
+                        constraints: const BoxConstraints(minHeight: 48),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 8,
+                        ),
+                        decoration: BoxDecoration(
+                          color: context.cs.primary.withValues(alpha: 0.08),
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.check_circle_rounded,
+                                  size: 20,
+                                  color: context.cs.primary,
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  tr(
+                                    context,
+                                    'Propuesta enviada',
+                                    'Proposal sent',
+                                  ),
+                                  style: context.tt.labelLarge?.copyWith(
+                                    color: context.cs.primary,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            Text(
+                              tr(
+                                context,
+                                'Ver mi propuesta',
+                                'View my proposal',
+                              ),
                               style: context.tt.labelMedium?.copyWith(
                                 decoration: TextDecoration.underline,
                                 color: context.cs.onSurface,

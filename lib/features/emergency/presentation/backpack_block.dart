@@ -5,6 +5,7 @@ import '../../../app/di/providers.dart';
 import '../../../app/l10n.dart';
 import '../../../app/theme/brand.dart';
 import '../../../app/ui/components.dart';
+import '../../assistant/presentation/tr.dart';
 import '../domain/emergency.dart';
 
 String backpackLabel(AppLocalizations l, String id) => switch (id) {
@@ -38,7 +39,7 @@ class BackpackBlock extends ConsumerWidget {
         BvSectionTitle(l.backpackTitle, subtitle: l.backpackHint),
         const SizedBox(height: 12),
         BvPanel(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -51,46 +52,104 @@ class BackpackBlock extends ConsumerWidget {
                         value: done / backpackItems.length,
                         minHeight: 10,
                         color: context.tones.trust,
+                        backgroundColor: context.tones.trustSoft,
                       ),
                     ),
                   ),
                   const SizedBox(width: 12),
                   Text(
                     l.backpackProgress(done, backpackItems.length),
-                    style: context.tt.labelMedium,
+                    style: context.tt.labelLarge,
                   ),
                 ],
               ),
-              const SizedBox(height: 12),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: [
-                  for (final id in backpackItems)
-                    FilterChip(
-                      label: Text(backpackLabel(l, id)),
-                      selected: packed.contains(id),
-                      showCheckmark: true,
-                      onSelected: (on) => repo.update(
-                        (s) => s.copyWith(
-                          packedItems: on
-                              ? {...s.packedItems, id}
-                              : ({...s.packedItems}..remove(id)),
-                        ),
+              const SizedBox(height: 4),
+              Text(
+                done == backpackItems.length
+                    ? tr(
+                        context,
+                        'Tu mochila está completa.',
+                        'Your backpack is complete.',
+                      )
+                    : tr(
+                        context,
+                        'Faltan ${backpackItems.length - done} por guardar.',
+                        '${backpackItems.length - done} left to pack.',
                       ),
-                      labelStyle: context.tt.labelMedium?.copyWith(
-                        color: packed.contains(id)
-                            ? context.cs.onPrimary
-                            : context.cs.onSurface,
-                      ),
-                      checkmarkColor: context.cs.onPrimary,
-                    ),
-                ],
+                style: context.tt.bodySmall?.copyWith(
+                  color: context.tones.muted,
+                ),
               ),
+              const SizedBox(height: 8),
+              for (final id in backpackItems)
+                _BackpackRow(
+                  label: backpackLabel(l, id),
+                  packed: packed.contains(id),
+                  onChanged: (on) => repo.update(
+                    (s) => s.copyWith(
+                      packedItems: on
+                          ? {...s.packedItems, id}
+                          : ({...s.packedItems}..remove(id)),
+                    ),
+                  ),
+                ),
             ],
           ),
         ),
       ],
     );
   }
+}
+
+class _BackpackRow extends StatelessWidget {
+  const _BackpackRow({
+    required this.label,
+    required this.packed,
+    required this.onChanged,
+  });
+
+  final String label;
+  final bool packed;
+  final ValueChanged<bool> onChanged;
+
+  @override
+  Widget build(BuildContext context) => Semantics(
+    checked: packed,
+    child: InkWell(
+      borderRadius: BorderRadius.circular(12),
+      onTap: () => onChanged(!packed),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(minHeight: 48),
+        child: ExcludeSemantics(
+          child: Row(
+            children: [
+              Icon(
+                packed
+                    ? Icons.check_circle_rounded
+                    : Icons.radio_button_unchecked_rounded,
+                color: packed ? context.tones.trust : context.tones.muted,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  label,
+                  style: context.tt.bodyMedium?.copyWith(
+                    fontWeight: packed ? FontWeight.w700 : FontWeight.w500,
+                  ),
+                ),
+              ),
+              Text(
+                packed
+                    ? tr(context, 'Guardado', 'Packed')
+                    : tr(context, 'Pendiente', 'Pending'),
+                style: context.tt.labelSmall?.copyWith(
+                  color: packed ? context.tones.trustText : context.tones.muted,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    ),
+  );
 }

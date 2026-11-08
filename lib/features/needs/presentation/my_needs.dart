@@ -22,7 +22,7 @@ class MyNeed {
       return switch (d.status) {
         DealStatus.accepted || DealStatus.inProgress => NeedPhase.active,
         DealStatus.awaitingRating => NeedPhase.rate,
-        DealStatus.closed => NeedPhase.done,
+        DealStatus.closed || DealStatus.cancelled => NeedPhase.done,
       };
     }
     return switch (need.syncStatus) {

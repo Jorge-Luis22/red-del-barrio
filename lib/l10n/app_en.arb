@@ -1,6 +1,6 @@
 {
   "@@locale": "en",
-  "appName": "Neighborhood Network",
+  "appName": "Mi Cuadra",
   "inicio": "Home",
   "vecinos": "Neighbors",
   "mensajes": "Messages",
@@ -868,7 +868,7 @@
       }
     }
   },
-  "smsFooter": "Sent from Neighborhood Network. If it is serious, call emergency services.",
+  "smsFooter": "Sent from Mi Cuadra. If it is serious, call emergency services.",
   "failContactName": "Write the contact’s name.",
   "failContactPhone": "Enter a valid phone number (numbers only).",
   "failContactDup": "You already have that contact.",

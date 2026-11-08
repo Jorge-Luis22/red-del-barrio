@@ -101,7 +101,7 @@ abstract class AppLocalizations {
   /// No description provided for @appName.
   ///
   /// In es, this message translates to:
-  /// **'Red del barrio'**
+  /// **'Mi Cuadra'**
   String get appName;
 
   /// No description provided for @inicio.
@@ -2987,7 +2987,7 @@ abstract class AppLocalizations {
   /// No description provided for @smsFooter.
   ///
   /// In es, this message translates to:
-  /// **'Enviado desde Red del barrio. Si es grave, llama a emergencias.'**
+  /// **'Enviado desde Mi Cuadra. Si es grave, llama a emergencias.'**
   String get smsFooter;
 
   /// No description provided for @failContactName.

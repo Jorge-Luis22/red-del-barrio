@@ -6,6 +6,7 @@ import '../../../app/l10n.dart';
 import '../../../app/theme/brand.dart';
 import '../../../app/ui/components.dart';
 import '../../../app/ui/sheet.dart';
+import '../../assistant/presentation/tr.dart';
 
 /// Punto de encuentro de la familia. Se guarda en el teléfono y se ve sin internet.
 class MeetingPointBlock extends ConsumerWidget {
@@ -52,6 +53,30 @@ class MeetingPointBlock extends ConsumerWidget {
               ),
             ),
           ),
+        ),
+        const SizedBox(height: 6),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(
+              Icons.lock_outline_rounded,
+              size: 16,
+              color: context.tones.muted,
+            ),
+            const SizedBox(width: 6),
+            Expanded(
+              child: Text(
+                tr(
+                  context,
+                  'Solo se guarda en tu teléfono; no se comparte con nadie.',
+                  'Saved only on your phone; it is not shared with anyone.',
+                ),
+                style: context.tt.bodySmall?.copyWith(
+                  color: context.tones.muted,
+                ),
+              ),
+            ),
+          ],
         ),
       ],
     );

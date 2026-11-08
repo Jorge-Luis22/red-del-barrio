@@ -341,4 +341,5 @@ String dealStatusLabel(AppLocalizations l, DealStatus s) => switch (s) {
   DealStatus.inProgress => l.enCurso,
   DealStatus.awaitingRating => l.faltaCalificar,
   DealStatus.closed => l.resuelta,
+  DealStatus.cancelled => l.localeName == 'en' ? 'Cancelled' : 'Cancelado',
 };
