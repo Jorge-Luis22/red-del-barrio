@@ -2,10 +2,13 @@ import { useState, type FormEvent } from 'react';
 import {
   activeEmergency,
   closeEmergency,
+  confirmSecurity,
   countResourceNeeds,
   countUrgentForMe,
   createEmergency,
   defaultPoint,
+  disputeSecurity,
+  disputesOf,
   helpersOf,
   listEmergencyWall,
   markInstitutionCalled,
@@ -52,6 +55,7 @@ export default function Emergencia() {
   const active = activeEmergency(me.id);
   const wall = listEmergencyWall(me.id, defaultPoint());
   const myHelpers = active ? helpersOf(active.id) : [];
+  const myDisputes = active && active.kind === 'seguridad' ? disputesOf(active.id) : 0;
   const forMe = countUrgentForMe(me.id);
   const resourceNeeds = countResourceNeeds(me.id);
 
@@ -141,7 +145,7 @@ export default function Emergencia() {
       {active && (
         <section className="card" key={`${active.id}-${version}`} style={{ borderLeft: '4px solid var(--danger)' }}>
           <div className="title-row" style={{ display: 'flex', justifyContent: 'space-between', gap: 8 }}>
-            <h3>Tu alerta activa</h3>
+            <h3>{active.kind === 'seguridad' ? 'Tu aviso activo' : 'Tu alerta activa'}</h3>
             <span className="badge danger">{EMERGENCY_LABEL[active.kind]}</span>
           </div>
           <p>{stripProxy(active.description)}</p>
@@ -154,7 +158,25 @@ export default function Emergencia() {
               {active.institutionCalled ? '✓ Institución avisada' : 'Institución aún no avisada'}
             </span>
           </div>
-          {active.kind !== 'violencia' && (
+          {active.kind === 'seguridad' && (
+            <div style={{ marginTop: 10 }} aria-live="polite">
+              <strong style={{ fontSize: '0.85rem' }}>
+                {myHelpers.length === 0
+                  ? 'Todavía nadie lo confirma: se muestra como "sin confirmar".'
+                  : `${myHelpers.length} ${myHelpers.length === 1 ? 'vecino lo confirma' : 'vecinos lo confirman'}`}
+              </strong>
+              {myDisputes > 0 && (
+                <p style={{ margin: '2px 0' }}>
+                  🚩 {myDisputes} {myDisputes === 1 ? 'vecino lo marcó' : 'vecinos lo marcaron'} como "no es real o ya
+                  pasó". Si ya pasó, ciérralo.
+                </p>
+              )}
+              <p style={{ fontSize: '0.75rem' }}>
+                Tus vecinos ven solo la zona aproximada (~1 km). El aviso se oculta solo a las 12 horas.
+              </p>
+            </div>
+          )}
+          {active.kind !== 'violencia' && active.kind !== 'seguridad' && (
             <div style={{ marginTop: 10 }} aria-live="polite">
               <strong style={{ fontSize: '0.85rem' }}>
                 {myHelpers.length === 0
@@ -193,7 +215,7 @@ export default function Emergencia() {
                 bump();
               }}
             >
-              Cerrar alerta (atendida)
+              {active.kind === 'seguridad' ? 'Cerrar aviso (ya pasó)' : 'Cerrar alerta (atendida)'}
             </button>
           </div>
         </section>
@@ -207,7 +229,7 @@ export default function Emergencia() {
 
       {!active && showForm && (
         <form className="panel" onSubmit={create}>
-          <h3 style={{ marginTop: 0 }}>Nueva alerta</h3>
+          <h3 style={{ marginTop: 0 }}>Nueva alerta o aviso</h3>
           <label htmlFor="kind">Tipo</label>
           <select id="kind" value={kind} onChange={(e) => setKind(e.target.value as EmergencyKind)}>
             {Object.entries(EMERGENCY_LABEL).map(([value, label]) => (
@@ -222,7 +244,11 @@ export default function Emergencia() {
             rows={3}
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            placeholder="Qué pasa, dónde, qué se necesita…"
+            placeholder={
+              kind === 'seguridad'
+                ? 'Qué pasó y en qué cuadra o zona. Ej.: robaron un celular en la cuadra 3 de la avenida, hace 10 minutos.'
+                : 'Qué pasa, dónde, qué se necesita…'
+            }
             maxLength={300}
           />
           <label htmlFor="zone">Zona</label>
@@ -247,6 +273,18 @@ export default function Emergencia() {
               Caso sensible: se comparte solo con personas de confianza, no en el muro.
             </p>
           )}
+          {kind === 'seguridad' && (
+            <div className="card" style={{ marginTop: 8, borderLeft: '4px solid var(--accent)' }}>
+              <p style={{ color: 'var(--text)' }}>
+                <strong>Para avisar a todos los vecinos</strong> de un robo, una zona peligrosa o algo sospechoso.
+                Cuenta lo que pasó y dónde, <strong>sin nombres ni acusaciones</strong>: describe hechos, no personas.
+              </p>
+              <p>
+                Se verá como <strong>"sin confirmar"</strong> hasta que otros vecinos digan que también lo vieron, y se
+                oculta solo a las 12 horas. <a href="tel:105">Si el peligro es ahora, llama primero al 105 (PNP).</a>
+              </p>
+            </div>
+          )}
           <div className="row" style={{ display: 'flex', gap: 8, marginTop: 12 }}>
             <button type="button" className="btn ghost" onClick={() => setShowForm(false)}>
               Cancelar
@@ -259,20 +297,23 @@ export default function Emergencia() {
       )}
 
       <section aria-label="Alertas de tus vecinos" style={{ marginTop: 18 }}>
-        <h2 style={{ fontSize: '1.05rem', margin: '0 0 8px' }}>Alertas de tus vecinos · ayuda solidaria</h2>
+        <h2 style={{ fontSize: '1.05rem', margin: '0 0 8px' }}>Alertas de tus vecinos · ayuda y avisos</h2>
         {wall.length === 0 && (
           <div className="empty">
-            No hay alertas activas cerca. Si alguien pide ayuda, aparecerá aquí.
+            No hay alertas activas cerca. Si alguien pide ayuda o avisa de un peligro, aparecerá aquí.
           </div>
         )}
         {wall.map((alert) => (
           <article
             key={`${alert.id}-${version}`}
             className="card"
-            style={{ borderLeft: '4px solid var(--danger)' }}
+            style={{ borderLeft: `4px solid ${alert.kind === 'seguridad' ? 'var(--accent)' : 'var(--danger)'}` }}
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8 }}>
-              <h3>{EMERGENCY_LABEL[alert.kind]}</h3>
+              <h3>
+                {alert.kind === 'seguridad' ? '⚠️ ' : ''}
+                {EMERGENCY_LABEL[alert.kind]}
+              </h3>
               <span className="badge danger">{ago(alert.createdAt)}</span>
             </div>
             <p style={{ color: 'var(--text)' }}>{stripProxy(alert.description)}</p>
@@ -285,12 +326,93 @@ export default function Emergencia() {
               <span className="badge warn">
                 {alert.institutionCalled ? '✓ Institución avisada' : 'Institución aún no avisada'}
               </span>
-              {alert.helpers.length > 0 && (
+              {alert.kind !== 'seguridad' && alert.helpers.length > 0 && (
                 <span className="badge">
                   🙋 {alert.helpers.length} {alert.helpers.length === 1 ? 'vecino ayuda' : 'vecinos ayudan'}
                 </span>
               )}
+              {alert.kind === 'seguridad' &&
+                (alert.helpers.length === 0 ? (
+                  <span className="badge warn">⚠ Sin confirmar · tómalo con cuidado</span>
+                ) : (
+                  <span className="badge ok">
+                    ✅ {alert.helpers.length} {alert.helpers.length === 1 ? 'vecino lo confirma' : 'vecinos lo confirman'}
+                  </span>
+                ))}
+              {alert.kind === 'seguridad' && alert.disputes > 0 && (
+                <span className="badge danger">
+                  🚩 {alert.disputes} {alert.disputes === 1 ? 'dice' : 'dicen'} que no es real o ya pasó
+                </span>
+              )}
             </div>
+            {alert.kind === 'seguridad' ? (
+              <>
+                <div className="row" style={{ display: 'flex', gap: 8, marginTop: 10, flexWrap: 'wrap' }}>
+                  {alert.iOffered && (
+                    <>
+                      <span className="badge ok" style={{ alignSelf: 'center' }}>
+                        ✓ Lo confirmaste
+                      </span>
+                      <button
+                        type="button"
+                        className="btn small ghost"
+                        onClick={async () => {
+                          await withdrawHelp(alert.id, me.id);
+                          bump();
+                        }}
+                      >
+                        Quitar
+                      </button>
+                    </>
+                  )}
+                  {alert.iDisputed && (
+                    <>
+                      <span className="badge danger" style={{ alignSelf: 'center' }}>
+                        🚩 Lo marcaste como no válido
+                      </span>
+                      <button
+                        type="button"
+                        className="btn small ghost"
+                        onClick={async () => {
+                          await withdrawHelp(alert.id, me.id);
+                          bump();
+                        }}
+                      >
+                        Quitar
+                      </button>
+                    </>
+                  )}
+                  {!alert.iOffered && !alert.iDisputed && (
+                    <>
+                      <button
+                        type="button"
+                        className="btn small"
+                        onClick={async () => {
+                          await confirmSecurity(alert.id, me.id);
+                          bump();
+                        }}
+                      >
+                        👁 Yo también lo vi
+                      </button>
+                      <button
+                        type="button"
+                        className="btn small ghost"
+                        onClick={async () => {
+                          await disputeSecurity(alert.id, me.id);
+                          bump();
+                        }}
+                      >
+                        🚩 No es real o ya pasó
+                      </button>
+                    </>
+                  )}
+                </div>
+                <p style={{ fontSize: '0.75rem' }}>
+                  Es un aviso de vecinos, no una verificación oficial. No te acerques al lugar. Si hay peligro ahora,{' '}
+                  <a href="tel:105">llama al 105 (PNP)</a>. Solo ves la zona aproximada.
+                </p>
+              </>
+            ) : (
             <div className="row" style={{ display: 'flex', gap: 8, marginTop: 10 }}>
               {alert.iOffered ? (
                 <>
@@ -321,10 +443,13 @@ export default function Emergencia() {
                 </button>
               )}
             </div>
-            <p style={{ fontSize: '0.75rem' }}>
-              La institución oficial va primero: si no hay nadie en camino, llama arriba antes de ir. Solo ves la
-              zona aproximada.
-            </p>
+            )}
+            {alert.kind !== 'seguridad' && (
+              <p style={{ fontSize: '0.75rem' }}>
+                La institución oficial va primero: si no hay nadie en camino, llama arriba antes de ir. Solo ves la
+                zona aproximada.
+              </p>
+            )}
           </article>
         ))}
       </section>

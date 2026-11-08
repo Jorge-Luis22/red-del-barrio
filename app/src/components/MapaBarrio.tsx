@@ -75,7 +75,7 @@ export default function MapaBarrio({ onShowAlerts }: { onShowAlerts: () => void 
       {
         id: `a-${a.id}`,
         layer: 'alerta',
-        icon: '🚨',
+        icon: a.kind === 'seguridad' ? '⚠️' : '🚨',
         title: EMERGENCY_LABEL[a.kind],
         sub: `${stripProxy(a.description)} · ${a.authorName} · ${ago(a.createdAt)}`,
         halo: true,

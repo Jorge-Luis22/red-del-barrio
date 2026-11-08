@@ -10,21 +10,39 @@ type Mode = 'todo' | 'sin_dinero';
 /** Recuerda la vista al volver de ver una publicación. */
 let lastMode: Mode = 'todo';
 
+/** Borrador que deja otra pantalla (Vecinos → "Pedir este servicio") para abrir el formulario ya llenado. */
+interface Draft {
+  type: NeedType;
+  title: string;
+  category: string;
+  description: string;
+}
+let pendingDraft: Draft | null = null;
+export function startNeedDraft(draft: Draft): void {
+  pendingDraft = draft;
+  lastMode = 'todo';
+}
+
 export default function Inicio() {
   const { me, version, bump, setTab } = useApp();
   const [q, setQ] = useState('');
   const [type, setType] = useState<NeedType | 'todos'>('todos');
-  const [showForm, setShowForm] = useState(false);
+  const [draft] = useState<Draft | null>(() => {
+    const taken = pendingDraft;
+    pendingDraft = null;
+    return taken;
+  });
+  const [showForm, setShowForm] = useState(draft !== null);
   const [mode, setModeState] = useState<Mode>(lastMode);
   const setMode = (next: Mode) => {
     lastMode = next;
     setModeState(next);
   };
 
-  const [formType, setFormType] = useState<NeedType>('servicio');
-  const [title, setTitle] = useState('');
-  const [category, setCategory] = useState('');
-  const [description, setDescription] = useState('');
+  const [formType, setFormType] = useState<NeedType>(draft?.type ?? 'servicio');
+  const [title, setTitle] = useState(draft?.title ?? '');
+  const [category, setCategory] = useState(draft?.category ?? '');
+  const [description, setDescription] = useState(draft?.description ?? '');
   const [zone, setZone] = useState('');
 
   if (!me) return null;
@@ -83,7 +101,7 @@ export default function Inicio() {
           role="alert"
         >
           <span>
-            🚨 <strong>{EMERGENCY_LABEL[alerts[0].kind]}</strong> cerca · {alerts[0].zone || 'tu barrio'}
+            {alerts[0].kind === 'seguridad' ? '⚠️' : '🚨'} <strong>{EMERGENCY_LABEL[alerts[0].kind]}</strong> cerca · {alerts[0].zone || 'tu barrio'}
             {alerts.length > 1 && ` (+${alerts.length - 1} más)`}
           </span>
           <span aria-hidden="true">Ver ›</span>

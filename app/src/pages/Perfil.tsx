@@ -1,7 +1,9 @@
 import { useEffect, useState, type FormEvent } from 'react';
-import { dbBytes, getStats, listUsers, resetAll, saveProfile } from '../db/repo';
+import { dbBytes, getStats, levelOf, listUsers, resetAll, saveProfile } from '../db/repo';
 import MisServicios from '../components/MisServicios';
+import { POINTS_PER_HELP, POINTS_PER_RECOMMENDATION } from '../lib/level';
 import { chat } from '../lib/matrix';
+import { loadA11y, openTutorial, setA11y } from '../lib/prefs';
 import { getSyncStatus, onSyncStatus, syncConfigured, syncNow } from '../lib/sync';
 import { useApp } from '../state/app';
 
@@ -13,12 +15,14 @@ export default function Perfil() {
   const [zone, setZone] = useState('');
   const [saved, setSaved] = useState(false);
   const [sync, setSync] = useState(getSyncStatus());
+  const [a11y, setA11yState] = useState(loadA11y());
 
   useEffect(() => onSyncStatus(() => setSync({ ...getSyncStatus() })), []);
 
   if (!me) return null;
 
   const stats = getStats(me.id);
+  const level = levelOf(me.id);
   const users = listUsers();
   const currentName = name !== '' || saved ? name : me.name;
   const currentZone = zone !== '' || saved ? zone : me.zone;
@@ -68,6 +72,21 @@ export default function Perfil() {
       </section>
 
       <section className="card">
+        <h3>Mi nivel: {level.name}</h3>
+        <p>
+          {level.points} {level.points === 1 ? 'punto' : 'puntos'}
+          {level.next
+            ? ` · te ${level.missing === 1 ? 'falta' : 'faltan'} ${level.missing} para ser ${level.next}.`
+            : ' · ya estás en el nivel más alto.'}
+        </p>
+        <p style={{ fontSize: '0.78rem' }}>
+          Cada ayuda completada suma {POINTS_PER_HELP} puntos (las dos partes la confirman) y cada recomendación de un
+          vecino suma {POINTS_PER_RECOMMENDATION}.
+          {level.capped && ' Tus calificaciones recientes están bajas: mejóralas para seguir subiendo.'}
+        </p>
+      </section>
+
+      <section className="card">
         <h3>Servidor</h3>
         <p>
           {!syncConfigured && 'Sin servidor: la app funciona solo en este teléfono.'}
@@ -88,6 +107,32 @@ export default function Perfil() {
       </section>
 
       <MisServicios />
+
+      <section className="card">
+        <h3>Accesibilidad y ayuda</h3>
+        <label style={{ display: 'flex', gap: 8, alignItems: 'center', margin: '8px 0' }}>
+          <input
+            type="checkbox"
+            style={{ width: 'auto', margin: 0 }}
+            checked={a11y.large}
+            onChange={(e) => setA11yState(setA11y({ large: e.target.checked }))}
+          />
+          Texto grande
+        </label>
+        <label style={{ display: 'flex', gap: 8, alignItems: 'center', margin: '8px 0' }}>
+          <input
+            type="checkbox"
+            style={{ width: 'auto', margin: 0 }}
+            checked={a11y.contrast}
+            onChange={(e) => setA11yState(setA11y({ contrast: e.target.checked }))}
+          />
+          Alto contraste
+        </label>
+        <p style={{ fontSize: '0.78rem' }}>Se guardan en este teléfono y se aplican de inmediato.</p>
+        <button type="button" className="btn small" onClick={openTutorial}>
+          Ver tutorial
+        </button>
+      </section>
 
       <section className="card">
         <h3>Mi ubicación</h3>

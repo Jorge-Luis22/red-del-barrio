@@ -29,6 +29,67 @@ function injectScript(src: string): Promise<void> {
   });
 }
 
+/** Sentencia CREATE TABLE de `schema.sql` para una tabla, con otro nombre (fuente única de la definición). */
+function ddlFor(table: string, as: string): string {
+  const found = schemaSql.match(new RegExp(`CREATE TABLE IF NOT EXISTS ${table} \\([\\s\\S]*?\\n\\);`));
+  if (!found) throw new Error(`No se encontró la definición de ${table} en schema.sql`);
+  return found[0].replace(`IF NOT EXISTS ${table}`, as);
+}
+
+const tableSql = (database: Database, table: string): string =>
+  String(
+    database.exec(`SELECT sql FROM sqlite_master WHERE type = 'table' AND name = '${table}'`)[0]?.values[0]?.[0] ?? '',
+  );
+
+/**
+ * Migraciones de bases que ya existían en el teléfono. `CREATE TABLE IF NOT EXISTS` no cambia los CHECK de
+ * una tabla vieja, así que, si falta algún valor nuevo, se reconstruye la tabla (receta oficial de SQLite:
+ * crear la nueva, copiar, borrar la vieja, renombrar). Conserva todos los datos.
+ *  - emergency_alerts.kind admite 'seguridad' (aviso de seguridad).
+ *  - emergency_responses.status admite 'disputa' ("no es real o ya pasó").
+ */
+function migrate(database: Database): void {
+  const alertsOld = !tableSql(database, 'emergency_alerts').includes("'seguridad'");
+  const responsesOld = !tableSql(database, 'emergency_responses').includes("'disputa'");
+  if (!alertsOld && !responsesOld) return;
+
+  database.exec('PRAGMA foreign_keys = OFF'); // no puede cambiarse dentro de una transacción
+  try {
+    database.exec('BEGIN');
+    if (alertsOld) {
+      database.exec(
+        `${ddlFor('emergency_alerts', 'emergency_alerts_new')}
+         INSERT INTO emergency_alerts_new
+           (id, author_id, kind, description, zone, lat_public, lng_public, lat_exact, lng_exact, status, institution_called, created_at)
+         SELECT id, author_id, kind, description, zone, lat_public, lng_public, lat_exact, lng_exact, status, institution_called, created_at
+           FROM emergency_alerts;
+         DROP TABLE emergency_alerts;
+         ALTER TABLE emergency_alerts_new RENAME TO emergency_alerts;`,
+      );
+    }
+    if (responsesOld) {
+      database.exec(
+        `${ddlFor('emergency_responses', 'emergency_responses_new')}
+         INSERT INTO emergency_responses_new (id, alert_id, helper_id, status, created_at, updated_at)
+         SELECT id, alert_id, helper_id, status, created_at, updated_at FROM emergency_responses;
+         DROP TABLE emergency_responses;
+         ALTER TABLE emergency_responses_new RENAME TO emergency_responses;
+         CREATE INDEX IF NOT EXISTS idx_emergency_resp_alert ON emergency_responses (alert_id, status);`,
+      );
+    }
+    database.exec('COMMIT');
+  } catch (error) {
+    try {
+      database.exec('ROLLBACK');
+    } catch {
+      /* ya no había transacción */
+    }
+    console.error('[db] migración fallida; se sigue con la base anterior', error);
+  } finally {
+    database.exec('PRAGMA foreign_keys = ON');
+  }
+}
+
 let opening: Promise<Database> | null = null;
 
 /** Abre (o crea) la base local. Idempotente: se llama una vez al arrancar. */
@@ -59,6 +120,7 @@ async function openInternal(): Promise<Database> {
   const saved = await get<Uint8Array>(DB_KEY);
   db = saved && saved.byteLength > 0 ? new engine.Database(saved) : new engine.Database();
   db.exec(schemaSql);
+  migrate(db);
 
   const result = db.exec('SELECT COUNT(*) FROM users');
   const empty = !result.length || Number(result[0].values[0]?.[0] ?? 0) === 0;

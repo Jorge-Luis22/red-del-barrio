@@ -2,6 +2,10 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import App from './App';
 import './index.css';
+import { applyA11y } from './lib/prefs';
+
+// Texto grande / alto contraste: se aplica antes de pintar para que no parpadee.
+applyA11y();
 
 const root = document.getElementById('root');
 if (!root) throw new Error('Falta <div id="root"> en index.html');

@@ -4,7 +4,7 @@ export type NeedType = 'servicio' | 'producto' | 'prestamo' | 'ayuda';
 export type NeedStatus = 'abierta' | 'en_curso' | 'cerrada' | 'cancelada';
 export type ProposalStatus = 'enviada' | 'aceptada' | 'rechazada' | 'retirada';
 export type MessageStatus = 'pendiente' | 'enviado' | 'fallido';
-export type EmergencyKind = 'sismo' | 'incendio' | 'medico' | 'persona_mayor' | 'violencia';
+export type EmergencyKind = 'sismo' | 'incendio' | 'medico' | 'persona_mayor' | 'seguridad' | 'violencia';
 export type Tab = 'inicio' | 'vecinos' | 'mensajes' | 'emergencia' | 'perfil';
 
 export interface User {
@@ -108,8 +108,13 @@ export interface EmergencyWallItem extends Emergency {
   authorName: string;
   authorColor: string;
   distanceKm: number | null;
+  /** En alertas normales: quienes dijeron "puedo ayudar". En avisos de seguridad: quienes lo confirman. */
   helpers: { id: string; name: string; zone: string }[];
+  /** Verdadero si yo dije "puedo ayudar" (o, en un aviso de seguridad, "yo también lo vi"). */
   iOffered: boolean;
+  /** Solo avisos de seguridad: vecinos que lo marcaron como "no es real o ya pasó". */
+  disputes: number;
+  iDisputed: boolean;
 }
 
 /** Oficios que un vecino puede ofrecer. "Otros" cubre lo que no esté en la lista. */
@@ -121,6 +126,13 @@ export const TRADES = [
   'Enfermería',
   'Transporte',
   'Agua y gas',
+  'Paseo de mascotas',
+  'Clases y refuerzo escolar',
+  'Cuidado de niños y adultos mayores',
+  'Costura y arreglos',
+  'Limpieza y jardinería',
+  'Reparación de electrodomésticos',
+  'Cocina y repostería',
   'Otros',
 ] as const;
 
@@ -132,6 +144,11 @@ export interface ServiceOffer {
   urgent: boolean;
   availableNow: boolean;
   schedule: string;
+}
+
+/** Vecino del directorio: sus datos de confianza más todo lo que ofrece (urgente o no). */
+export interface DirectoryEntry extends Provider {
+  offers: ServiceOffer[];
 }
 
 /** Servicio de urgencia de otro vecino (con costo: el precio se propone al pedirlo). */
@@ -181,5 +198,6 @@ export const EMERGENCY_LABEL: Record<EmergencyKind, string> = {
   incendio: 'Incendio',
   medico: 'Emergencia médica',
   persona_mayor: 'Persona mayor en riesgo',
+  seguridad: 'Aviso de seguridad',
   violencia: 'Violencia (privado)',
 };

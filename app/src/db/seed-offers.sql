@@ -26,3 +26,19 @@ INSERT OR IGNORE INTO service_offers (id, provider_id, trade, description, urgen
 SELECT 'o_ana_cerr', 'u_ana', 'Cerrajería', 'Apertura de puertas, cambio de chapas y copias de llaves.', 1, 1, '24 horas', 1,
        '2026-10-25T12:00:00.000Z', '2026-10-25T12:00:00.000Z'
  WHERE EXISTS (SELECT 1 FROM users WHERE id = 'u_ana');
+
+-- Oficios del día a día (no urgentes): alimentan el directorio de Vecinos.
+INSERT OR IGNORE INTO service_offers (id, provider_id, trade, description, urgent, available_now, schedule, active, created_at, updated_at)
+SELECT 'o_ana_costura', 'u_ana', 'Costura y arreglos', 'Bastas, cierres, ajustes y arreglos de ropa. Entrego en 2 días.', 0, 0, 'Lun a sáb, 9 a. m. – 6 p. m.', 1,
+       '2026-10-26T12:00:00.000Z', '2026-10-26T12:00:00.000Z'
+ WHERE EXISTS (SELECT 1 FROM users WHERE id = 'u_ana');
+
+INSERT OR IGNORE INTO service_offers (id, provider_id, trade, description, urgent, available_now, schedule, active, created_at, updated_at)
+SELECT 'o_julio_mascotas', 'u_julio', 'Paseo de mascotas', 'Paseo diario de perros en el parque, de uno o dos a la vez.', 0, 1, '6–8 a. m. y 5–7 p. m.', 1,
+       '2026-10-26T12:00:00.000Z', '2026-10-26T12:00:00.000Z'
+ WHERE EXISTS (SELECT 1 FROM users WHERE id = 'u_julio');
+
+INSERT OR IGNORE INTO service_offers (id, provider_id, trade, description, urgent, available_now, schedule, active, created_at, updated_at)
+SELECT 'o_rosa_clases', 'u_rosa', 'Clases y refuerzo escolar', 'Refuerzo de matemática y comunicación, primaria y secundaria.', 0, 0, 'Tardes, previa cita', 1,
+       '2026-10-26T12:00:00.000Z', '2026-10-26T12:00:00.000Z'
+ WHERE EXISTS (SELECT 1 FROM users WHERE id = 'u_rosa');

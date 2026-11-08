@@ -3,6 +3,7 @@ import { distanceKm, getCurrentPoint, jitter, roundZone, type Point } from '../l
 import { hashMeetCode, meetCode as makeMeetCode, txnId, uid } from '../lib/ids';
 import { chat } from '../lib/matrix';
 import { enqueue, pendingOutbox } from '../lib/outbox';
+import { computeLevel, type LevelInfo } from '../lib/level';
 import { markDirty } from '../lib/sync';
 import {
   PROXY_PREFIX,
@@ -15,6 +16,7 @@ import {
 } from '../lib/solidarity';
 import type {
   Conversation,
+  DirectoryEntry,
   Emergency,
   EmergencyKind,
   EmergencyWallItem,
@@ -132,7 +134,7 @@ const toUser = (row: UserRow): User => ({
   zone: row.zone,
   lat: row.lat,
   lng: row.lng,
-  level: row.solid_level,
+  level: levelOf(row.id).name,
   color: row.avatar_color,
 });
 
@@ -621,7 +623,7 @@ export function listProviders(viewerId: string, viewer: Point): Provider[] {
     name: row.display_name,
     zone: row.zone,
     color: row.avatar_color,
-    level: row.solid_level,
+    level: levelOf(row.id).name,
     category: row.category,
     latest: row.latest,
     recommendations: Number(row.recs ?? 0),
@@ -631,6 +633,21 @@ export function listProviders(viewerId: string, viewer: Point): Provider[] {
         ? distanceKm(viewer, { lat: row.lat, lng: row.lng })
         : null,
   }));
+}
+
+/** Directorio: todos los vecinos (menos tú) con los oficios que ofrecen, estén o no marcados como urgentes. */
+export function listDirectory(viewerId: string, viewer: Point): DirectoryEntry[] {
+  const offers = all<OfferRow>(`SELECT * FROM service_offers WHERE active = 1 ORDER BY created_at, id`).map(toOffer);
+  const byProvider = new Map<string, ServiceOffer[]>();
+  for (const offer of offers) byProvider.set(offer.providerId, [...(byProvider.get(offer.providerId) ?? []), offer]);
+  return listProviders(viewerId, viewer)
+    .map((p) => ({ ...p, offers: byProvider.get(p.id) ?? [] }))
+    .sort(
+      (a, b) =>
+        b.recommendations - a.recommendations ||
+        Number(b.offers.some((o) => o.availableNow)) - Number(a.offers.some((o) => o.availableNow)) ||
+        (a.distanceKm ?? 99) - (b.distanceKm ?? 99),
+    );
 }
 
 /** Un voto por vecino y por proveedor. Devuelve true si quedó recomendado. */
@@ -743,6 +760,12 @@ interface WallRow extends EmergencyRow {
   author_color: string;
 }
 
+/**
+ * Un aviso de seguridad que varios vecinos marcan como "no es real o ya pasó" se oculta del muro de los demás:
+ * así un rumor o una acusación falsa no se queda circulando. Con 2 o más marcas y más marcas que confirmaciones.
+ */
+const SECURITY_HIDE_DISPUTES = 2;
+
 /** Alertas activas de OTROS vecinos (las de violencia nunca llegan aquí: son privadas). */
 export function listEmergencyWall(viewerId: string, viewer: Point): EmergencyWallItem[] {
   const since = new Date(Date.now() - WALL_WINDOW_HOURS * 3_600_000).toISOString();
@@ -753,24 +776,35 @@ export function listEmergencyWall(viewerId: string, viewer: Point): EmergencyWal
       ORDER BY e.created_at DESC`,
     [viewerId, since],
   );
-  return rows.map((row) => {
+  const items: EmergencyWallItem[] = [];
+  for (const row of rows) {
     const helpers = all<{ id: string; name: string; zone: string }>(
       `SELECT r.helper_id AS id, u.display_name AS name, u.zone AS zone
          FROM emergency_responses r JOIN users u ON u.id = r.helper_id
         WHERE r.alert_id = ? AND r.status = 'ofrece' ORDER BY r.updated_at`,
       [row.id],
     );
+    const disputers = all<{ id: string }>(
+      `SELECT helper_id AS id FROM emergency_responses WHERE alert_id = ? AND status = 'disputa'`,
+      [row.id],
+    );
+    if (row.kind === 'seguridad' && disputers.length >= SECURITY_HIDE_DISPUTES && disputers.length > helpers.length) {
+      continue;
+    }
     const point =
       row.lat_public !== null && row.lng_public !== null ? { lat: row.lat_public, lng: row.lng_public } : null;
-    return {
+    items.push({
       ...toEmergency(row),
       authorName: row.author_name,
       authorColor: row.author_color,
       distanceKm: point ? distanceKm(viewer, point) : null,
       helpers,
       iOffered: helpers.some((h) => h.id === viewerId),
-    };
-  });
+      disputes: disputers.length,
+      iDisputed: disputers.some((d) => d.id === viewerId),
+    });
+  }
+  return items;
 }
 
 export function countWallAlerts(viewerId: string): number {
@@ -787,7 +821,7 @@ export function helpersOf(alertId: string): { id: string; name: string; zone: st
   );
 }
 
-async function setHelp(alertId: string, helperId: string, status: 'ofrece' | 'retirado'): Promise<void> {
+async function setHelp(alertId: string, helperId: string, status: 'ofrece' | 'retirado' | 'disputa'): Promise<void> {
   const id = `er_${alertId}_${helperId}`;
   const ts = now();
   run(
@@ -802,6 +836,14 @@ async function setHelp(alertId: string, helperId: string, status: 'ofrece' | 're
 
 export const offerHelp = (alertId: string, helperId: string) => setHelp(alertId, helperId, 'ofrece');
 export const withdrawHelp = (alertId: string, helperId: string) => setHelp(alertId, helperId, 'retirado');
+/** Aviso de seguridad: "yo también lo vi" (reutiliza la respuesta 'ofrece') y "no es real o ya pasó". */
+export const confirmSecurity = offerHelp;
+export const disputeSecurity = (alertId: string, helperId: string) => setHelp(alertId, helperId, 'disputa');
+
+/** Cuántos vecinos marcaron como "no es real o ya pasó" el aviso de seguridad del propio usuario. */
+export function disputesOf(alertId: string): number {
+  return count(`SELECT COUNT(*) AS n FROM emergency_responses WHERE alert_id = ? AND status = 'disputa'`, [alertId]);
+}
 
 /* ---- Servicios de urgencia (con costo) ------------------------------ */
 
@@ -899,7 +941,7 @@ export function listUrgentServices(viewerId: string, viewer: Point, trade?: stri
       ...toOffer(row),
       providerName: row.name,
       providerColor: row.color,
-      level: row.level,
+      level: levelOf(row.provider_id).name,
       recommendations: Number(row.recs ?? 0),
       distanceKm:
         row.lat !== null && row.lng !== null ? distanceKm(viewer, { lat: row.lat, lng: row.lng }) : null,
@@ -1040,6 +1082,25 @@ export function emergencySignal(userId: string): number {
 /* ------------------------------------------------------------------ */
 /* Perfil                                                              */
 /* ------------------------------------------------------------------ */
+
+/** Nivel calculado con lo que ya está en la base (ayudas completadas, recomendaciones, calificaciones). */
+export function levelOf(userId: string): LevelInfo {
+  const helps = count(
+    `SELECT COUNT(*) AS n FROM interactions WHERE status = 'completado' AND (requester_id = ? OR provider_id = ?)`,
+    [userId, userId],
+  );
+  const recs = count(`SELECT COUNT(*) AS n FROM recommendations WHERE provider_id = ?`, [userId]);
+  const rated = one<{ avg: number | null; n: number }>(
+    `SELECT AVG(stars) AS avg, COUNT(*) AS n FROM ratings WHERE to_user = ?`,
+    [userId],
+  );
+  return computeLevel(
+    helps,
+    recs,
+    rated?.avg === null || rated?.avg === undefined ? null : Number(rated.avg),
+    Number(rated?.n ?? 0),
+  );
+}
 
 export function getStats(userId: string): Stats {
   const helps = count(

@@ -1,5 +1,6 @@
 import { AppProvider, useApp } from './state/app';
 import TabBar from './components/TabBar';
+import Tutorial from './components/Tutorial';
 import Inicio from './pages/Inicio';
 import Vecinos from './pages/Vecinos';
 import Mensajes from './pages/Mensajes';
@@ -30,6 +31,7 @@ function Shell() {
         )}
       </main>
       {screen.name === 'none' && <TabBar />}
+      <Tutorial />
     </div>
   );
 }

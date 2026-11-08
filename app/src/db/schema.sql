@@ -106,7 +106,7 @@ CREATE TABLE IF NOT EXISTS emergency_alerts (
   id                TEXT PRIMARY KEY,
   author_id         TEXT NOT NULL REFERENCES users(id),
   kind              TEXT NOT NULL
-                    CHECK (kind IN ('sismo','incendio','medico','persona_mayor','violencia')),
+                    CHECK (kind IN ('sismo','incendio','medico','persona_mayor','seguridad','violencia')),
   description       TEXT NOT NULL DEFAULT '',
   zone              TEXT NOT NULL DEFAULT '',
   lat_public        REAL,
@@ -135,13 +135,16 @@ CREATE TABLE IF NOT EXISTS service_offers (
 );
 CREATE INDEX IF NOT EXISTS idx_service_offers_urgent ON service_offers (urgent, active, trade);
 
--- "Puedo ayudar" en el muro de emergencia. Una fila por (alerta, vecino): el id es
--- determinista, así dos teléfonos nunca duplican la misma oferta y retirarla es un UPDATE.
+-- Respuesta de un vecino a una alerta del muro. Una fila por (alerta, vecino): el id es
+-- determinista, así dos teléfonos nunca duplican la misma respuesta y cambiarla es un UPDATE.
+--   'ofrece'  = "Puedo ayudar" (en un aviso de seguridad: "Yo también lo vi")
+--   'disputa' = "No es real o ya pasó" (solo avisos de seguridad)
+--   'retirado'= el vecino se echó atrás
 CREATE TABLE IF NOT EXISTS emergency_responses (
   id          TEXT PRIMARY KEY,
   alert_id    TEXT NOT NULL REFERENCES emergency_alerts(id) ON DELETE CASCADE,
   helper_id   TEXT NOT NULL REFERENCES users(id),
-  status      TEXT NOT NULL DEFAULT 'ofrece' CHECK (status IN ('ofrece','retirado')),
+  status      TEXT NOT NULL DEFAULT 'ofrece' CHECK (status IN ('ofrece','retirado','disputa')),
   created_at  TEXT NOT NULL,
   updated_at  TEXT NOT NULL
 );

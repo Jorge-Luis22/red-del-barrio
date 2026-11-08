@@ -275,7 +275,7 @@ function apply(entity: string, d: Json): boolean {
          ON CONFLICT(id) DO UPDATE SET
            status = excluded.status, updated_at = excluded.updated_at
            WHERE excluded.updated_at >= emergency_responses.updated_at`,
-        [s(d.id), s(d.alert_id), s(d.helper_id), s(d.status) === 'retirado' ? 'retirado' : 'ofrece',
+        [s(d.id), s(d.alert_id), s(d.helper_id), s(d.status) === 'retirado' || s(d.status) === 'disputa' ? s(d.status) : 'ofrece',
          s(d.created_at), s(d.updated_at) ?? s(d.created_at)],
       );
       return true;

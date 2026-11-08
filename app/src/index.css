@@ -592,3 +592,221 @@ form.panel .row > * {
 .layer-solidario .map-icon {
   fill: #fff;
 }
+
+
+/* ---- Accesibilidad: texto grande (Perfil → Accesibilidad) ---- */
+html[data-large='1'] {
+  font-size: 125%;
+}
+
+html[data-large='1'] .tab {
+  font-size: 0.6rem;
+}
+
+/* ---- Accesibilidad: alto contraste ---- */
+html[data-contrast='1'] {
+  --bg: #ffffff;
+  --card: #ffffff;
+  --text: #000000;
+  --muted: #1f1f1f;
+  --line: #000000;
+  --teal: #00504c;
+  --teal-dark: #00302d;
+  --accent: #8a5200;
+  --danger: #8f1209;
+  --shadow: none;
+}
+
+html[data-contrast='1'] body {
+  background: #ffffff;
+}
+
+html[data-contrast='1'] .card,
+html[data-contrast='1'] form.panel,
+html[data-contrast='1'] .map-wrap {
+  border: 2px solid #000;
+}
+
+html[data-contrast='1'] .badge,
+html[data-contrast='1'] .badge.warn,
+html[data-contrast='1'] .badge.ok,
+html[data-contrast='1'] .badge.danger {
+  background: #fff;
+  color: #000;
+  border: 1px solid #000;
+}
+
+html[data-contrast='1'] .btn.ghost {
+  border-width: 2px;
+  color: var(--teal-dark);
+}
+
+html[data-contrast='1'] input,
+html[data-contrast='1'] select,
+html[data-contrast='1'] textarea {
+  border: 2px solid #000;
+}
+
+html[data-contrast='1'] .seg-btn,
+html[data-contrast='1'] .chip {
+  border: 2px solid #000;
+}
+
+html[data-contrast='1'] .seg-btn.on,
+html[data-contrast='1'] .chip.on {
+  background: #000;
+  color: #fff;
+}
+
+html[data-contrast='1'] .seg-btn.on span,
+html[data-contrast='1'] .chip.on {
+  color: #fff;
+}
+
+html[data-contrast='1'] .bubble.other {
+  background: #fff;
+  border: 2px solid #000;
+}
+
+html[data-contrast='1'] .bubble.system,
+html[data-contrast='1'] .code-card {
+  background: #fff;
+  color: #000;
+  border: 2px solid #000;
+}
+
+html[data-contrast='1'] .tabbar {
+  border-top: 3px solid #000;
+}
+
+html[data-contrast='1'] .tab.active {
+  text-decoration: underline;
+}
+
+html[data-contrast='1'] a {
+  color: #00302d;
+  text-decoration: underline;
+}
+
+html[data-contrast='1'] .map-bg {
+  fill: #fff;
+}
+
+html[data-contrast='1'] .map-halo {
+  opacity: 0.28;
+}
+
+/* ---- Tutorial de 4 pasos ---- */
+.tutorial-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 12px;
+  background: rgb(8 24 20 / 62%);
+}
+
+.tutorial {
+  width: 100%;
+  max-width: 456px;
+  max-height: calc(100dvh - 24px);
+  overflow-y: auto;
+  background: var(--card);
+  color: var(--text);
+  border-radius: 18px;
+  padding: 18px 18px 16px;
+}
+
+html[data-contrast='1'] .tutorial {
+  border: 3px solid #000;
+}
+
+.tutorial-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
+.tutorial-skip {
+  background: none;
+  border: 0;
+  padding: 6px 4px;
+  font: inherit;
+  color: var(--teal);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.tutorial-icon {
+  font-size: 2.4rem;
+  margin: 6px 0 2px;
+}
+
+.tutorial h2 {
+  margin: 0 0 6px;
+  font-size: 1.25rem;
+}
+
+.tutorial-body {
+  margin: 0 0 8px;
+  font-size: 0.95rem;
+}
+
+.tutorial ul {
+  margin: 0 0 12px;
+  padding-left: 18px;
+  font-size: 0.9rem;
+}
+
+.tutorial li {
+  margin-bottom: 6px;
+}
+
+.tutorial-dots {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.tutorial-dots .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--line);
+}
+
+.tutorial-dots .dot.on {
+  background: var(--teal);
+  width: 22px;
+  border-radius: 999px;
+}
+
+.tutorial-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.tutorial-actions .btn {
+  flex: 1;
+}
+
+.tutorial-actions .btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+/* ---- Directorio de oficios ---- */
+.dir-trade {
+  border-top: 1px solid var(--line);
+  padding: 6px 0 2px;
+  font-size: 0.88rem;
+}
+
+.dir-trade:first-of-type {
+  border-top: 0;
+}
