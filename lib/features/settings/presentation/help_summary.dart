@@ -29,7 +29,10 @@ final helpSummaryProvider = Provider<HelpSummary>((ref) {
     (d) => d.status == DealStatus.closed,
   );
   final interactions = ref.watch(interactionsStreamProvider).value ?? const [];
-  final stars = interactions.map((i) => i.stars).toList();
+  final stars = interactions
+      .where((i) => !i.isClientRating)
+      .map((i) => i.stars)
+      .toList();
   return HelpSummary(
     confirmed: deals.length,
     people: deals.map((d) => d.providerId).toSet().length,

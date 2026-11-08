@@ -61,6 +61,14 @@ final closeAndRateProvider = Provider<CloseAndRate>(
   ),
 );
 
+final rateClientProvider = Provider<RateClient>(
+  (ref) => RateClient(
+    deals: ref.watch(dealRepositoryProvider),
+    reputation: ref.watch(reputationRepositoryProvider),
+    clock: ref.watch(clockProvider),
+  ),
+);
+
 final dealsStreamProvider = StreamProvider<List<Deal>>(
   (ref) => ref.watch(dealRepositoryProvider).watchAll(),
 );

@@ -199,3 +199,45 @@ class CloseAndRate {
     );
   }
 }
+
+/// Quien presta el servicio califica a quien lo pidió (calificación en los dos sentidos).
+/// No cuenta para la reputación de quien presta el servicio.
+class RateClient {
+  RateClient({required this.deals, required this.reputation, required this.clock});
+
+  final DealRepository deals;
+  final ReputationRepository reputation;
+  final Clock clock;
+
+  Future<Result<Interaction>> call(
+    String dealId, {
+    required int stars,
+    String comment = '',
+  }) async {
+    if (stars < 1 || stars > 5) {
+      return const Err(ValidationFailure('Elige de 1 a 5 estrellas.'));
+    }
+    final deal = await deals.byId(dealId);
+    if (deal == null) {
+      return const Err(ValidationFailure('No encontramos este trato.'));
+    }
+    if (deal.status != DealStatus.closed) {
+      return const Err(
+        ValidationFailure('Primero se califica a quien prestó el servicio.'),
+      );
+    }
+    final rating = Interaction(
+      id: Interaction.clientRatingId(deal.id),
+      dealId: deal.id,
+      providerId: '${Interaction.clientPrefix}${deal.id}',
+      raterId: deal.providerId,
+      stars: stars,
+      recommended: false,
+      closedAt: clock.now(),
+      comment: comment.trim(),
+    );
+    final recorded = await reputation.record(rating);
+    if (recorded case Err(:final failure)) return Err(failure);
+    return Ok(rating);
+  }
+}

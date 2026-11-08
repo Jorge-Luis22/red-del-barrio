@@ -22,4 +22,13 @@ class Interaction {
   final bool recommended;
   final DateTime closedAt;
   final String comment;
+
+  /// Las calificaciones al cliente (quien pidió el servicio) se guardan aquí con este prefijo
+  /// en [providerId]: así nunca se mezclan con la reputación de quien presta el servicio.
+  static const clientPrefix = 'client:';
+
+  /// Id fijo por trato: calificar dos veces al mismo cliente reemplaza, no duplica.
+  static String clientRatingId(String dealId) => 'client-$dealId';
+
+  bool get isClientRating => providerId.startsWith(clientPrefix);
 }

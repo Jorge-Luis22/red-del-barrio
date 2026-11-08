@@ -57,7 +57,14 @@ class DealPanel extends StatelessWidget {
           DealStatus.accepted => MeetingCodeCard(deal: d),
           DealStatus.inProgress => InProgressCard(deal: d),
           DealStatus.awaitingRating => RatingCard(deal: d),
-          DealStatus.closed => ClosedSummaryCard(deal: d),
+          DealStatus.closed => Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              ClosedSummaryCard(deal: d),
+              const SizedBox(height: 16),
+              ClientRatingCard(deal: d),
+            ],
+          ),
         },
       ],
     );

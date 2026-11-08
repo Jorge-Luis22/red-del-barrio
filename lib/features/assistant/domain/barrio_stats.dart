@@ -77,7 +77,10 @@ class BarrioStats {
       byKind[n.kind] = (byKind[n.kind] ?? 0) + 1;
       if (n.urgency == Urgency.now || n.urgency == Urgency.today) urgent++;
     }
-    final stars = interactions.map((i) => i.stars).toList();
+    final stars = interactions
+        .where((i) => !i.isClientRating)
+        .map((i) => i.stars)
+        .toList();
     return BarrioStats(
       needs: needs.length,
       byKind: byKind,

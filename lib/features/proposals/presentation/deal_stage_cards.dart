@@ -5,6 +5,8 @@ import '../../../app/di/providers.dart';
 import '../../../app/l10n.dart';
 import '../../../app/theme/brand.dart';
 import '../../../app/ui/components.dart';
+import '../../assistant/presentation/tr.dart';
+import '../../reputation/domain/interaction.dart';
 import '../domain/deal.dart';
 import 'deal_action_runner.dart';
 import 'deal_providers.dart';
@@ -379,4 +381,129 @@ class _SummaryRow extends StatelessWidget {
       ],
     ),
   );
+}
+
+/// Calificación en el otro sentido: quien presta el servicio califica a quien lo pidió.
+/// En esta versión de un solo teléfono se puede simular; con servidor lo hará cada persona desde el suyo.
+class ClientRatingCard extends ConsumerStatefulWidget {
+  const ClientRatingCard({super.key, required this.deal});
+
+  final Deal deal;
+
+  @override
+  ConsumerState<ClientRatingCard> createState() => _ClientRatingCardState();
+}
+
+class _ClientRatingCardState extends ConsumerState<ClientRatingCard>
+    with DealActionRunner {
+  int _stars = 0;
+  final _comment = TextEditingController();
+
+  @override
+  void dispose() {
+    _comment.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final d = widget.deal;
+    final all = ref.watch(interactionsStreamProvider).value ?? const [];
+    final saved = all
+        .where((i) => i.id == Interaction.clientRatingId(d.id))
+        .firstOrNull;
+    final name = _firstName(d);
+    return BvPanel(
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            tr(context, 'Calificación mutua', 'Mutual rating'),
+            style: context.tt.titleMedium,
+          ),
+          const SizedBox(height: 4),
+          Text(
+            tr(
+              context,
+              '$name también califica a quien pidió el servicio. '
+                  'Así la confianza va en los dos sentidos. '
+                  'En esta versión de un solo teléfono puedes simularlo.',
+              '$name also rates the person who asked for the service. '
+                  'Trust goes both ways. In this single-phone version you can simulate it.',
+            ),
+            style: context.tt.bodyMedium?.copyWith(color: context.tones.muted),
+          ),
+          const SizedBox(height: 12),
+          if (saved != null) ...[
+            Row(
+              children: [
+                BvStars(value: saved.stars, size: 28),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    tr(
+                      context,
+                      'Calificación al cliente guardada',
+                      'Client rating saved',
+                    ),
+                    style: context.tt.titleSmall,
+                  ),
+                ),
+              ],
+            ),
+            if (saved.comment.isNotEmpty) ...[
+              const SizedBox(height: 6),
+              Text(saved.comment, style: context.tt.bodyMedium),
+            ],
+          ] else ...[
+            Center(
+              child: BvStars(
+                value: _stars,
+                size: 36,
+                onChanged: (s) => setState(() => _stars = s),
+              ),
+            ),
+            const SizedBox(height: 8),
+            TextField(
+              controller: _comment,
+              maxLength: 200,
+              textCapitalization: TextCapitalization.sentences,
+              decoration: InputDecoration(
+                labelText: tr(
+                  context,
+                  'Comentario sobre el cliente (opcional)',
+                  'Comment about the client (optional)',
+                ),
+              ),
+            ),
+            const SizedBox(height: 8),
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton.icon(
+                onPressed: (busy || _stars == 0)
+                    ? null
+                    : () => run(
+                        () => ref.read(rateClientProvider)(
+                          d.id,
+                          stars: _stars,
+                          comment: _comment.text,
+                        ),
+                        ok: tr(
+                          context,
+                          'Calificación al cliente guardada.',
+                          'Client rating saved.',
+                        ),
+                      ),
+                icon: const Icon(Icons.star_rate_rounded),
+                label: Text(
+                  tr(context, 'Calificar al cliente', 'Rate the client'),
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
 }
