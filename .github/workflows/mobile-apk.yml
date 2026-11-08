@@ -1,0 +1,58 @@
+name: Celular (APK Android)
+
+# Compila la app Flutter de /mobile y deja el APK para descargar en la pestaña "Actions" de GitHub.
+on:
+  push:
+    branches: [feat/flutter-mobile]
+    paths:
+      - 'mobile/**'
+      - '.github/workflows/mobile-apk.yml'
+  workflow_dispatch:
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    defaults:
+      run:
+        working-directory: mobile
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.24.5'
+          channel: stable
+          cache: true
+
+      # El repositorio guarda solo el código (lib/ y pubspec.yaml); la carpeta de Android la genera Flutter.
+      - name: Crear proyecto Android
+        run: flutter create --org pe.redbarrio --project-name red_barrio --platforms=android .
+
+      - name: Permiso de internet y nombre de la app
+        run: |
+          MANIFEST=android/app/src/main/AndroidManifest.xml
+          sed -i 's#<application#<uses-permission android:name="android.permission.INTERNET"/>\n    <application#' "$MANIFEST"
+          sed -i 's#android:label="red_barrio"#android:label="Red del barrio"#' "$MANIFEST"
+          grep -n 'INTERNET\|android:label' "$MANIFEST"
+
+      - name: Dependencias
+        run: flutter pub get
+
+      - name: Revisar el código (no detiene la compilación)
+        continue-on-error: true
+        run: flutter analyze lib
+
+      - name: Compilar APK
+        run: flutter build apk --release
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: red-del-barrio-apk
+          path: mobile/build/app/outputs/flutter-apk/app-release.apk
+          if-no-files-found: error
