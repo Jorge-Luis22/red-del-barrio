@@ -5,6 +5,8 @@ import '../../../app/l10n.dart';
 import '../../../app/theme/brand.dart';
 import '../../../app/ui/components.dart';
 import '../../../app/ui/section_header.dart';
+import '../../assistant/presentation/tablero_screen.dart';
+import '../../assistant/presentation/tr.dart';
 import '../../profile/presentation/my_profile_section.dart';
 import 'data_actions.dart';
 import 'help_summary.dart';
@@ -47,6 +49,12 @@ class PerfilScreen extends ConsumerWidget {
                   ),
                 ),
                 const SizedBox(height: 28),
+                const SizedBox(height: 28),
+                BvSectionTitle(
+                  tr(context, 'Para la municipalidad', 'For the municipality'),
+                ),
+                const SizedBox(height: 12),
+                const TableroEntry(),
                 const SizedBox(height: 28),
                 BvSectionTitle(l.ayudaYDatos),
                 const SizedBox(height: 12),

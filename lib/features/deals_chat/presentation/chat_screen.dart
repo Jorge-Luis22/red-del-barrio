@@ -15,6 +15,10 @@ import '../domain/chat.dart';
 import '../../../app/l10n.dart';
 import 'quick_phrases.dart';
 import '../../../app/ui/failure_text.dart';
+import '../../assistant/domain/safety_guard.dart';
+import '../../assistant/presentation/assistant_widgets.dart';
+import '../../assistant/presentation/quechua_sheet.dart';
+import '../../assistant/presentation/tr.dart';
 
 /// Chat de un trato. No hay otra persona conectada todavía: lo que escribes se guarda en tu
 /// teléfono y NO se inventan respuestas.
@@ -42,6 +46,11 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   Future<void> _send([String? phrase]) async {
     final body = (phrase ?? _text.text).trim();
     if (body.isEmpty || _sending) return;
+    final flags = const SafetyGuard().scan(body);
+    if (flags.isNotEmpty) {
+      final ok = await confirmSafety(context, flags);
+      if (ok != true || !mounted) return;
+    }
     setState(() => _sending = true);
     final r = await ref.read(sendMessageProvider)(
       dealId: widget.dealId,
@@ -68,6 +77,19 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           SnackBar(content: Text(failureText(context.l, failure))),
         );
     }
+  }
+
+  Future<void> _pickQuechua() async {
+    final phrase = await showQuechuaSheet(context);
+    if (phrase == null || !mounted) return;
+    final current = _text.text.trim();
+    final text = current.isEmpty ? phrase : '$current $phrase';
+    setState(() {
+      _text.value = TextEditingValue(
+        text: text,
+        selection: TextSelection.collapsed(offset: text.length),
+      );
+    });
   }
 
   @override
@@ -180,6 +202,18 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
+                  IconButton(
+                    tooltip: tr(
+                      context,
+                      'Frases en quechua',
+                      'Quechua phrases',
+                    ),
+                    onPressed: _pickQuechua,
+                    icon: const Icon(Icons.translate_rounded),
+                    style: IconButton.styleFrom(
+                      minimumSize: const Size(48, 56),
+                    ),
+                  ),
                   Expanded(
                     child: TextField(
                       controller: _text,
