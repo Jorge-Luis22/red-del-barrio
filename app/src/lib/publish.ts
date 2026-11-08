@@ -90,9 +90,22 @@ export const SCHEDULES = ['Mañanas', 'Tardes', 'Todo el día', 'Fines de semana
 
 export const MAX_DETAIL = 200;
 
-/** Título del pedido: "Necesito: Gasfitería · Fuga de agua". */
-export function needTitle(tile: Tile, what: string | null): string {
-  const base = what ? `${tile.label} · ${what}` : tile.label;
+/** Recorta un texto escrito a una frase corta para el título, sin cortar palabras a la mitad. */
+export function shortPhrase(text: string, max = 45): string {
+  const clean = text.trim().replace(/\s+/g, ' ');
+  if (clean.length <= max) return clean;
+  const cut = clean.slice(0, max);
+  const lastSpace = cut.lastIndexOf(' ');
+  return `${(lastSpace > 20 ? cut.slice(0, lastSpace) : cut).trim()}…`;
+}
+
+/**
+ * Título del pedido: "Necesito: Gasfitería · Fuga de agua".
+ * Si el vecino tocó un botón rápido se usa ese; si prefirió escribir con sus palabras, se usa lo escrito.
+ */
+export function needTitle(tile: Tile, what: string | null, written = ''): string {
+  const extra = what ?? (written.trim() ? shortPhrase(written) : null);
+  const base = extra ? `${tile.label} · ${extra}` : tile.label;
   return withDirection('necesito', base).slice(0, 80);
 }
 

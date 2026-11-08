@@ -49,7 +49,6 @@ export default function PublishSheet({
   const [what, setWhat] = useState<string | null>(null);
   const [when, setWhen] = useState<string | null>(null);
   const [detail, setDetail] = useState(request.detail ?? '');
-  const [showDetail, setShowDetail] = useState(Boolean(request.detail));
   const [availableNow, setAvailableNow] = useState(false);
   const [urgent, setUrgent] = useState(true);
   const [schedule, setSchedule] = useState<string | null>(null);
@@ -133,7 +132,7 @@ export default function PublishSheet({
         await createNeed({
           authorId: me!.id,
           type: tile.type,
-          title: needTitle(tile, what),
+          title: needTitle(tile, what, detail),
           category: tile.category,
           description: needDescription(when, detail),
           zone,
@@ -185,9 +184,9 @@ export default function PublishSheet({
               ))}
               <button type="button" className="tile" data-tile="otro" onClick={() => setStep('otro')}>
                 <span className="ico" aria-hidden="true">
-                  ➕
+                  ✏️
                 </span>
-                Otra cosa
+                Otra cosa (escribir)
               </button>
             </div>
             {offer && (
@@ -329,23 +328,21 @@ export default function PublishSheet({
               </>
             )}
 
-            {showDetail ? (
-              <>
-                <label htmlFor="pub-detail">Un detalle (opcional)</label>
-                <textarea
-                  id="pub-detail"
-                  rows={2}
-                  value={detail}
-                  onChange={(e) => setDetail(e.target.value)}
-                  maxLength={MAX_DETAIL}
-                  placeholder={offer ? 'Qué haces, con qué experiencia…' : 'Algo que el vecino deba saber…'}
-                />
-              </>
-            ) : (
-              <button type="button" className="sheet-link" onClick={() => setShowDetail(true)}>
-                ✏️ Agregar un detalle
-              </button>
-            )}
+            <label htmlFor="pub-detail" className="sheet-q" style={{ display: 'block' }}>
+              {offer ? 'Cuéntalo con tus palabras' : '¿Otra cosa? Cuéntalo con tus palabras'} <span>(opcional)</span>
+            </label>
+            <textarea
+              id="pub-detail"
+              rows={3}
+              value={detail}
+              onChange={(e) => setDetail(e.target.value)}
+              maxLength={MAX_DETAIL}
+              placeholder={
+                offer
+                  ? 'Ej. Hago instalaciones y reparaciones, con 10 años de experiencia'
+                  : 'Ej. Se me quemó el tablero y no tengo luz en la cocina'
+              }
+            />
 
             <p className="sheet-where">
               📍 {zone}. Se muestra solo una zona aproximada, nunca tu ubicación exacta.
