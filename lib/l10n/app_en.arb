@@ -1,0 +1,668 @@
+{
+  "@@locale": "en",
+  "appName": "Neighborhood Network",
+  "inicio": "Home",
+  "vecinos": "Neighbors",
+  "mensajes": "Messages",
+  "emergencia": "Emergency",
+  "perfil": "Profile",
+  "algoNoSalioBien": "Something went wrong",
+  "intentarOtraVez": "Try again",
+  "cargando": "Loading",
+  "unMomento": "One moment…",
+  "atajos": "Shortcuts",
+  "unToqueAbreEl": "One tap opens the request already written",
+  "zonaAproximadaSinDireccion": "Approximate area · no exact address",
+  "zonaAprox1Km": "Area {p0}, {p1} (approx. 1 km)",
+  "@zonaAprox1Km": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      },
+      "p1": {
+        "type": "Object"
+      }
+    }
+  },
+  "queNecesitasHoy": "What do you need today?",
+  "cuentaloYLosVecinos": "Tell us and the neighbors and businesses in your area will suggest how to solve it.",
+  "pedirAlgo": "Request something",
+  "noPudimosVerDonde": "We couldn’t see where you are",
+  "veQueHayCerca": "See what’s near you",
+  "revisaQueLaUbicacion": "Check that location is turned on.",
+  "tuUbicacionSeQueda": "Your location stays on your phone. Neighbors will only see an area of about 1000 m.",
+  "buscando": "Searching…",
+  "usarMiUbicacion": "Use my location",
+  "pedir": "Request: {p0}",
+  "@pedir": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "noPudimosLeerTus": "We couldn’t read your requests. Close and reopen the app.",
+  "misPedidos": "My requests",
+  "verTodosMisPedidos": "See all my requests ({p0})",
+  "@verTodosMisPedidos": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "listoTuPedidoQuedo": "Done: your request was saved. See its status on the next screen.",
+  "queNecesitas": "What do you need?",
+  "eligeUnaFraseO": "Choose a phrase or write in your own words. Your neighborhood will suggest how to solve it.",
+  "queTipoDeAyuda": "What kind of help",
+  "eligeUnaFraseO2": "Choose a phrase or write it yourself",
+  "conTusPalabras": "In your own words ({p0})",
+  "@conTusPalabras": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "paraCuandoLoNecesitas": "When do you need it?",
+  "publicando": "Posting…",
+  "publicar": "Post",
+  "noPudimosLeerTus2": "We couldn’t read your requests.",
+  "enCurso": "In progress",
+  "resueltos": "Resolved",
+  "enCursoResueltos": "{active} in progress · {done} resolved",
+  "@enCursoResueltos": {
+    "placeholders": {
+      "active": {
+        "type": "int"
+      },
+      "done": {
+        "type": "int"
+      }
+    }
+  },
+  "aunNoResolvisteNinguno": "You haven’t resolved any yet",
+  "noTienesPedidosEn": "You have no requests in progress",
+  "cuandoCierresUnTrato": "When you close a deal and rate it, it will appear here.",
+  "pideAlgoDesdeInicio": "Request something from Home and your neighborhood will suggest how to solve it.",
+  "para": "{p0} · For: {p1}",
+  "@para": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      },
+      "p1": {
+        "type": "Object"
+      }
+    }
+  },
+  "explorarCerca": "Explore nearby",
+  "losVecinosYNegocios": "The neighbors and businesses are examples, placed around you.",
+  "servicios": "Services",
+  "productos": "Products",
+  "noPudimosCargarLo": "We couldn’t load what is nearby.",
+  "nadaPorAhora": "Nothing for now",
+  "noHayResultadosCon": "No results for that category. Try \"All\".",
+  "verTodos": "See all",
+  "ordenar": "Sort",
+  "masRecomendados": "Most recommended",
+  "masCerca": "Closest",
+  "recomendados": "Recommended",
+  "ejemplo": "Example",
+  "aunSinRecomendaciones": "No recommendations yet",
+  "podrasRecomendarloCuandoCierres": "You will be able to recommend them once you close a deal with this person.",
+  "pedirEsteServicio": "Request this service",
+  "loQuiero": "I want it",
+  "noEncontramosEstePedido": "We couldn’t find this request",
+  "puedeQueYaNo": "It may no longer be on your phone. Go back to Home to see your requests.",
+  "propuestasDeTuBarrio": "Proposals from your neighborhood",
+  "aquiElPrecioLo": "Here each person sets the price after seeing your request. You choose. The proposals are examples.",
+  "reputacion": "Reputation",
+  "cercania": "Distance",
+  "precio": "Price",
+  "noPudimosCargarLas": "We couldn’t load the proposals.",
+  "para2": "For: {p0}",
+  "@para2": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "todaviaNoHayServidor": "There is no server yet: the proposals you see are examples.",
+  "enviando": "Sending…",
+  "reintentarAhora": "Retry now",
+  "recomiendan": "{p0} · {p1} recommend",
+  "@recomiendan": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      },
+      "p1": {
+        "type": "Object"
+      }
+    }
+  },
+  "aprox": "{p0} (approx.)",
+  "@aprox": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "ofreceVisitaDeDiagnostico": "Offers a diagnostic visit: S/ {p0} (deducted from the final price)",
+  "@ofreceVisitaDeDiagnostico": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "aceptarPropuesta": "Accept proposal",
+  "aceptada": "Accepted",
+  "faltaCalificar": "Needs rating",
+  "resuelta": "Resolved",
+  "trato": "Deal: {p0}",
+  "@trato": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "abrirElChatDe": "Open this deal’s chat",
+  "tuCodigoDeEncuentro": "Your meeting code",
+  "codigoValidadoEncuentroConfirmado": "Code verified. Meeting confirmed.",
+  "demoLaOtraPersona": "Demo: the other person enters the code",
+  "todaviaNoHayCuentas": "There are no accounts yet: this button acts as the other person, for the demo only.",
+  "encuentroConfirmadoConCodigo": "Meeting confirmed with code",
+  "tiempoDesdeQueSe": "Time since the code was verified. It is informational, not a charge.",
+  "servicioMarcadoComoHecho": "Service marked as done.",
+  "servicioHecho": "Service done",
+  "comoTeFue": "How did it go?",
+  "comentarioOpcional": "Comment (optional)",
+  "sumaAVecinosQue": "Adds to \"neighbors who recommend\". It only counts because there was a deal with you.",
+  "graciasTuCalificacionQuedo": "Thank you. Your rating was saved on your phone.",
+  "enviarCalificacion": "Submit rating",
+  "tratoCerrado": "Deal closed.",
+  "tratoResueltoYCalificado": "Deal resolved and rated",
+  "servicioRealizadoEn": "Service completed in",
+  "precioFinal": "Final price",
+  "calificacionesTuyas": "Your ratings",
+  "vecinosQueLoRecomiendan": "Neighbors who recommend",
+  "necesidadesResueltas": "Requests resolved",
+  "cadaNecesidadResueltaDeja": "Every request you resolve leaves the neighborhood better prepared for the next one. The other person’s rating of you will be shown once there are accounts.",
+  "etapaDe": "Step {p0} of {p1}: {p2}",
+  "@etapaDe": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      },
+      "p1": {
+        "type": "Object"
+      },
+      "p2": {
+        "type": "Object"
+      }
+    }
+  },
+  "tu": "You",
+  "favoresPrestamosYAyuda": "Favors, loans and help between neighbors.",
+  "ofrecer": "Offer",
+  "porAhoraLosVecinos": "For now the neighbors on the wall are examples. What you post is saved on your phone.",
+  "piden": "Asking",
+  "ofrecen": "Offering",
+  "todas": "All",
+  "nadiePideEstoPor": "Nobody is asking for this right now",
+  "nadieOfreceEstoPor": "Nobody is offering this right now",
+  "cambiaLaModalidadO": "Change the type or ask the neighborhood for something yourself.",
+  "cambiaLaModalidadU": "Change the type or offer something to the neighborhood yourself.",
+  "verTodas": "See all",
+  "aAprox": "{p0} away (approx.)",
+  "@aAprox": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "listoTuOfertaQuedo": "Done: your offer was saved on your phone.",
+  "ofrecerAlgoAlBarrio": "Offer something to the neighborhood",
+  "unaHerramientaTuTiempo": "A tool, your time or a skill. You decide how.",
+  "publicarOferta": "Post offer",
+  "comoLoOfreces": "How do you offer it?",
+  "queOfreces": "What do you offer",
+  "elChatDeCada": "The chat for each deal.",
+  "noPudimosLeerTus3": "We couldn’t read your conversations.",
+  "aunNoTienesConversaciones": "You have no conversations yet",
+  "cuandoAceptesUnaPropuesta": "When you accept a proposal, that deal’s chat appears here.",
+  "escribeElPrimerMensaje": "Write the first message",
+  "tu2": "You: {p0}",
+  "@tu2": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "noEncontramosEsteTrato": "We couldn’t find this deal",
+  "vuelveAMensajesPara": "Go back to Messages to see your conversations.",
+  "verElPedido": "View the request",
+  "todaviaNoHayCuentas2": "There are no accounts yet: your messages are saved on your phone. Chat with the other person will arrive with the server.",
+  "noPudimosLeerLos": "We couldn’t read the messages.",
+  "sinMensajesTodavia": "No messages yet",
+  "escribeAbajoOToca": "Write below or tap a quick phrase.",
+  "escribeUnMensaje": "Write a message",
+  "enviarMensaje": "Send message",
+  "guardado": "Saved",
+  "ayudaDelBarrioCuando": "Neighborhood help when it matters most.",
+  "serviciosOficiales": "Official services",
+  "enPeligroLlamaAqui": "In danger, call here first.",
+  "verificaEstosNumerosCon": "Check these numbers against official sources before relying on them.",
+  "ayudaDelBarrio": "Neighborhood help",
+  "avisaATusVecinos": "Alert your neighbors. It does not replace official services.",
+  "necesitoAyuda": "I need help",
+  "noPudimosLeerTus4": "We couldn’t read your alerts.",
+  "misAvisos": "My alerts",
+  "todaviaNoHayVecinos": "There are no connected neighbors who can respond yet: nobody will write to you from the app.",
+  "unBarrioPreparado": "A prepared neighborhood",
+  "quePodriasOfrecerSi": "What you could offer if something happens.",
+  "brigadistaVecinalVoluntario": "Volunteer neighborhood brigade member",
+  "sinVerificarSoloQueda": "Unverified. It is only saved on your phone.",
+  "puntosDeAcopio": "Collection points",
+  "lugaresParaReunirAyuda": "Places to gather aid. The ones you suggest stay unverified.",
+  "proponer": "Suggest",
+  "aunNoHayPuntos": "There are no collection points yet. Suggest one: a school, a church or a local shop.",
+  "llamarAl": "Call {p0}?",
+  "@llamarAl": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "esteNumeroEstaPor": "{p0} · {p1}.\nThis number still needs to be verified with official sources.",
+  "@esteNumeroEstaPor": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      },
+      "p1": {
+        "type": "Object"
+      }
+    }
+  },
+  "cancelar": "Cancel",
+  "llamar": "Call",
+  "noPudimosAbrirEl": "We couldn’t open the phone. Dial {p0} from your phone.",
+  "@noPudimosAbrirEl": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "llamarANumero": "Call {p0}, number {p1}",
+  "@llamarANumero": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      },
+      "p1": {
+        "type": "Object"
+      }
+    }
+  },
+  "porVerificar": "To be verified",
+  "privado": "Private",
+  "propuestoPorTiSin": "Suggested by you · unverified",
+  "proponerUnPuntoDe": "Suggest a collection point",
+  "unLugarDelBarrio": "A place in the neighborhood to gather water, food or blankets.",
+  "guardarPunto": "Save point",
+  "nombreDelLugar": "Name of the place",
+  "referenciaOpcional": "Landmark (optional)",
+  "porEjemploFrenteAl": "For example: across from the park",
+  "tuAvisoQuedoGuardado": "Your alert was saved. If it is serious, call official services now.",
+  "eligeQuePasaEl": "Choose what is happening. The text is already written: sending takes one tap.",
+  "enviarAviso": "Send alert",
+  "noSePudoGuardar": "The alert could not be saved",
+  "siEsUrgenteLlama": "{p0} If it is urgent, call the official services.",
+  "@siEsUrgenteLlama": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "primeroLosServiciosOficiales": "First, the official services",
+  "siHayPeligroAhora": "If there is danger now, call emergency services before using the app. Neighbors do not replace the Fire Department, Police or SAMU.",
+  "quePasa": "What is happening?",
+  "esteAvisoEsPrivado": "This alert is private: it is not shown on the neighborhood wall.",
+  "quePasoPuedesCambiarlo": "What happened (you can change it)",
+  "tuUbicacionExactaNo": "Your exact location is not shared. It is saved on your phone and sent when there is internet.",
+  "tuAyudaAlBarrio": "Your help to the neighborhood and your settings.",
+  "tuAyudaAlBarrio2": "Your help to the neighborhood",
+  "soloTuVesEste": "Only you see this summary.",
+  "esEvidenciaDeLo": "It is evidence of what you did, not points: it gives no priority or advantage.",
+  "verYEscucharMejor": "See and hear better",
+  "tamanoDelTexto": "Text size",
+  "normal": "Normal",
+  "grande": "Large",
+  "muyGrande": "Extra large",
+  "apariencia": "Appearance",
+  "sistema": "System",
+  "claro": "Light",
+  "oscuro": "Dark",
+  "altoContraste": "High contrast",
+  "textosMasOscurosY": "Darker text and stronger borders.",
+  "vibracionAlConfirmar": "Vibrate on confirm",
+  "unaVibracionCortaCuando": "A short vibration when you send something.",
+  "ayudaYDatos": "Help and data",
+  "verElTutorial": "View the tutorial",
+  "tresPantallasParaEmpezar": "Three screens to get started.",
+  "sobreEstePrototipo": "About this prototype",
+  "queEsRealY": "What is real and what is an example.",
+  "borrarMisDatosDe": "Erase my data from this phone",
+  "pedidosTratosMensajesY": "Requests, deals, messages and settings.",
+  "tratosResueltos": "Deals resolved",
+  "personasDistintas": "Different people",
+  "calificacionQueDiste": "Rating you gave",
+  "min": "{p0} min",
+  "@min": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "tiempoEnTratos": "Time in deals",
+  "esRealTusPedidos": "It is real: your requests, deals, messages and settings are saved on your phone, it works without internet and the queue sends what is pending when the signal returns.\n\nIt is an example: the neighbors, businesses, proposals and prices you see, and the “sent” status, because there is no server or accounts yet.\n\nTo be verified: emergency numbers must be confirmed with official sources.",
+  "entendido": "Got it",
+  "borrarTusDatos": "Erase your data?",
+  "seBorraranTusPedidos": "Your requests, deals, ratings, messages, alerts and settings will be erased from this phone.",
+  "continuar": "Continue",
+  "ultimaConfirmacion": "Final confirmation",
+  "estoNoSePuede": "This cannot be undone. Are you sure you want to erase everything?",
+  "noConservar": "No, keep it",
+  "siBorrarTodo": "Yes, erase everything",
+  "listoBorramosTusDatos": "Done: we erased your data from this phone.",
+  "cuentaQueNecesitas": "Tell us what you need",
+  "tocaPedirAlgoY": "Tap \"Request something\" and choose a phrase, or write in your own words. With a shortcut, it takes just two taps.",
+  "eligeAQuienY": "Choose who and meet up",
+  "tuBarrioTePropone": "Your neighborhood suggests how to solve it and each person sets their price. When you meet, you tell each other a 4-digit code.",
+  "calificaYConstruyeConfianza": "Rate and build trust",
+  "alTerminarCalificasAsi": "When it is done, you rate. That way the neighborhood knows who to trust. It also works without internet: your requests are sent later.",
+  "saltar": "Skip",
+  "empezar": "Get started",
+  "siguiente": "Next",
+  "todoAlDiaResueltos": "All caught up · {n, plural, =1{1 resolved} other{{n} resolved}}",
+  "@todoAlDiaResueltos": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "enCursoSolo": "{active} in progress",
+  "@enCursoSolo": {
+    "placeholders": {
+      "active": {
+        "type": "int"
+      }
+    }
+  },
+  "verTodosServicios": "See all services ({n})",
+  "@verTodosServicios": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "verTodosProductos": "See all products ({n})",
+  "@verTodosProductos": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "aDistancia": "{d} away",
+  "@aDistancia": {
+    "placeholders": {
+      "d": {
+        "type": "String"
+      }
+    }
+  },
+  "aDistanciaAprox": "{d} away (approx.)",
+  "@aDistanciaAprox": {
+    "placeholders": {
+      "d": {
+        "type": "String"
+      }
+    }
+  },
+  "vecinosRecomiendanEjemplo": "{n} neighbors recommend them (example)",
+  "@vecinosRecomiendanEjemplo": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "vecinosRecomiendanEjemploTuyas": "{n} neighbors recommend them (example) + {m, plural, =1{1 of yours} other{{m} of yours}}",
+  "@vecinosRecomiendanEjemploTuyas": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      },
+      "m": {
+        "type": "int"
+      }
+    }
+  },
+  "codigoDigitos": "Code {digits}",
+  "@codigoDigitos": {
+    "placeholders": {
+      "digits": {
+        "type": "String"
+      }
+    }
+  },
+  "diselo": "Tell {name} when they arrive. That way we confirm you really met and the deal counts toward reputation.",
+  "@diselo": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "servicioRealizado": "Service completed",
+  "servicioRealizadoEnTiempo": "Service completed in {time}",
+  "@servicioRealizadoEnTiempo": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "recomendarA": "Recommend {name}",
+  "@recomendarA": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "reputacionDe": "{name}’s reputation",
+  "@reputacionDe": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "vecinosRecomiendanResumen": "{n} (example) + {m, plural, =1{1 of yours} other{{m} of yours}}",
+  "@vecinosRecomiendanResumen": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      },
+      "m": {
+        "type": "int"
+      }
+    }
+  },
+  "duracionSegundos": "{s} s",
+  "@duracionSegundos": {
+    "placeholders": {
+      "s": {
+        "type": "int"
+      }
+    }
+  },
+  "duracionMinutos": "{m} min",
+  "@duracionMinutos": {
+    "placeholders": {
+      "m": {
+        "type": "int"
+      }
+    }
+  },
+  "duracionMinutosSegundos": "{m} min {s} s",
+  "@duracionMinutosSegundos": {
+    "placeholders": {
+      "m": {
+        "type": "int"
+      },
+      "s": {
+        "type": "int"
+      }
+    }
+  },
+  "kindService": "Service",
+  "kindProduct": "Product",
+  "kindLoan": "Loan",
+  "kindHelp": "Help",
+  "hintService": "A trade or professional",
+  "hintProduct": "Something near you",
+  "hintLoan": "Lend, rent or swap",
+  "hintHelp": "A favor or time from someone",
+  "urgencyNow": "Right now",
+  "urgencyToday": "Today",
+  "urgencyTomorrow": "Tomorrow",
+  "urgencyThisWeek": "This week",
+  "suggService1": "I need a plumber to fix a leak",
+  "suggService2": "I need an electrician, the kitchen lights went out",
+  "suggProduct1": "I need 2 water jugs",
+  "suggProduct2": "I need bread and milk, I am unable to go out",
+  "suggLoan1": "I need a drill for an hour",
+  "suggLoan2": "I need a ladder for today",
+  "suggHelp1": "I need help moving a piece of furniture",
+  "suggHelp2": "I need someone to watch my child for 2 hours",
+  "quickPlumber": "Plumber",
+  "quickElectrician": "Electrician",
+  "quickWater": "2 water jugs",
+  "syncPending": "Saved on your phone · it will be sent when there is internet",
+  "syncSentDemo": "Sent · example neighborhood (demo)",
+  "syncSent": "Sent",
+  "syncError": "Could not send · tap to retry",
+  "badgePending": "Pending",
+  "badgeSent": "Sent",
+  "badgeRetry": "Retry",
+  "phaseSending": "Waiting to send",
+  "phaseError": "Not sent · retry",
+  "phaseWaiting": "With proposals",
+  "phaseActive": "In progress",
+  "phaseRate": "Needs rating",
+  "phaseDone": "Resolved",
+  "modFree": "Free",
+  "modBarter": "Barter",
+  "modRent": "Rent",
+  "modFreeHint": "No cost: a favor between neighbors.",
+  "modBarterHint": "You swap one thing or favor for another.",
+  "modRentHint": "You lend it in exchange for a payment you both agree on.",
+  "sitEarthquake": "Earthquake",
+  "sitFire": "Fire",
+  "sitMedical": "Medical",
+  "sitElderly": "Elderly person at risk",
+  "sitViolence": "Violence",
+  "tplEarthquake": "There was an earthquake and I need help.",
+  "tplFire": "There is a fire nearby and I need help.",
+  "tplMedical": "I need urgent medical help.",
+  "tplElderly": "An elderly person needs help right now.",
+  "tplViolence": "I am in a situation of violence and I need help.",
+  "offPolice": "National Police",
+  "offPoliceUse": "Crime and immediate danger",
+  "offFire": "Fire Department",
+  "offFireUse": "Fires and rescues",
+  "offSamu": "SAMU (ambulance)",
+  "offSamuUse": "Medical emergencies",
+  "offCivil": "Civil Defense",
+  "offCivilUse": "Earthquakes and disasters",
+  "offLine100": "Line 100",
+  "offLine100Use": "Family and sexual violence",
+  "capFirstAid": "First aid",
+  "capMedkit": "First-aid kit",
+  "capVehicle": "Vehicle",
+  "capTools": "Tools",
+  "capSupplies": "Water or food",
+  "capCare": "Caring for children or older adults",
+  "qpOnMyWay": "I am on my way",
+  "qpAtDoor": "I am at the door",
+  "qpWhatTime": "What time can you come?",
+  "qpThanks": "Thanks, all good",
+  "trAll": "All",
+  "trPlumbing": "Plumbing",
+  "trElectrical": "Electrical",
+  "trCarpentry": "Carpentry",
+  "trLocksmith": "Locksmith",
+  "trSewing": "Sewing",
+  "trLessons": "Lessons",
+  "trPets": "Pets",
+  "trGrocery": "Grocery store",
+  "trMinimarket": "Minimarket",
+  "trNeighbor": "From a neighbor",
+  "roPlumber": "Plumber",
+  "roElectrician": "Electrician",
+  "roCarpenter": "Carpenter",
+  "roLocksmith": "Locksmith",
+  "roSeamstress": "Seamstress",
+  "roTutor": "Private tutor",
+  "roPetWalker": "Pet walker",
+  "roNeighbor": "Neighbor",
+  "failWriteMessage": "Write a message.",
+  "failSaveMessage": "Your message could not be saved.",
+  "failUpdateMessage": "The message could not be updated.",
+  "failPlaceName": "Write the name of the place.",
+  "failSaveAlert": "Your alert could not be saved.",
+  "failUpdateAlert": "The alert could not be updated.",
+  "failSavePoint": "The collection point could not be saved.",
+  "failLocation": "We couldn’t get your location. Please try again.",
+  "failNeedShort": "Tell us what you need (at least 3 letters).",
+  "failSavePhone": "It could not be saved on your phone.",
+  "failUpdateStatus": "The status could not be updated.",
+  "failAlreadyAccepted": "This request already has an accepted proposal.",
+  "failDealNotFound": "We couldn’t find this deal.",
+  "failCodeValidated": "This deal’s code was already verified.",
+  "failValidateCodeFirst": "First the meeting code must be verified.",
+  "failStars": "Choose 1 to 5 stars.",
+  "failMarkDoneFirst": "First mark the service as done.",
+  "failPersonNotFound": "We couldn’t find this person.",
+  "failSaveDeal": "The deal could not be saved on your phone.",
+  "failSaveRating": "Your rating could not be saved.",
+  "failOfferShort": "Tell us what you offer (at least 3 letters).",
+  "failSavePending": "The pending item could not be saved.",
+  "failUpdateQueue": "The queue could not be updated.",
+  "failLocationOff": "Turn on your phone’s location to see what is nearby.",
+  "failLocationPermission": "Location permission denied. You can choose your area by hand.",
+  "idioma": "Language",
+  "wall1": "I need a drill for an hour.",
+  "wall2": "I am lending my 3-meter ladder. Come pick it up.",
+  "wall3": "I will swap knitting lessons for help with my phone.",
+  "wall4": "Looking for someone to help me move a piece of furniture on Saturday.",
+  "wall5": "I rent out a sewing machine by the day.",
+  "wall6": "I need to borrow a wheelbarrow for the weekend."
+}

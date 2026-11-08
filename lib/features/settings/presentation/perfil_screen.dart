@@ -8,6 +8,7 @@ import '../../../app/ui/section_header.dart';
 import '../../proposals/domain/deal.dart';
 import '../domain/app_settings.dart';
 import 'tutorial_sheet.dart';
+import '../../../app/l10n.dart';
 
 /// Evidencia de lo que la persona aportó, calculada de sus tratos cerrados.
 /// Solo ella la ve. No hay puntos, puestos ni prioridad.
@@ -55,8 +56,8 @@ class PerfilScreen extends ConsumerWidget {
         padding: EdgeInsets.zero,
         children: [
           BvSectionHeader(
-            title: 'Perfil',
-            subtitle: 'Tu ayuda al barrio y tus ajustes.',
+            title: context.l.perfil,
+            subtitle: context.l.tuAyudaAlBarrio,
             icon: Icons.person_rounded,
             background: context.tones.trust,
             foreground: context.cs.onTertiary,
@@ -66,44 +67,47 @@ class PerfilScreen extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const BvSectionTitle(
-                  'Tu ayuda al barrio',
-                  subtitle: 'Solo tú ves este resumen.',
+                BvSectionTitle(
+                  context.l.tuAyudaAlBarrio2,
+                  subtitle: context.l.soloTuVesEste,
                 ),
                 const SizedBox(height: 12),
                 _HelpGrid(help: help),
                 const SizedBox(height: 8),
                 Text(
-                  'Es evidencia de lo que hiciste, no puntos: no da prioridad ni ventaja.',
+                  context.l.esEvidenciaDeLo,
                   style: context.tt.bodySmall?.copyWith(
                     color: context.tones.muted,
                   ),
                 ),
                 const SizedBox(height: 28),
-                const BvSectionTitle('Ver y escuchar mejor'),
+                BvSectionTitle(context.l.verYEscucharMejor),
                 const SizedBox(height: 12),
                 BvPanel(
                   padding: const EdgeInsets.all(16),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Tamaño del texto', style: context.tt.titleSmall),
+                      Text(
+                        context.l.tamanoDelTexto,
+                        style: context.tt.titleSmall,
+                      ),
                       const SizedBox(height: 10),
                       BvSegmented<double>(
-                        options: const [
+                        options: [
                           (
                             value: 1.0,
-                            label: 'Normal',
+                            label: context.l.normal,
                             icon: Icons.text_fields_rounded,
                           ),
                           (
                             value: 1.15,
-                            label: 'Grande',
+                            label: context.l.grande,
                             icon: Icons.text_increase_rounded,
                           ),
                           (
                             value: 1.3,
-                            label: 'Muy grande',
+                            label: context.l.muyGrande,
                             icon: Icons.format_size_rounded,
                           ),
                         ],
@@ -112,23 +116,48 @@ class PerfilScreen extends ConsumerWidget {
                             repo.update((c) => c.copyWith(textScale: v)),
                       ),
                       const SizedBox(height: 16),
-                      Text('Apariencia', style: context.tt.titleSmall),
+                      Text(context.l.idioma, style: context.tt.titleSmall),
+                      const SizedBox(height: 10),
+                      BvSegmented<String>(
+                        options:
+                            [
+                                  (
+                                    '',
+                                    context.l.sistema,
+                                    Icons.language_rounded,
+                                  ),
+                                  ('es', 'Español', Icons.translate_rounded),
+                                  ('en', 'English', Icons.translate_rounded),
+                                ]
+                                .map(
+                                  (o) => (value: o.$1, label: o.$2, icon: o.$3),
+                                )
+                                .toList(),
+                        selected: s.languageCode ?? '',
+                        onChanged: (v) => repo.update(
+                          (c) => v.isEmpty
+                              ? c.copyWith(useSystemLanguage: true)
+                              : c.copyWith(languageCode: v),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Text(context.l.apariencia, style: context.tt.titleSmall),
                       const SizedBox(height: 10),
                       BvSegmented<ThemePreference>(
-                        options: const [
+                        options: [
                           (
                             value: ThemePreference.system,
-                            label: 'Sistema',
+                            label: context.l.sistema,
                             icon: Icons.brightness_auto_rounded,
                           ),
                           (
                             value: ThemePreference.light,
-                            label: 'Claro',
+                            label: context.l.claro,
                             icon: Icons.light_mode_rounded,
                           ),
                           (
                             value: ThemePreference.dark,
-                            label: 'Oscuro',
+                            label: context.l.oscuro,
                             icon: Icons.dark_mode_rounded,
                           ),
                         ],
@@ -140,12 +169,10 @@ class PerfilScreen extends ConsumerWidget {
                       SwitchListTile(
                         contentPadding: EdgeInsets.zero,
                         title: Text(
-                          'Alto contraste',
+                          context.l.altoContraste,
                           style: context.tt.titleSmall,
                         ),
-                        subtitle: const Text(
-                          'Textos más oscuros y bordes más marcados.',
-                        ),
+                        subtitle: Text(context.l.textosMasOscurosY),
                         value: s.highContrast,
                         onChanged: (v) =>
                             repo.update((c) => c.copyWith(highContrast: v)),
@@ -153,12 +180,10 @@ class PerfilScreen extends ConsumerWidget {
                       SwitchListTile(
                         contentPadding: EdgeInsets.zero,
                         title: Text(
-                          'Vibración al confirmar',
+                          context.l.vibracionAlConfirmar,
                           style: context.tt.titleSmall,
                         ),
-                        subtitle: const Text(
-                          'Una vibración corta cuando envías algo.',
-                        ),
+                        subtitle: Text(context.l.unaVibracionCortaCuando),
                         value: s.vibration,
                         onChanged: (v) =>
                             repo.update((c) => c.copyWith(vibration: v)),
@@ -167,26 +192,26 @@ class PerfilScreen extends ConsumerWidget {
                   ),
                 ),
                 const SizedBox(height: 28),
-                const BvSectionTitle('Ayuda y datos'),
+                BvSectionTitle(context.l.ayudaYDatos),
                 const SizedBox(height: 12),
                 BvRows(
                   children: [
                     _ActionRow(
                       icon: Icons.school_rounded,
-                      title: 'Ver el tutorial',
-                      subtitle: 'Tres pantallas para empezar.',
+                      title: context.l.verElTutorial,
+                      subtitle: context.l.tresPantallasParaEmpezar,
                       onTap: () => showTutorial(context),
                     ),
                     _ActionRow(
                       icon: Icons.info_outline_rounded,
-                      title: 'Sobre este prototipo',
-                      subtitle: 'Qué es real y qué es de ejemplo.',
+                      title: context.l.sobreEstePrototipo,
+                      subtitle: context.l.queEsRealY,
                       onTap: () => _showAbout(context),
                     ),
                     _ActionRow(
                       icon: Icons.delete_forever_rounded,
-                      title: 'Borrar mis datos de este teléfono',
-                      subtitle: 'Pedidos, tratos, mensajes y ajustes.',
+                      title: context.l.borrarMisDatosDe,
+                      subtitle: context.l.pedidosTratosMensajesY,
                       danger: true,
                       onTap: () => _confirmErase(context, ref),
                     ),
@@ -212,25 +237,25 @@ class _HelpGrid extends StatelessWidget {
       (
         Icons.task_alt_rounded,
         '${help.confirmed}',
-        'Tratos resueltos',
+        context.l.tratosResueltos,
         BvTone.trust,
       ),
       (
         Icons.groups_rounded,
         '${help.people}',
-        'Personas distintas',
+        context.l.personasDistintas,
         BvTone.violet,
       ),
       (
         Icons.star_rounded,
         help.averageStars == null ? '—' : help.averageStars!.toStringAsFixed(1),
-        'Calificación que diste',
+        context.l.calificacionQueDiste,
         BvTone.sun,
       ),
       (
         Icons.timer_rounded,
-        '${help.minutes} min',
-        'Tiempo en tratos',
+        context.l.min(help.minutes),
+        context.l.tiempoEnTratos,
         BvTone.coral,
       ),
     ];
@@ -323,20 +348,12 @@ class _ActionRow extends StatelessWidget {
 void _showAbout(BuildContext context) => showDialog<void>(
   context: context,
   builder: (ctx) => AlertDialog(
-    title: const Text('Sobre este prototipo'),
-    content: const SingleChildScrollView(
-      child: Text(
-        'Es real: tus pedidos, tratos, mensajes y ajustes se guardan en tu teléfono, '
-        'funciona sin internet y la cola envía lo pendiente al volver la señal.\n\n'
-        'Es de ejemplo: los vecinos, negocios, propuestas y precios que ves, y el '
-        '"enviado", porque todavía no hay servidor ni cuentas.\n\n'
-        'Por verificar: los números de emergencia deben confirmarse con fuentes oficiales.',
-      ),
-    ),
+    title: Text(context.l.sobreEstePrototipo),
+    content: SingleChildScrollView(child: Text(context.l.esRealTusPedidos)),
     actions: [
       TextButton(
         onPressed: () => Navigator.pop(ctx),
-        child: const Text('Entendido'),
+        child: Text(context.l.entendido),
       ),
     ],
   ),
@@ -346,18 +363,16 @@ Future<void> _confirmErase(BuildContext context, WidgetRef ref) async {
   final first = await showDialog<bool>(
     context: context,
     builder: (ctx) => AlertDialog(
-      title: const Text('¿Borrar tus datos?'),
-      content: const Text(
-        'Se borrarán tus pedidos, tratos, calificaciones, mensajes, avisos y ajustes de este teléfono.',
-      ),
+      title: Text(context.l.borrarTusDatos),
+      content: Text(context.l.seBorraranTusPedidos),
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(ctx, false),
-          child: const Text('Cancelar'),
+          child: Text(context.l.cancelar),
         ),
         TextButton(
           onPressed: () => Navigator.pop(ctx, true),
-          child: const Text('Continuar'),
+          child: Text(context.l.continuar),
         ),
       ],
     ),
@@ -366,14 +381,12 @@ Future<void> _confirmErase(BuildContext context, WidgetRef ref) async {
   final second = await showDialog<bool>(
     context: context,
     builder: (ctx) => AlertDialog(
-      title: const Text('Última confirmación'),
-      content: const Text(
-        'Esto no se puede deshacer. ¿Seguro que quieres borrar todo?',
-      ),
+      title: Text(context.l.ultimaConfirmacion),
+      content: Text(context.l.estoNoSePuede),
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(ctx, false),
-          child: const Text('No, conservar'),
+          child: Text(context.l.noConservar),
         ),
         FilledButton(
           onPressed: () => Navigator.pop(ctx, true),
@@ -381,7 +394,7 @@ Future<void> _confirmErase(BuildContext context, WidgetRef ref) async {
             backgroundColor: context.tones.emergency,
             foregroundColor: context.cs.onError,
           ),
-          child: const Text('Sí, borrar todo'),
+          child: Text(context.l.siBorrarTodo),
         ),
       ],
     ),
@@ -389,10 +402,7 @@ Future<void> _confirmErase(BuildContext context, WidgetRef ref) async {
   if (second != true) return;
   await ref.read(settingsRepositoryProvider).eraseAll();
   if (context.mounted) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Listo: borramos tus datos de este teléfono.'),
-      ),
-    );
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(context.l.listoBorramosTusDatos)));
   }
 }

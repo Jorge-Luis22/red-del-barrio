@@ -11,6 +11,8 @@ import '../../needs/domain/need.dart';
 import '../../needs/presentation/composer_sheet.dart';
 import '../domain/explore_nearby.dart';
 import 'explore_controller.dart';
+import '../../../app/l10n.dart';
+import '../../directory/presentation/trade_labels.dart';
 
 /// "Explorar cerca" en Inicio: un adelanto de 3 resultados y un acceso a la pantalla completa.
 /// Con [compact] en falso muestra todo (lo usa [ExploreScreen]).
@@ -33,23 +35,23 @@ class ExploreSection extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         BvSectionTitle(
-          'Explorar cerca',
-          subtitle: 'Los vecinos y negocios son de ejemplo, ubicados alrededor de ti.',
+          context.l.explorarCerca,
+          subtitle: context.l.losVecinosYNegocios,
           trailing: compact
               ? null
               : _SortMenu(sort: filters.sort, onChanged: ctl.setSort),
         ),
         const SizedBox(height: 14),
         BvSegmented<ListingKind>(
-          options: const [
+          options: [
             (
               value: ListingKind.service,
-              label: 'Servicios',
+              label: context.l.servicios,
               icon: Icons.handyman_rounded,
             ),
             (
               value: ListingKind.product,
-              label: 'Productos',
+              label: context.l.productos,
               icon: Icons.storefront_rounded,
             ),
           ],
@@ -65,7 +67,7 @@ class ExploreSection extends ConsumerWidget {
               itemCount: trades.length,
               separatorBuilder: (_, _) => const SizedBox(width: 8),
               itemBuilder: (_, i) => ChoiceChip(
-                label: Text(trades[i]),
+                label: Text(tradeLabel(context.l, trades[i])),
                 selected: filters.trade == trades[i],
                 onSelected: (_) => ctl.setTrade(trades[i]),
                 labelStyle: context.tt.labelMedium?.copyWith(
@@ -81,19 +83,18 @@ class ExploreSection extends ConsumerWidget {
         items.when(
           loading: () => const BvSkeletonRows(),
           error: (_, _) => BvErrorState(
-            message: 'No pudimos cargar lo que hay cerca.',
+            message: context.l.noPudimosCargarLo,
             onRetry: () => ref.invalidate(exploreItemsProvider),
           ),
           data: (list) {
             if (list.isEmpty) {
               return BvPanel(
                 child: BvEmptyState(
-                  title: 'Nada por ahora',
-                  message:
-                      'No hay resultados con ese rubro. Prueba con "Todos".',
+                  title: context.l.nadaPorAhora,
+                  message: context.l.noHayResultadosCon,
                   action: OutlinedButton(
                     onPressed: () => ctl.setTrade('Todos'),
-                    child: const Text('Ver todos'),
+                    child: Text(context.l.verTodos),
                   ),
                 ),
               );
@@ -114,7 +115,9 @@ class ExploreSection extends ConsumerWidget {
                     onPressed: () => context.push('/explorar'),
                     icon: const Icon(Icons.arrow_forward_rounded),
                     label: Text(
-                      'Ver todos los ${isService ? 'servicios' : 'productos'} (${list.length})',
+                      isService
+                          ? context.l.verTodosServicios(list.length)
+                          : context.l.verTodosProductos(list.length),
                     ),
                   ),
                 ],
@@ -133,7 +136,7 @@ class ExploreScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(title: const Text('Explorar cerca')),
+    appBar: AppBar(title: Text(context.l.explorarCerca)),
     body: const SafeArea(
       top: false,
       child: SingleChildScrollView(
@@ -152,16 +155,19 @@ class _SortMenu extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => PopupMenuButton<ExploreSort>(
-    tooltip: 'Ordenar',
+    tooltip: context.l.ordenar,
     initialValue: sort,
     onSelected: onChanged,
     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-    itemBuilder: (_) => const [
+    itemBuilder: (_) => [
       PopupMenuItem(
         value: ExploreSort.recommended,
-        child: Text('Más recomendados'),
+        child: Text(context.l.masRecomendados),
       ),
-      PopupMenuItem(value: ExploreSort.nearest, child: Text('Más cerca')),
+      PopupMenuItem(
+        value: ExploreSort.nearest,
+        child: Text(context.l.masCerca),
+      ),
     ],
     child: Container(
       constraints: const BoxConstraints(minHeight: 48),
@@ -172,7 +178,9 @@ class _SortMenu extends StatelessWidget {
           Icon(Icons.sort_rounded, size: 20, color: context.cs.primary),
           const SizedBox(width: 4),
           Text(
-            sort == ExploreSort.recommended ? 'Recomendados' : 'Más cerca',
+            sort == ExploreSort.recommended
+                ? context.l.recomendados
+                : context.l.masCerca,
             style: context.tt.labelMedium?.copyWith(color: context.cs.primary),
           ),
         ],
@@ -211,9 +219,15 @@ class ExploreRow extends StatelessWidget {
     final isService = l.kind == ListingKind.service;
     final dist = item.distanceMeters == null
         ? null
-        : 'a ${formatDistance(item.distanceMeters!)}${item.distanceIsReal ? '' : ' (aprox.)'}';
+        : (item.distanceIsReal
+              ? context.l.aDistancia(formatDistance(item.distanceMeters!))
+              : context.l.aDistanciaAprox(
+                  formatDistance(item.distanceMeters!),
+                ));
     final subtitle = [
-      isService ? item.provider.role : l.trade,
+      isService
+          ? roleLabel(context.l, item.provider.role)
+          : tradeLabel(context.l, l.trade),
       ?dist,
     ].join(' · ');
 
@@ -240,7 +254,7 @@ class ExploreRow extends StatelessWidget {
                           child: Text(l.title, style: context.tt.titleMedium),
                         ),
                         const SizedBox(width: 8),
-                        const BvPill('Ejemplo'),
+                        BvPill(context.l.ejemplo),
                       ],
                     ),
                     const SizedBox(height: 2),
@@ -260,18 +274,22 @@ class ExploreRow extends StatelessWidget {
             children: [
               Expanded(
                 child: vb.isEmpty
-                    ? const Align(
+                    ? Align(
                         alignment: Alignment.centerLeft,
                         child: BvPill(
-                          'Aún sin recomendaciones',
+                          context.l.aunSinRecomendaciones,
                           icon: Icons.hourglass_empty_rounded,
                         ),
                       )
                     : Align(
                         alignment: Alignment.centerLeft,
                         child: BvPill(
-                          '${vb.example} vecinos lo recomiendan (ejemplo)'
-                          '${vb.confirmed > 0 ? ' + ${vb.confirmed} tuya${vb.confirmed == 1 ? '' : 's'}' : ''}',
+                          vb.confirmed > 0
+                              ? context.l.vecinosRecomiendanEjemploTuyas(
+                                  vb.example,
+                                  vb.confirmed,
+                                )
+                              : context.l.vecinosRecomiendanEjemplo(vb.example),
                           icon: Icons.verified_rounded,
                           tone: BvTone.trust,
                         ),
@@ -288,7 +306,7 @@ class ExploreRow extends StatelessWidget {
             if (!item.recommendedByMe) ...[
               const SizedBox(height: 4),
               Text(
-                'Podrás recomendarlo cuando cierres un trato con esta persona.',
+                context.l.podrasRecomendarloCuandoCierres,
                 style: context.tt.bodySmall?.copyWith(
                   color: context.tones.muted,
                 ),
@@ -305,7 +323,9 @@ class ExploreRow extends StatelessWidget {
                 text: l.requestText,
               ),
               style: FilledButton.styleFrom(minimumSize: const Size(64, 48)),
-              child: Text(isService ? 'Pedir este servicio' : 'Lo quiero'),
+              child: Text(
+                isService ? context.l.pedirEsteServicio : context.l.loQuiero,
+              ),
             ),
           ),
         ],

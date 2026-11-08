@@ -5,6 +5,7 @@ import '../../../app/di/providers.dart';
 import '../../../app/theme/brand.dart';
 import '../../../app/ui/components.dart';
 import '../../../app/ui/sheet.dart';
+import '../../../app/l10n.dart';
 
 /// Tutorial de 3 pantallas: pedir, elegir y encontrarse, confiar. Se ve la primera vez
 /// y se puede repetir desde Perfil.
@@ -20,24 +21,24 @@ class _Step {
   final String text;
 }
 
-const _steps = [
+List<_Step> _steps(AppLocalizations l) => [
   _Step(
     Icons.edit_note_rounded,
     BvTone.violet,
-    'Cuenta qué necesitas',
-    'Toca "Pedir algo" y elige una frase, o escribe con tus palabras. Con un atajo, son solo dos toques.',
+    l.cuentaQueNecesitas,
+    l.tocaPedirAlgoY,
   ),
   _Step(
     Icons.handshake_rounded,
     BvTone.coral,
-    'Elige a quién y encuéntrense',
-    'Tu barrio te propone cómo resolverlo y cada persona pone su precio. Al encontrarse, se dicen un código de 4 dígitos.',
+    l.eligeAQuienY,
+    l.tuBarrioTePropone,
   ),
   _Step(
     Icons.verified_rounded,
     BvTone.trust,
-    'Califica y construye confianza',
-    'Al terminar, calificas. Así el barrio sabe en quién confiar. También funciona sin internet: tus pedidos se envían después.',
+    l.calificaYConstruyeConfianza,
+    l.alTerminarCalificasAsi,
   ),
 ];
 
@@ -67,7 +68,8 @@ class _TutorialState extends ConsumerState<_Tutorial> {
 
   @override
   Widget build(BuildContext context) {
-    final last = _index == _steps.length - 1;
+    final steps = _steps(context.l);
+    final last = _index == steps.length - 1;
     return PopScope(
       onPopInvokedWithResult: (didPop, _) {
         if (didPop) {
@@ -88,7 +90,7 @@ class _TutorialState extends ConsumerState<_Tutorial> {
                   controller: _page,
                   onPageChanged: (i) => setState(() => _index = i),
                   children: [
-                    for (final s in _steps)
+                    for (final s in steps)
                       Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
@@ -115,7 +117,7 @@ class _TutorialState extends ConsumerState<_Tutorial> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  for (var i = 0; i < _steps.length; i++)
+                  for (var i = 0; i < steps.length; i++)
                     Container(
                       width: i == _index ? 24 : 8,
                       height: 8,
@@ -133,7 +135,10 @@ class _TutorialState extends ConsumerState<_Tutorial> {
               Row(
                 children: [
                   if (!last) ...[
-                    TextButton(onPressed: _finish, child: const Text('Saltar')),
+                    TextButton(
+                      onPressed: _finish,
+                      child: Text(context.l.saltar),
+                    ),
                   ],
                   const Spacer(),
                   FilledButton(
@@ -143,7 +148,7 @@ class _TutorialState extends ConsumerState<_Tutorial> {
                             duration: const Duration(milliseconds: 220),
                             curve: Curves.easeOut,
                           ),
-                    child: Text(last ? 'Empezar' : 'Siguiente'),
+                    child: Text(last ? context.l.empezar : context.l.siguiente),
                   ),
                 ],
               ),

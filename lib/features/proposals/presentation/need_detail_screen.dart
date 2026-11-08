@@ -13,6 +13,8 @@ import '../../sync/presentation/sync_controller.dart';
 import '../domain/deal.dart';
 import 'deal_panel.dart';
 import 'deal_providers.dart';
+import '../../../app/l10n.dart';
+import '../../../app/ui/failure_text.dart';
 
 enum _Sort { reputation, distance, price }
 
@@ -34,8 +36,9 @@ class _NeedDetailScreenState extends ConsumerState<NeedDetailScreen> {
     final r = await ref.read(acceptProposalProvider)(need, v.proposal);
     if (!mounted) return;
     if (r case Err(:final failure)) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(failure.message)));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(failureText(context.l, failure))));
     }
   }
 
@@ -48,9 +51,9 @@ class _NeedDetailScreenState extends ConsumerState<NeedDetailScreen> {
     if (need == null) {
       return Scaffold(
         appBar: AppBar(leading: BackButton(onPressed: () => context.go('/'))),
-        body: const BvEmptyState(
-          title: 'No encontramos este pedido',
-          message: 'Puede que ya no esté en tu teléfono. Vuelve a Inicio para ver tus pedidos.',
+        body: BvEmptyState(
+          title: context.l.noEncontramosEstePedido,
+          message: context.l.puedeQueYaNo,
         ),
       );
     }
@@ -58,7 +61,7 @@ class _NeedDetailScreenState extends ConsumerState<NeedDetailScreen> {
     return Scaffold(
       appBar: AppBar(
         leading: BackButton(onPressed: () => context.go('/')),
-        title: Text(NeedLabels.kind(need.kind)),
+        title: Text(NeedLabels.kind(context.l, need.kind)),
       ),
       body: SafeArea(
         top: false,
@@ -82,24 +85,28 @@ class _NeedDetailScreenState extends ConsumerState<NeedDetailScreen> {
   List<Widget> _proposals(BuildContext context) {
     final views = ref.watch(proposalViewsProvider(widget.needId));
     return [
-      const BvSectionTitle(
-        'Propuestas de tu barrio',
-        subtitle: 'Aquí el precio lo pone cada persona al ver tu pedido. Tú eliges. Las propuestas son de ejemplo.',
+      BvSectionTitle(
+        context.l.propuestasDeTuBarrio,
+        subtitle: context.l.aquiElPrecioLo,
       ),
       const SizedBox(height: 14),
       BvSegmented<_Sort>(
-        options: const [
+        options: [
           (
             value: _Sort.reputation,
-            label: 'Reputación',
+            label: context.l.reputacion,
             icon: Icons.star_rounded,
           ),
           (
             value: _Sort.distance,
-            label: 'Cercanía',
+            label: context.l.cercania,
             icon: Icons.near_me_rounded,
           ),
-          (value: _Sort.price, label: 'Precio', icon: Icons.sell_rounded),
+          (
+            value: _Sort.price,
+            label: context.l.precio,
+            icon: Icons.sell_rounded,
+          ),
         ],
         selected: _sort,
         onChanged: (s) => setState(() => _sort = s),
@@ -108,7 +115,7 @@ class _NeedDetailScreenState extends ConsumerState<NeedDetailScreen> {
       views.when(
         loading: () => const BvSkeletonRows(),
         error: (_, _) => BvErrorState(
-          message: 'No pudimos cargar las propuestas.',
+          message: context.l.noPudimosCargarLas,
           onRetry: () => ref.invalidate(proposalViewsProvider(widget.needId)),
         ),
         data: (list) {
@@ -162,7 +169,7 @@ class _NeedHeader extends StatelessWidget {
             Text(need.text, style: context.tt.headlineSmall),
             const SizedBox(height: 8),
             BvPill(
-              'Para: ${NeedLabels.urgency(need.urgency)}',
+              context.l.para2(NeedLabels.urgency(context.l, need.urgency)),
               icon: Icons.schedule_rounded,
               tone: BvTone.violet,
             ),
@@ -182,15 +189,15 @@ class _SyncBanner extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final busy = ref.watch(syncControllerProvider);
-    final badge = syncBadge(need.syncStatus);
+    final badge = syncBadge(context.l, need.syncStatus);
     final notSent = need.syncStatus != SyncStatus.sent;
     return BvBanner(
       icon: badge.icon,
       tone: badge.tone,
       message: [
-        syncLabel(need.syncStatus, isDemo: isDemo),
+        syncLabel(context.l, need.syncStatus, isDemo: isDemo),
         if (need.syncStatus == SyncStatus.sent && isDemo)
-          'Todavía no hay servidor: las propuestas que ves son de ejemplo.',
+          context.l.todaviaNoHayServidor,
       ].join('\n'),
       action: notSent
           ? OutlinedButton.icon(
@@ -204,7 +211,9 @@ class _SyncBanner extends ConsumerWidget {
                       child: CircularProgressIndicator(strokeWidth: 2.5),
                     )
                   : const Icon(Icons.sync_rounded),
-              label: Text(busy ? 'Enviando…' : 'Reintentar ahora'),
+              label: Text(
+                busy ? context.l.enviando : context.l.reintentarAhora,
+              ),
             )
           : null,
     );
@@ -237,7 +246,7 @@ class _ProposalCard extends StatelessWidget {
                   children: [
                     Text(p.providerName, style: context.tt.titleMedium),
                     Text(
-                      '${p.role} · ${view.vistoBueno.total} recomiendan',
+                      context.l.recomiendan(p.role, view.vistoBueno.total),
                       style: context.tt.bodySmall?.copyWith(
                         color: context.tones.muted,
                       ),
@@ -280,17 +289,17 @@ class _ProposalCard extends StatelessWidget {
             runSpacing: 8,
             children: [
               BvPill(
-                '${formatDistance(p.distanceMeters)} (aprox.)',
+                context.l.aprox(formatDistance(p.distanceMeters)),
                 icon: Icons.near_me_rounded,
               ),
               BvPill(p.availability, icon: Icons.schedule_rounded),
-              if (p.isExample) const BvPill('Ejemplo'),
+              if (p.isExample) BvPill(context.l.ejemplo),
             ],
           ),
           if (p.diagnosticVisitSoles != null) ...[
             const SizedBox(height: 10),
             Text(
-              'Ofrece visita de diagnóstico: S/ ${p.diagnosticVisitSoles} (se descuenta)',
+              context.l.ofreceVisitaDeDiagnostico(p.diagnosticVisitSoles!),
               style: context.tt.bodySmall?.copyWith(color: context.tones.muted),
             ),
           ],
@@ -300,7 +309,7 @@ class _ProposalCard extends StatelessWidget {
             child: FilledButton.icon(
               onPressed: onAccept,
               icon: const Icon(Icons.handshake_rounded),
-              label: const Text('Aceptar propuesta'),
+              label: Text(context.l.aceptarPropuesta),
             ),
           ),
         ],
@@ -310,9 +319,9 @@ class _ProposalCard extends StatelessWidget {
 }
 
 /// Texto del estado del trato (también lo usa la lista de Inicio en el futuro).
-String dealStatusLabel(DealStatus s) => switch (s) {
-  DealStatus.accepted => 'Aceptada',
-  DealStatus.inProgress => 'En curso',
-  DealStatus.awaitingRating => 'Falta calificar',
-  DealStatus.closed => 'Resuelta',
+String dealStatusLabel(AppLocalizations l, DealStatus s) => switch (s) {
+  DealStatus.accepted => l.aceptada,
+  DealStatus.inProgress => l.enCurso,
+  DealStatus.awaitingRating => l.faltaCalificar,
+  DealStatus.closed => l.resuelta,
 };

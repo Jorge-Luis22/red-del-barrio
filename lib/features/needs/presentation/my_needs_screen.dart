@@ -6,6 +6,7 @@ import '../../../app/theme/brand.dart';
 import '../../../app/ui/components.dart';
 import 'my_needs.dart';
 import 'need_labels.dart';
+import '../../../app/l10n.dart';
 
 enum _Filter { active, done, all }
 
@@ -24,7 +25,7 @@ class _MyNeedsScreenState extends ConsumerState<MyNeedsScreen> {
   Widget build(BuildContext context) {
     final items = ref.watch(myNeedsProvider);
     return Scaffold(
-      appBar: AppBar(title: const Text('Mis pedidos')),
+      appBar: AppBar(title: Text(context.l.misPedidos)),
       body: SafeArea(
         top: false,
         child: items.when(
@@ -35,7 +36,7 @@ class _MyNeedsScreenState extends ConsumerState<MyNeedsScreen> {
           error: (_, _) => Padding(
             padding: const EdgeInsets.all(16),
             child: BvErrorState(
-              message: 'No pudimos leer tus pedidos.',
+              message: context.l.noPudimosLeerTus2,
               onRetry: () => ref.invalidate(myNeedsProvider),
             ),
           ),
@@ -54,17 +55,17 @@ class _MyNeedsScreenState extends ConsumerState<MyNeedsScreen> {
                   options: [
                     (
                       value: _Filter.active,
-                      label: 'En curso',
+                      label: context.l.enCurso,
                       icon: Icons.pending_actions_rounded,
                     ),
                     (
                       value: _Filter.done,
-                      label: 'Resueltos',
+                      label: context.l.resueltos,
                       icon: Icons.check_circle_rounded,
                     ),
                     (
                       value: _Filter.all,
-                      label: 'Todos',
+                      label: context.l.trAll,
                       icon: Icons.list_alt_rounded,
                     ),
                   ],
@@ -73,7 +74,7 @@ class _MyNeedsScreenState extends ConsumerState<MyNeedsScreen> {
                 ),
                 const SizedBox(height: 12),
                 Text(
-                  '${active.length} en curso · ${done.length} resueltos',
+                  context.l.enCursoResueltos(active.length, done.length),
                   style: context.tt.bodySmall?.copyWith(
                     color: context.tones.muted,
                   ),
@@ -83,11 +84,11 @@ class _MyNeedsScreenState extends ConsumerState<MyNeedsScreen> {
                   BvPanel(
                     child: BvEmptyState(
                       title: _filter == _Filter.done
-                          ? 'Aún no resolviste ninguno'
-                          : 'No tienes pedidos en curso',
+                          ? context.l.aunNoResolvisteNinguno
+                          : context.l.noTienesPedidosEn,
                       message: _filter == _Filter.done
-                          ? 'Cuando cierres un trato y lo califiques, aparecerá aquí.'
-                          : 'Pide algo desde Inicio y tu barrio te propone cómo resolverlo.',
+                          ? context.l.cuandoCierresUnTrato
+                          : context.l.pideAlgoDesdeInicio,
                     ),
                   )
                 else
@@ -119,7 +120,7 @@ class MyNeedRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final need = item.need;
-    final badge = item.badge;
+    final badge = item.badge(context.l);
     return InkWell(
       onTap: onTap,
       child: Padding(
@@ -143,7 +144,10 @@ class MyNeedRow extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    '${NeedLabels.kind(need.kind)} · Para: ${NeedLabels.urgency(need.urgency)}',
+                    context.l.para(
+                      NeedLabels.kind(context.l, need.kind),
+                      NeedLabels.urgency(context.l, need.urgency),
+                    ),
                     style: context.tt.bodySmall?.copyWith(
                       color: context.tones.muted,
                     ),

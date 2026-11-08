@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../theme/brand.dart';
+import '../l10n.dart';
 
 /// Abre una hoja inferior sobre toda la app (también sobre la barra de pestañas),
 /// respetando el área segura y el teclado.
@@ -104,7 +105,7 @@ class BvSheetScaffold extends StatelessWidget {
                           child: CircularProgressIndicator(strokeWidth: 2.5),
                         )
                       : Icon(actionIcon),
-                  label: Text(busy ? 'Un momento…' : actionLabel),
+                  label: Text(busy ? context.l.unMomento : actionLabel),
                 ),
               ),
             ),

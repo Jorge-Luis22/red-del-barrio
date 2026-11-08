@@ -11,6 +11,8 @@ import 'composer_sheet.dart';
 import 'my_needs.dart';
 import 'my_needs_screen.dart' show MyNeedRow;
 import 'need_labels.dart';
+import '../../../app/l10n.dart';
+import '../../../app/ui/failure_text.dart';
 
 /// Inicio: pedir, lo que necesita atención de mis pedidos y un adelanto de Explorar cerca.
 /// Cada bloque es corto; lo demás vive en su propia pantalla ("Ver todos").
@@ -33,9 +35,9 @@ class HomeScreen extends ConsumerWidget {
                   _LocationBanner(state: loc),
                   const SizedBox(height: 24),
                 ],
-                const BvSectionTitle(
-                  'Atajos',
-                  subtitle: 'Un toque abre el pedido ya escrito',
+                BvSectionTitle(
+                  context.l.atajos,
+                  subtitle: context.l.unToqueAbreEl,
                 ),
                 const SizedBox(height: 12),
               ],
@@ -67,8 +69,11 @@ class _Hero extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = context.cs;
     final zone = loc.location == null
-        ? 'Zona aproximada · sin dirección exacta'
-        : 'Zona ${loc.location!.zone.lat.toStringAsFixed(2)}, ${loc.location!.zone.lng.toStringAsFixed(2)} (aprox. 1 km)';
+        ? context.l.zonaAproximadaSinDireccion
+        : context.l.zonaAprox1Km(
+            loc.location!.zone.lat.toStringAsFixed(2),
+            loc.location!.zone.lng.toStringAsFixed(2),
+          );
     return Container(
       decoration: BoxDecoration(
         color: cs.primary,
@@ -104,7 +109,7 @@ class _Hero extends StatelessWidget {
                     ),
                     const SizedBox(width: 10),
                     Text(
-                      'Red del barrio',
+                      context.l.appName,
                       style: context.tt.titleMedium?.copyWith(
                         color: cs.onPrimary,
                       ),
@@ -134,7 +139,7 @@ class _Hero extends StatelessWidget {
                 Semantics(
                   header: true,
                   child: Text(
-                    '¿Qué necesitas hoy?',
+                    context.l.queNecesitasHoy,
                     style: context.tt.headlineLarge?.copyWith(
                       color: cs.onPrimary,
                     ),
@@ -142,7 +147,7 @@ class _Hero extends StatelessWidget {
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  'Cuéntalo y los vecinos y negocios de tu zona te proponen cómo resolverlo.',
+                  context.l.cuentaloYLosVecinos,
                   style: context.tt.bodyMedium?.copyWith(
                     color: cs.onPrimary.withValues(alpha: 0.92),
                   ),
@@ -159,7 +164,7 @@ class _Hero extends StatelessWidget {
                       textStyle: context.tt.titleMedium,
                     ),
                     icon: const Icon(Icons.add_circle_rounded, size: 26),
-                    label: const Text('Pedir algo'),
+                    label: Text(context.l.pedirAlgo),
                   ),
                 ),
               ],
@@ -186,10 +191,12 @@ class _LocationBanner extends ConsumerWidget {
     return BvBanner(
       icon: failed ? Icons.location_off_rounded : Icons.my_location_rounded,
       tone: failed ? BvTone.sun : BvTone.violet,
-      title: failed ? 'No pudimos ver dónde estás' : 'Ve qué hay cerca de ti',
+      title: failed ? context.l.noPudimosVerDonde : context.l.veQueHayCerca,
       message: failed
-          ? (state.message ?? 'Revisa que la ubicación esté activada.')
-          : 'Tu ubicación se queda en tu teléfono. Los vecinos solo verán una zona de unos 1000 m.',
+          ? (state.message == null
+                ? context.l.revisaQueLaUbicacion
+                : messageText(context.l, state.message!))
+          : context.l.tuUbicacionSeQueda,
       action: FilledButton.icon(
         onPressed: loading
             ? null
@@ -202,7 +209,7 @@ class _LocationBanner extends ConsumerWidget {
                 child: CircularProgressIndicator(strokeWidth: 2.5),
               )
             : const Icon(Icons.near_me_rounded),
-        label: Text(loading ? 'Buscando…' : 'Usar mi ubicación'),
+        label: Text(loading ? context.l.buscando : context.l.usarMiUbicacion),
       ),
     );
   }
@@ -218,15 +225,15 @@ class _QuickShortcuts extends StatelessWidget {
     child: ListView.separated(
       scrollDirection: Axis.horizontal,
       padding: const EdgeInsets.symmetric(horizontal: 16),
-      itemCount: NeedLabels.quick.length,
+      itemCount: NeedLabels.quick(context.l).length,
       separatorBuilder: (_, _) => const SizedBox(width: 12),
       itemBuilder: (context, i) {
-        final q = NeedLabels.quick[i];
+        final q = NeedLabels.quick(context.l)[i];
         final tone = NeedLabels.tone(q.kind);
         final c = toneColors(context, tone);
         return Semantics(
           button: true,
-          label: 'Pedir: ${q.label}',
+          label: context.l.pedir(q.label),
           child: InkWell(
             borderRadius: BorderRadius.circular(22),
             onTap: () => showComposer(context, kind: q.kind, text: q.text),
@@ -281,7 +288,7 @@ class _MyNeedsPreview extends ConsumerWidget {
       error: (_, _) => Padding(
         padding: const EdgeInsets.only(bottom: 28),
         child: BvErrorState(
-          message: 'No pudimos leer tus pedidos. Cierra y abre la app.',
+          message: context.l.noPudimosLeerTus,
           onRetry: () => ref.invalidate(myNeedsProvider),
         ),
       ),
@@ -296,10 +303,12 @@ class _MyNeedsPreview extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               BvSectionTitle(
-                'Mis pedidos',
+                context.l.misPedidos,
                 subtitle: active.isEmpty
-                    ? 'Todo al día · $done ${done == 1 ? 'resuelto' : 'resueltos'}'
-                    : '${active.length} en curso${done > 0 ? ' · $done resueltos' : ''}',
+                    ? context.l.todoAlDiaResueltos(done)
+                    : (done > 0
+                          ? context.l.enCursoResueltos(active.length, done)
+                          : context.l.enCursoSolo(active.length)),
               ),
               const SizedBox(height: 12),
               if (shown.isNotEmpty)
@@ -319,7 +328,7 @@ class _MyNeedsPreview extends ConsumerWidget {
                   child: TextButton.icon(
                     onPressed: () => context.push('/pedidos'),
                     icon: const Icon(Icons.arrow_forward_rounded),
-                    label: Text('Ver todos mis pedidos (${all.length})'),
+                    label: Text(context.l.verTodosMisPedidos(all.length)),
                   ),
                 ),
               ],

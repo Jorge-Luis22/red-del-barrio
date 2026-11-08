@@ -1,3 +1,5 @@
+import 'dart:ui' show PlatformDispatcher;
+
 import 'package:flutter/material.dart';
 
 import '../router.dart';
@@ -14,6 +16,8 @@ class RecoveryPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Aquí puede no haber tema ni traducciones cargadas: se usa el idioma del dispositivo.
+    final t = _texts(PlatformDispatcher.instance.locale.languageCode);
     TextStyle style(
       double size,
       FontWeight w, [
@@ -56,19 +60,13 @@ class RecoveryPanel extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 20),
-                Text(
-                  'Esta pantalla no se pudo mostrar',
-                  style: style(24, FontWeight.w800),
-                ),
+                Text(t.title, style: style(24, FontWeight.w800)),
                 const SizedBox(height: 8),
-                Text(
-                  'Tus datos siguen guardados en tu teléfono. Vuelve a Inicio; si sigue igual, cierra y abre la app.',
-                  style: style(17, FontWeight.w400),
-                ),
+                Text(t.body, style: style(17, FontWeight.w400)),
                 if (detail != null) ...[
                   const SizedBox(height: 16),
                   Text(
-                    'Detalle técnico: $detail',
+                    '${t.detail}: $detail',
                     maxLines: 4,
                     overflow: TextOverflow.ellipsis,
                     style: style(
@@ -93,7 +91,7 @@ class RecoveryPanel extends StatelessWidget {
                       textStyle: style(16, FontWeight.w700),
                     ),
                     icon: const Icon(Icons.home_rounded),
-                    label: const Text('Ir a Inicio'),
+                    label: Text(t.button),
                   ),
                 ),
               ],
@@ -104,3 +102,19 @@ class RecoveryPanel extends StatelessWidget {
     );
   }
 }
+
+({String title, String body, String detail, String button}) _texts(
+  String lang,
+) => lang == 'en'
+    ? (
+        title: 'This screen could not be shown',
+        body: 'Your data is still saved on your phone. Go back to Home; if it keeps happening, close and reopen the app.',
+        detail: 'Technical detail',
+        button: 'Go to Home',
+      )
+    : (
+        title: 'Esta pantalla no se pudo mostrar',
+        body: 'Tus datos siguen guardados en tu teléfono. Vuelve a Inicio; si sigue igual, cierra y abre la app.',
+        detail: 'Detalle técnico',
+        button: 'Ir a Inicio',
+      );

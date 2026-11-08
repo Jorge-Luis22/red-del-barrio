@@ -88,7 +88,7 @@ void main() {
 
       await sos(situation: SosSituation.violence, text: '');
       final post = (await emergency.watchPosts().first).single;
-      expect(post.text, SosSituation.violence.template);
+      expect(post.text, SosSituation.violence.name);
       expect(outbox.ops.values.single.payload, contains('"private":true'));
       expect(SosSituation.fire.isPrivate, isFalse);
     },

@@ -9,6 +9,7 @@ import '../../../app/ui/section_header.dart';
 import '../../proposals/domain/deal.dart';
 import '../../proposals/presentation/deal_providers.dart';
 import '../domain/chat.dart';
+import '../../../app/l10n.dart';
 
 /// Una conversación por trato: se abre al aceptar una propuesta.
 class MensajesScreen extends ConsumerWidget {
@@ -26,8 +27,8 @@ class MensajesScreen extends ConsumerWidget {
         padding: EdgeInsets.zero,
         children: [
           BvSectionHeader(
-            title: 'Mensajes',
-            subtitle: 'El chat de cada trato.',
+            title: context.l.mensajes,
+            subtitle: context.l.elChatDeCada,
             icon: Icons.chat_bubble_rounded,
             background: context.cs.primary,
             foreground: context.cs.onPrimary,
@@ -37,19 +38,19 @@ class MensajesScreen extends ConsumerWidget {
             child: deals.when(
               loading: () => const BvSkeletonRows(),
               error: (_, _) => BvErrorState(
-                message: 'No pudimos leer tus conversaciones.',
+                message: context.l.noPudimosLeerTus3,
                 onRetry: () => ref.invalidate(dealsStreamProvider),
               ),
               data: (list) {
                 if (list.isEmpty) {
                   return BvPanel(
                     child: BvEmptyState(
-                      title: 'Aún no tienes conversaciones',
-                      message: 'Cuando aceptes una propuesta, el chat de ese trato aparece aquí.',
+                      title: context.l.aunNoTienesConversaciones,
+                      message: context.l.cuandoAceptesUnaPropuesta,
                       action: FilledButton.icon(
                         onPressed: () => context.go('/'),
                         icon: const Icon(Icons.add_circle_rounded),
-                        label: const Text('Pedir algo'),
+                        label: Text(context.l.pedirAlgo),
                       ),
                     ),
                   );
@@ -118,8 +119,8 @@ class _ConversationRow extends ConsumerWidget {
                   const SizedBox(height: 4),
                   Text(
                     last == null
-                        ? 'Escribe el primer mensaje'
-                        : 'Tú: ${last!.text}',
+                        ? context.l.escribeElPrimerMensaje
+                        : context.l.tu2(last!.text),
                     style: context.tt.bodyMedium?.copyWith(
                       fontStyle: last == null
                           ? FontStyle.italic

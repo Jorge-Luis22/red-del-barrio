@@ -12,6 +12,9 @@ import '../../proposals/domain/deal.dart';
 import '../../proposals/presentation/need_detail_screen.dart';
 import '../../sync/presentation/sync_controller.dart';
 import '../domain/chat.dart';
+import '../../../app/l10n.dart';
+import 'quick_phrases.dart';
+import '../../../app/ui/failure_text.dart';
 
 /// Chat de un trato. No hay otra persona conectada todavía: lo que escribes se guarda en tu
 /// teléfono y NO se inventan respuestas.
@@ -61,8 +64,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           }
         });
       case Err(:final failure):
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(failure.message)));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(failureText(context.l, failure))),
+        );
     }
   }
 
@@ -78,9 +82,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     if (deal == null) {
       return Scaffold(
         appBar: AppBar(),
-        body: const BvEmptyState(
-          title: 'No encontramos este trato',
-          message: 'Vuelve a Mensajes para ver tus conversaciones.',
+        body: BvEmptyState(
+          title: context.l.noEncontramosEsteTrato,
+          message: context.l.vuelveAMensajesPara,
         ),
       );
     }
@@ -104,7 +108,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                     overflow: TextOverflow.ellipsis,
                   ),
                   Text(
-                    'Trato: ${dealStatusLabel(current.status)}',
+                    context.l.trato(dealStatusLabel(context.l, current.status)),
                     style: context.tt.bodySmall?.copyWith(
                       color: context.tones.muted,
                     ),
@@ -116,7 +120,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         ),
         actions: [
           IconButton(
-            tooltip: 'Ver el pedido',
+            tooltip: context.l.verElPedido,
             icon: const Icon(Icons.assignment_outlined),
             onPressed: () => context.push('/need/${current.needId}'),
           ),
@@ -125,14 +129,12 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            const Padding(
+            Padding(
               padding: EdgeInsets.fromLTRB(16, 4, 16, 8),
               child: BvBanner(
                 icon: Icons.info_outline_rounded,
                 tone: BvTone.sun,
-                message:
-                    'Todavía no hay cuentas: tus mensajes se guardan en tu teléfono. '
-                    'El chat con la otra persona llegará con el servidor.',
+                message: context.l.todaviaNoHayCuentas2,
               ),
             ),
             Expanded(
@@ -141,15 +143,15 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                 error: (_, _) => Padding(
                   padding: const EdgeInsets.all(16),
                   child: BvErrorState(
-                    message: 'No pudimos leer los mensajes.',
+                    message: context.l.noPudimosLeerLos,
                     onRetry: () =>
                         ref.invalidate(dealMessagesProvider(widget.dealId)),
                   ),
                 ),
                 data: (list) => list.isEmpty
-                    ? const BvEmptyState(
-                        title: 'Sin mensajes todavía',
-                        message: 'Escribe abajo o toca una frase rápida.',
+                    ? BvEmptyState(
+                        title: context.l.sinMensajesTodavia,
+                        message: context.l.escribeAbajoOToca,
                       )
                     : ListView.builder(
                         controller: _scroll,
@@ -164,11 +166,11 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
               child: ListView.separated(
                 scrollDirection: Axis.horizontal,
                 padding: const EdgeInsets.symmetric(horizontal: 16),
-                itemCount: quickPhrases.length,
+                itemCount: quickPhrases(context.l).length,
                 separatorBuilder: (_, _) => const SizedBox(width: 8),
                 itemBuilder: (_, i) => ActionChip(
-                  label: Text(quickPhrases[i]),
-                  onPressed: () => _send(quickPhrases[i]),
+                  label: Text(quickPhrases(context.l)[i]),
+                  onPressed: () => _send(quickPhrases(context.l)[i]),
                   labelStyle: context.tt.labelMedium,
                 ),
               ),
@@ -184,8 +186,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                       minLines: 1,
                       maxLines: 4,
                       textCapitalization: TextCapitalization.sentences,
-                      decoration: const InputDecoration(
-                        hintText: 'Escribe un mensaje',
+                      decoration: InputDecoration(
+                        hintText: context.l.escribeUnMensaje,
                       ),
                       onChanged: (_) => setState(() {}),
                       onSubmitted: (_) => _send(),
@@ -193,7 +195,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                   ),
                   const SizedBox(width: 8),
                   IconButton.filled(
-                    tooltip: 'Enviar mensaje',
+                    tooltip: context.l.enviarMensaje,
                     onPressed: _text.text.trim().isEmpty || _sending
                         ? null
                         : _send,
@@ -219,7 +221,7 @@ class _Bubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final badge = syncBadge(message.syncStatus);
+    final badge = syncBadge(context.l, message.syncStatus);
     final sent = message.syncStatus.name == 'sent';
     return Align(
       alignment: Alignment.centerRight,
@@ -258,7 +260,7 @@ class _Bubble extends StatelessWidget {
                 ),
                 const SizedBox(width: 4),
                 Text(
-                  sent ? 'Guardado' : badge.label,
+                  sent ? context.l.guardado : badge.label,
                   style: context.tt.labelSmall?.copyWith(
                     color: context.cs.onPrimary.withValues(alpha: 0.85),
                   ),

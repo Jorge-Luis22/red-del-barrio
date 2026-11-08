@@ -6,6 +6,7 @@ import '../features/settings/presentation/tutorial_sheet.dart';
 import 'di/providers.dart';
 
 import 'theme/brand.dart';
+import 'l10n.dart';
 
 /// Marco de la app: contenido + barra inferior de cinco pestañas.
 /// Emergencia lleva el rojo de la paleta para que nunca se confunda con el resto.
@@ -47,30 +48,30 @@ class _ShellScaffoldState extends ConsumerState<ShellScaffold> {
           onDestinationSelected: (i) =>
               shell.goBranch(i, initialLocation: i == shell.currentIndex),
           destinations: [
-            const NavigationDestination(
+            NavigationDestination(
               icon: Icon(Icons.home_outlined),
               selectedIcon: Icon(Icons.home_rounded),
-              label: 'Inicio',
+              label: context.l.inicio,
             ),
-            const NavigationDestination(
+            NavigationDestination(
               icon: Icon(Icons.diversity_3_outlined),
               selectedIcon: Icon(Icons.diversity_3_rounded),
-              label: 'Vecinos',
+              label: context.l.vecinos,
             ),
-            const NavigationDestination(
+            NavigationDestination(
               icon: Icon(Icons.chat_bubble_outline_rounded),
               selectedIcon: Icon(Icons.chat_bubble_rounded),
-              label: 'Mensajes',
+              label: context.l.mensajes,
             ),
             NavigationDestination(
               icon: Icon(Icons.crisis_alert_outlined, color: emergency),
               selectedIcon: Icon(Icons.crisis_alert_rounded, color: emergency),
-              label: 'Emergencia',
+              label: context.l.emergencia,
             ),
-            const NavigationDestination(
+            NavigationDestination(
               icon: Icon(Icons.person_outline_rounded),
               selectedIcon: Icon(Icons.person_rounded),
-              label: 'Perfil',
+              label: context.l.perfil,
             ),
           ],
         ),

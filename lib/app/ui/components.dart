@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../theme/brand.dart';
 import 'illustrations.dart';
+import '../l10n.dart';
 
 /// Intención de color de un componente. Cada tono sale de la paleta Barrio Vivo.
 enum BvTone { violet, coral, trust, sun, emergency, neutral }
@@ -420,14 +421,14 @@ class BvErrorState extends StatelessWidget {
   Widget build(BuildContext context) => BvBanner(
     icon: Icons.cloud_off_rounded,
     tone: BvTone.emergency,
-    title: 'Algo no salió bien',
+    title: context.l.algoNoSalioBien,
     message: message,
     action: onRetry == null
         ? null
         : OutlinedButton.icon(
             onPressed: onRetry,
             icon: const Icon(Icons.refresh_rounded),
-            label: const Text('Intentar otra vez'),
+            label: Text(context.l.intentarOtraVez),
           ),
   );
 }
@@ -449,7 +450,7 @@ class BvSkeletonRows extends StatelessWidget {
       ),
     );
     return Semantics(
-      label: 'Cargando',
+      label: context.l.cargando,
       child: BvRows(
         children: [
           for (var i = 0; i < count; i++)

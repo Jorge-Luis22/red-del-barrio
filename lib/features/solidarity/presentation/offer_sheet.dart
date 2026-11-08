@@ -9,6 +9,8 @@ import '../../../core/result.dart';
 import '../../sync/presentation/sync_controller.dart';
 import '../domain/offer.dart';
 import 'modality_labels.dart';
+import '../../../app/l10n.dart';
+import '../../../app/ui/failure_text.dart';
 
 /// "Ofrecer algo al barrio": modalidad + qué ofreces.
 Future<void> showOfferSheet(BuildContext context) =>
@@ -43,35 +45,32 @@ class _OfferSheetState extends ConsumerState<_OfferSheet> {
       text: _text.text,
     );
     if (!mounted) return;
+    final l = context.l;
     switch (r) {
       case Ok():
         final messenger = ScaffoldMessenger.of(context);
         Navigator.of(context).pop();
         confirmHaptic(enabled: ref.read(appSettingsProvider).vibration);
         await ref.read(syncControllerProvider.notifier).flushNow();
-        messenger.showSnackBar(
-          const SnackBar(
-            content: Text('Listo: tu oferta quedó guardada en tu teléfono.'),
-          ),
-        );
+        messenger.showSnackBar(SnackBar(content: Text(l.listoTuOfertaQuedo)));
       case Err(:final failure):
         setState(() {
           _busy = false;
-          _error = failure.message;
+          _error = failureText(context.l, failure);
         });
     }
   }
 
   @override
   Widget build(BuildContext context) => BvSheetScaffold(
-    title: 'Ofrecer algo al barrio',
-    subtitle: 'Una herramienta, tu tiempo o una habilidad. Tú decides cómo.',
-    actionLabel: 'Publicar oferta',
+    title: context.l.ofrecerAlgoAlBarrio,
+    subtitle: context.l.unaHerramientaTuTiempo,
+    actionLabel: context.l.publicarOferta,
     actionIcon: Icons.volunteer_activism_rounded,
     busy: _busy,
     onAction: _text.text.trim().length >= 3 ? _publish : null,
     children: [
-      Text('¿Cómo lo ofreces?', style: context.tt.titleSmall),
+      Text(context.l.comoLoOfreces, style: context.tt.titleSmall),
       const SizedBox(height: 10),
       Row(
         children: [
@@ -80,7 +79,7 @@ class _OfferSheetState extends ConsumerState<_OfferSheet> {
               child: Semantics(
                 button: true,
                 selected: _modality == m,
-                label: ModalityLabels.name(m),
+                label: ModalityLabels.name(context.l, m),
                 child: InkWell(
                   borderRadius: BorderRadius.circular(18),
                   onTap: () => setState(() => _modality = m),
@@ -113,7 +112,7 @@ class _OfferSheetState extends ConsumerState<_OfferSheet> {
                           ),
                           const SizedBox(height: 6),
                           Text(
-                            ModalityLabels.name(m),
+                            ModalityLabels.name(context.l, m),
                             style: context.tt.labelMedium,
                           ),
                         ],
@@ -129,7 +128,7 @@ class _OfferSheetState extends ConsumerState<_OfferSheet> {
       ),
       const SizedBox(height: 6),
       Text(
-        ModalityLabels.hint(_modality),
+        ModalityLabels.hint(context.l, _modality),
         style: context.tt.bodySmall?.copyWith(color: context.tones.muted),
       ),
       const SizedBox(height: 16),
@@ -140,7 +139,7 @@ class _OfferSheetState extends ConsumerState<_OfferSheet> {
         maxLength: 200,
         textCapitalization: TextCapitalization.sentences,
         decoration: InputDecoration(
-          labelText: 'Qué ofreces',
+          labelText: context.l.queOfreces,
           errorText: _error,
         ),
         onChanged: (_) => setState(() => _error = null),

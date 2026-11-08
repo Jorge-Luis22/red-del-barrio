@@ -11,6 +11,7 @@ class AppSettings {
     this.tutorialSeen = false,
     this.volunteer = false,
     this.capabilities = const {},
+    this.languageCode,
   });
 
   /// 1.0 normal · 1.15 grande · 1.3 muy grande.
@@ -28,6 +29,9 @@ class AppSettings {
   /// Capacidades que la persona podría ofrecer en una emergencia.
   final Set<String> capabilities;
 
+  /// Idioma elegido: `es`, `en` o `null` para seguir al sistema.
+  final String? languageCode;
+
   AppSettings copyWith({
     double? textScale,
     bool? highContrast,
@@ -36,6 +40,8 @@ class AppSettings {
     bool? tutorialSeen,
     bool? volunteer,
     Set<String>? capabilities,
+    String? languageCode,
+    bool useSystemLanguage = false,
   }) => AppSettings(
     textScale: textScale ?? this.textScale,
     highContrast: highContrast ?? this.highContrast,
@@ -44,15 +50,18 @@ class AppSettings {
     tutorialSeen: tutorialSeen ?? this.tutorialSeen,
     volunteer: volunteer ?? this.volunteer,
     capabilities: capabilities ?? this.capabilities,
+    languageCode: useSystemLanguage
+        ? null
+        : (languageCode ?? this.languageCode),
   );
 }
 
 /// Capacidades que se pueden marcar para "Un barrio preparado".
 const emergencyCapabilities = [
-  'Primeros auxilios',
-  'Botiquín',
-  'Vehículo',
-  'Herramientas',
-  'Agua o víveres',
-  'Cuidar niños o mayores',
+  'firstAid',
+  'medkit',
+  'vehicle',
+  'tools',
+  'supplies',
+  'care',
 ];

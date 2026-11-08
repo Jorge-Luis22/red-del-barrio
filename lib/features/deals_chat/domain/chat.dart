@@ -17,11 +17,3 @@ class ChatMessage {
   final DateTime createdAt;
   final SyncStatus syncStatus;
 }
-
-/// Frases rápidas para quien escribe poco o con dificultad.
-const quickPhrases = [
-  'Ya voy en camino',
-  'Estoy en la puerta',
-  '¿A qué hora puede venir?',
-  'Gracias, todo bien',
-];

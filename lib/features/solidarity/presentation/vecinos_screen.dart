@@ -13,6 +13,7 @@ import '../domain/offer.dart';
 import '../domain/wall_demo.dart';
 import 'modality_labels.dart';
 import 'offer_sheet.dart';
+import '../../../app/l10n.dart';
 
 /// Muro de favores entre vecinos, sin dinero por defecto: se pide, se ofrece, se presta.
 /// Los vecinos del muro son de ejemplo; lo que publica la persona queda en su teléfono.
@@ -23,7 +24,7 @@ final _wallProvider = Provider<List<WallEntry>>((ref) {
     for (final o in offers)
       WallEntry(
         id: o.id,
-        author: 'Tú',
+        author: '',
         text: o.text,
         modality: o.modality,
         isRequest: false,
@@ -35,9 +36,9 @@ final _wallProvider = Provider<List<WallEntry>>((ref) {
     ))
       WallEntry(
         id: n.id,
-        author: 'Tú',
+        author: '',
         text: n.text,
-        tag: NeedLabels.kind(n.kind),
+        tag: n.kind.name,
         isRequest: true,
         isExample: false,
         syncStatus: n.syncStatus,
@@ -73,8 +74,8 @@ class _VecinosScreenState extends ConsumerState<VecinosScreen> {
         padding: EdgeInsets.zero,
         children: [
           BvSectionHeader(
-            title: 'Vecinos',
-            subtitle: 'Favores, préstamos y ayuda entre vecinos.',
+            title: context.l.vecinos,
+            subtitle: context.l.favoresPrestamosYAyuda,
             icon: Icons.diversity_3_rounded,
             background: context.tones.coral,
             foreground: context.cs.onSecondary,
@@ -91,7 +92,7 @@ class _VecinosScreenState extends ConsumerState<VecinosScreen> {
                         onPressed: () =>
                             showComposer(context, kind: NeedKind.loan),
                         icon: const Icon(Icons.front_hand_rounded),
-                        label: const Text('Pedir algo'),
+                        label: Text(context.l.pedirAlgo),
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -99,28 +100,28 @@ class _VecinosScreenState extends ConsumerState<VecinosScreen> {
                       child: OutlinedButton.icon(
                         onPressed: () => showOfferSheet(context),
                         icon: const Icon(Icons.volunteer_activism_rounded),
-                        label: const Text('Ofrecer'),
+                        label: Text(context.l.ofrecer),
                       ),
                     ),
                   ],
                 ),
                 const SizedBox(height: 16),
-                const BvBanner(
+                BvBanner(
                   icon: Icons.info_outline_rounded,
                   tone: BvTone.sun,
-                  message: 'Por ahora los vecinos del muro son de ejemplo. Lo que publiques queda guardado en tu teléfono.',
+                  message: context.l.porAhoraLosVecinos,
                 ),
                 const SizedBox(height: 20),
                 BvSegmented<bool>(
-                  options: const [
+                  options: [
                     (
                       value: true,
-                      label: 'Piden',
+                      label: context.l.piden,
                       icon: Icons.front_hand_rounded,
                     ),
                     (
                       value: false,
-                      label: 'Ofrecen',
+                      label: context.l.ofrecen,
                       icon: Icons.volunteer_activism_rounded,
                     ),
                   ],
@@ -134,7 +135,7 @@ class _VecinosScreenState extends ConsumerState<VecinosScreen> {
                     scrollDirection: Axis.horizontal,
                     children: [
                       ChoiceChip(
-                        label: const Text('Todas'),
+                        label: Text(context.l.todas),
                         selected: _modality == null,
                         onSelected: (_) => setState(() => _modality = null),
                         labelStyle: context.tt.labelMedium?.copyWith(
@@ -153,7 +154,7 @@ class _VecinosScreenState extends ConsumerState<VecinosScreen> {
                                 ? context.cs.onPrimary
                                 : context.cs.primary,
                           ),
-                          label: Text(ModalityLabels.name(m)),
+                          label: Text(ModalityLabels.name(context.l, m)),
                           selected: _modality == m,
                           onSelected: (_) => setState(() => _modality = m),
                           labelStyle: context.tt.labelMedium?.copyWith(
@@ -171,14 +172,14 @@ class _VecinosScreenState extends ConsumerState<VecinosScreen> {
                   BvPanel(
                     child: BvEmptyState(
                       title: _requests
-                          ? 'Nadie pide esto por ahora'
-                          : 'Nadie ofrece esto por ahora',
+                          ? context.l.nadiePideEstoPor
+                          : context.l.nadieOfreceEstoPor,
                       message: _requests
-                          ? 'Cambia la modalidad o pide tú algo al barrio.'
-                          : 'Cambia la modalidad u ofrece tú algo al barrio.',
+                          ? context.l.cambiaLaModalidadO
+                          : context.l.cambiaLaModalidadU,
                       action: OutlinedButton(
                         onPressed: () => setState(() => _modality = null),
-                        child: const Text('Ver todas'),
+                        child: Text(context.l.verTodas),
                       ),
                     ),
                   )
@@ -202,14 +203,15 @@ class _WallRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final m = entry.modality;
     final status = entry.syncStatus;
-    final badge = status == null ? null : syncBadge(status);
+    final badge = status == null ? null : syncBadge(context.l, status);
+    final author = status != null ? context.l.tu : entry.author;
     return Padding(
       padding: const EdgeInsets.all(16),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           BvAvatar(
-            entry.author,
+            author,
             tone: entry.isExample ? BvTone.violet : BvTone.trust,
           ),
           const SizedBox(width: 14),
@@ -219,14 +221,15 @@ class _WallRow extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    Expanded(
-                      child: Text(entry.author, style: context.tt.titleSmall),
-                    ),
-                    if (entry.isExample) const BvPill('Ejemplo'),
+                    Expanded(child: Text(author, style: context.tt.titleSmall)),
+                    if (entry.isExample) BvPill(context.l.ejemplo),
                   ],
                 ),
                 const SizedBox(height: 4),
-                Text(entry.text, style: context.tt.bodyMedium),
+                Text(
+                  entry.isExample ? _demoText(context.l, entry) : entry.text,
+                  style: context.tt.bodyMedium,
+                ),
                 const SizedBox(height: 10),
                 Wrap(
                   spacing: 8,
@@ -234,19 +237,22 @@ class _WallRow extends StatelessWidget {
                   children: [
                     if (m != null)
                       BvPill(
-                        ModalityLabels.name(m),
+                        ModalityLabels.name(context.l, m),
                         icon: ModalityLabels.icon(m),
                         tone: ModalityLabels.tone(m),
                       )
                     else if (entry.tag != null)
                       BvPill(
-                        entry.tag!,
+                        NeedLabels.kind(
+                          context.l,
+                          NeedKind.values.byName(entry.tag!),
+                        ),
                         icon: Icons.handshake_rounded,
                         tone: BvTone.violet,
                       ),
                     if (entry.distanceMeters != null)
                       BvPill(
-                        'a ${formatDistance(entry.distanceMeters!)} (aprox.)',
+                        context.l.aAprox(formatDistance(entry.distanceMeters!)),
                         icon: Icons.near_me_rounded,
                       ),
                     if (badge != null)
@@ -261,3 +267,14 @@ class _WallRow extends StatelessWidget {
     );
   }
 }
+
+/// Los mensajes de ejemplo del muro se traducen; lo que escribe la persona se muestra tal cual.
+String _demoText(AppLocalizations l, WallEntry e) => switch (e.id) {
+  'w1' => l.wall1,
+  'w2' => l.wall2,
+  'w3' => l.wall3,
+  'w4' => l.wall4,
+  'w5' => l.wall5,
+  'w6' => l.wall6,
+  _ => e.text,
+};

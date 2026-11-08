@@ -10,6 +10,8 @@ import '../../../app/ui/components.dart';
 import '../../../core/result.dart';
 import '../domain/deal.dart';
 import 'deal_providers.dart';
+import '../../../app/l10n.dart';
+import '../../../app/ui/failure_text.dart';
 
 /// Línea de tiempo del trato: Aceptada → En curso → Falta calificar → Resuelta.
 class DealPanel extends ConsumerStatefulWidget {
@@ -49,7 +51,7 @@ class _DealPanelState extends ConsumerState<DealPanel> {
       case Ok():
         if (ok != null) _toast(ok);
       case Err(:final failure):
-        _toast(failure.message);
+        _toast(failureText(context.l, failure));
     }
   }
 
@@ -71,7 +73,7 @@ class _DealPanelState extends ConsumerState<DealPanel> {
                   children: [
                     Text(d.providerName, style: context.tt.titleMedium),
                     Text(
-                      'Trato: ${d.priceLabel}',
+                      context.l.trato(d.priceLabel),
                       style: context.tt.bodyMedium?.copyWith(
                         color: context.tones.muted,
                       ),
@@ -80,7 +82,7 @@ class _DealPanelState extends ConsumerState<DealPanel> {
                 ),
               ),
               IconButton.filledTonal(
-                tooltip: 'Abrir el chat de este trato',
+                tooltip: context.l.abrirElChatDe,
                 onPressed: () => context.push('/mensajes/${d.id}'),
                 icon: const Icon(Icons.chat_bubble_rounded),
                 style: IconButton.styleFrom(minimumSize: const Size(52, 52)),
@@ -110,12 +112,12 @@ class _DealPanelState extends ConsumerState<DealPanel> {
           children: [
             Icon(Icons.pin_rounded, color: context.cs.primary),
             const SizedBox(width: 8),
-            Text('Tu código de encuentro', style: context.tt.titleMedium),
+            Text(context.l.tuCodigoDeEncuentro, style: context.tt.titleMedium),
           ],
         ),
         const SizedBox(height: 16),
         Semantics(
-          label: 'Código ${d.code.split('').join(' ')}',
+          label: context.l.codigoDigitos(d.code.split('').join(' ')),
           child: ExcludeSemantics(
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -144,8 +146,7 @@ class _DealPanelState extends ConsumerState<DealPanel> {
         ),
         const SizedBox(height: 16),
         Text(
-          'Díselo a ${d.providerName.split(' ').first} cuando llegue. Así confirmamos que se encontraron de verdad '
-          'y el trato cuenta para la reputación.',
+          context.l.diselo(d.providerName.split(' ').first),
           style: context.tt.bodyMedium,
         ),
         const SizedBox(height: 20),
@@ -156,15 +157,15 @@ class _DealPanelState extends ConsumerState<DealPanel> {
                 ? null
                 : () => _run(
                     () => ref.read(validateMeetingCodeProvider)(d.id, d.code),
-                    ok: 'Código validado. Encuentro confirmado.',
+                    ok: context.l.codigoValidadoEncuentroConfirmado,
                   ),
             icon: const Icon(Icons.science_outlined),
-            label: const Text('Demo: la otra persona ingresa el código'),
+            label: Text(context.l.demoLaOtraPersona),
           ),
         ),
         const SizedBox(height: 8),
         Text(
-          'Todavía no hay cuentas: este botón hace de la otra persona solo para la demostración.',
+          context.l.todaviaNoHayCuentas,
           style: context.tt.bodySmall?.copyWith(color: context.tones.muted),
         ),
       ],
@@ -176,16 +177,16 @@ class _DealPanelState extends ConsumerState<DealPanel> {
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const BvPill(
-          'Encuentro confirmado con código',
+        BvPill(
+          context.l.encuentroConfirmadoConCodigo,
           icon: Icons.verified_rounded,
           tone: BvTone.trust,
         ),
         const SizedBox(height: 16),
-        Text('En curso', style: context.tt.titleMedium),
+        Text(context.l.enCurso, style: context.tt.titleMedium),
         _Elapsed(since: d.startedAt!),
         Text(
-          'Tiempo desde que se validó el código. Es informativo, no es un cobro.',
+          context.l.tiempoDesdeQueSe,
           style: context.tt.bodySmall?.copyWith(color: context.tones.muted),
         ),
         const SizedBox(height: 20),
@@ -196,10 +197,10 @@ class _DealPanelState extends ConsumerState<DealPanel> {
                 ? null
                 : () => _run(
                     () => ref.read(completeDealProvider)(d.id),
-                    ok: 'Servicio marcado como hecho.',
+                    ok: context.l.servicioMarcadoComoHecho,
                   ),
             icon: const Icon(Icons.task_alt_rounded),
-            label: const Text('Servicio hecho'),
+            label: Text(context.l.servicioHecho),
           ),
         ),
       ],
@@ -212,12 +213,16 @@ class _DealPanelState extends ConsumerState<DealPanel> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Servicio realizado${d.duration != null ? ' en ${_fmt(d.duration!)}' : ''}',
+          d.duration != null
+              ? context.l.servicioRealizadoEnTiempo(
+                  _fmt(context.l, d.duration!),
+                )
+              : context.l.servicioRealizado,
           style: context.tt.titleMedium,
         ),
         const SizedBox(height: 4),
         Text(
-          '¿Cómo te fue?',
+          context.l.comoTeFue,
           style: context.tt.bodyMedium?.copyWith(color: context.tones.muted),
         ),
         const SizedBox(height: 8),
@@ -233,17 +238,15 @@ class _DealPanelState extends ConsumerState<DealPanel> {
           controller: _comment,
           maxLength: 200,
           textCapitalization: TextCapitalization.sentences,
-          decoration: const InputDecoration(labelText: 'Comentario (opcional)'),
+          decoration: InputDecoration(labelText: context.l.comentarioOpcional),
         ),
         SwitchListTile(
           contentPadding: EdgeInsets.zero,
           title: Text(
-            'Recomendar a ${d.providerName.split(' ').first}',
+            context.l.recomendarA(d.providerName.split(' ').first),
             style: context.tt.titleSmall,
           ),
-          subtitle: const Text(
-            'Suma a "vecinos que lo recomiendan". Solo cuenta porque hubo un trato contigo.',
-          ),
+          subtitle: Text(context.l.sumaAVecinosQue),
           value: _recommend,
           onChanged: (v) => setState(() => _recommend = v),
         ),
@@ -260,10 +263,10 @@ class _DealPanelState extends ConsumerState<DealPanel> {
                       comment: _comment.text,
                       recommend: _recommend,
                     ),
-                    ok: 'Gracias. Tu calificación quedó guardada en tu teléfono.',
+                    ok: context.l.graciasTuCalificacionQuedo,
                   ),
             icon: const Icon(Icons.send_rounded),
-            label: const Text('Enviar calificación'),
+            label: Text(context.l.enviarCalificacion),
           ),
         ),
       ],
@@ -289,7 +292,7 @@ class _DealPanelState extends ConsumerState<DealPanel> {
       ),
       child: summary.when(
         loading: () => const LinearProgressIndicator(),
-        error: (_, _) => const Text('Trato cerrado.'),
+        error: (_, _) => Text(context.l.tratoCerrado),
         data: (s) => Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -303,7 +306,7 @@ class _DealPanelState extends ConsumerState<DealPanel> {
                 const SizedBox(width: 10),
                 Expanded(
                   child: Text(
-                    'Trato resuelto y calificado',
+                    context.l.tratoResueltoYCalificado,
                     style: context.tt.titleLarge,
                   ),
                 ),
@@ -311,26 +314,36 @@ class _DealPanelState extends ConsumerState<DealPanel> {
             ),
             const SizedBox(height: 14),
             if (d.duration != null)
-              _row(context, 'Servicio realizado en', _fmt(d.duration!)),
-            _row(context, 'Precio final', d.priceLabel),
+              _row(
+                context,
+                context.l.servicioRealizadoEn,
+                _fmt(context.l, d.duration!),
+              ),
+            _row(context, context.l.precioFinal, d.priceLabel),
             if (s != null) ...[
               _row(
                 context,
-                'Reputación de ${d.providerName.split(' ').first}',
+                context.l.reputacionDe(d.providerName.split(' ').first),
                 '${s.before.average.toStringAsFixed(2)} → ${s.after.average.toStringAsFixed(2)} ★',
               ),
-              _row(context, 'Calificaciones tuyas', '${s.after.realCount}'),
               _row(
                 context,
-                'Vecinos que lo recomiendan',
-                '${s.vistoBueno.example} (ejemplo) + ${s.vistoBueno.confirmed} tuya${s.vistoBueno.confirmed == 1 ? '' : 's'}',
+                context.l.calificacionesTuyas,
+                '${s.after.realCount}',
+              ),
+              _row(
+                context,
+                context.l.vecinosQueLoRecomiendan,
+                context.l.vecinosRecomiendanResumen(
+                  s.vistoBueno.example,
+                  s.vistoBueno.confirmed,
+                ),
               ),
             ],
-            _row(context, 'Necesidades resueltas', '$resolved'),
+            _row(context, context.l.necesidadesResueltas, '$resolved'),
             const SizedBox(height: 12),
             Text(
-              'Cada necesidad resuelta deja al barrio mejor preparado para la siguiente. '
-              'La calificación de la otra persona hacia ti se mostrará cuando haya cuentas.',
+              context.l.cadaNecesidadResueltaDeja,
               style: context.tt.bodySmall?.copyWith(color: context.tones.muted),
             ),
           ],
@@ -358,10 +371,10 @@ class _DealPanelState extends ConsumerState<DealPanel> {
     ),
   );
 
-  static String _fmt(Duration d) {
+  static String _fmt(AppLocalizations l, Duration d) {
     final m = d.inMinutes, s = d.inSeconds % 60;
-    if (m == 0) return '${d.inSeconds.clamp(1, 59)} s';
-    return '$m min${s > 0 ? ' $s s' : ''}';
+    if (m == 0) return l.duracionSegundos(d.inSeconds.clamp(1, 59));
+    return s > 0 ? l.duracionMinutosSegundos(m, s) : l.duracionMinutos(m);
   }
 }
 
@@ -372,18 +385,24 @@ class _Timeline extends StatelessWidget {
 
   final int current;
 
-  static const _steps = ['Aceptada', 'En curso', 'Falta calificar', 'Resuelta'];
+  static List<String> _stepNames(AppLocalizations l) => [
+    l.aceptada,
+    l.enCurso,
+    l.faltaCalificar,
+    l.resuelta,
+  ];
 
   @override
   Widget build(BuildContext context) {
     final cs = context.cs;
+    final steps = _stepNames(context.l);
     return Semantics(
-      label: 'Etapa ${current + 1} de ${_steps.length}: ${_steps[current]}',
+      label: context.l.etapaDe(current + 1, steps.length, steps[current]),
       child: ExcludeSemantics(
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            for (var i = 0; i < _steps.length; i++) ...[
+            for (var i = 0; i < steps.length; i++) ...[
               Expanded(
                 child: Column(
                   children: [
@@ -396,7 +415,7 @@ class _Timeline extends StatelessWidget {
                         ),
                         _dot(context, i),
                         Expanded(
-                          child: i == _steps.length - 1
+                          child: i == steps.length - 1
                               ? const SizedBox()
                               : _line(context, i < current),
                         ),
@@ -404,7 +423,7 @@ class _Timeline extends StatelessWidget {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      _steps[i],
+                      steps[i],
                       textAlign: TextAlign.center,
                       style: context.tt.labelSmall?.copyWith(
                         color: i == current ? cs.primary : context.tones.muted,

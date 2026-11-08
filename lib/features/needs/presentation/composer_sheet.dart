@@ -9,6 +9,8 @@ import '../../../core/result.dart';
 import '../../sync/presentation/sync_controller.dart';
 import '../domain/need.dart';
 import 'need_labels.dart';
+import '../../../app/l10n.dart';
+import '../../../app/ui/failure_text.dart';
 
 /// Abre el formulario de "¿Qué necesitas?".
 ///
@@ -65,6 +67,7 @@ class _ComposerSheetState extends ConsumerState<ComposerSheet> {
       urgency: _urgency,
     );
     if (!mounted) return;
+    final l = context.l;
     switch (result) {
       case Ok(:final value):
         final router = GoRouter.of(context);
@@ -72,18 +75,16 @@ class _ComposerSheetState extends ConsumerState<ComposerSheet> {
         Navigator.of(context).pop();
         await ref.read(syncControllerProvider.notifier).flushNow();
         messenger.showSnackBar(
-          const SnackBar(
+          SnackBar(
             duration: Duration(seconds: 6),
-            content: Text(
-              'Listo: tu pedido quedó guardado. Mira su estado en la siguiente pantalla.',
-            ),
+            content: Text(l.listoTuPedidoQuedo),
           ),
         );
         router.go('/need/${value.id}');
       case Err(:final failure):
         setState(() {
           _busy = false;
-          _error = failure.message;
+          _error = failureText(context.l, failure);
         });
     }
   }
@@ -107,21 +108,24 @@ class _ComposerSheetState extends ConsumerState<ComposerSheet> {
                 children: [
                   Semantics(
                     header: true,
-                    child: Text('¿Qué necesitas?', style: tt.headlineSmall),
+                    child: Text(
+                      context.l.queNecesitas,
+                      style: tt.headlineSmall,
+                    ),
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'Elige una frase o escribe con tus palabras. Tu barrio te propone cómo resolverlo.',
+                    context.l.eligeUnaFraseO,
                     style: tt.bodyMedium?.copyWith(color: context.tones.muted),
                   ),
                   const SizedBox(height: 20),
-                  _stepLabel(context, '1', 'Qué tipo de ayuda'),
+                  _stepLabel(context, '1', context.l.queTipoDeAyuda),
                   const SizedBox(height: 10),
                   _kindGrid(context),
                   const SizedBox(height: 20),
-                  _stepLabel(context, '2', 'Elige una frase o escríbelo'),
+                  _stepLabel(context, '2', context.l.eligeUnaFraseO2),
                   const SizedBox(height: 10),
-                  for (final s in NeedLabels.suggestions(_kind))
+                  for (final s in NeedLabels.suggestions(context.l, _kind))
                     _SuggestionRow(
                       text: s,
                       selected: _text.text == s,
@@ -135,13 +139,15 @@ class _ComposerSheetState extends ConsumerState<ComposerSheet> {
                     maxLength: 200,
                     textCapitalization: TextCapitalization.sentences,
                     decoration: InputDecoration(
-                      labelText: 'Con tus palabras (${NeedLabels.kind(_kind)})',
+                      labelText: context.l.conTusPalabras(
+                        NeedLabels.kind(context.l, _kind),
+                      ),
                       errorText: _error,
                     ),
                     onChanged: (_) => setState(() => _error = null),
                   ),
                   const SizedBox(height: 12),
-                  _stepLabel(context, '3', '¿Para cuándo lo necesitas?'),
+                  _stepLabel(context, '3', context.l.paraCuandoLoNecesitas),
                   const SizedBox(height: 10),
                   Wrap(
                     spacing: 8,
@@ -149,7 +155,7 @@ class _ComposerSheetState extends ConsumerState<ComposerSheet> {
                     children: [
                       for (final u in Urgency.values)
                         ChoiceChip(
-                          label: Text(NeedLabels.urgency(u)),
+                          label: Text(NeedLabels.urgency(context.l, u)),
                           selected: _urgency == u,
                           onSelected: (_) => setState(() => _urgency = u),
                           labelStyle: tt.labelMedium?.copyWith(
@@ -184,7 +190,9 @@ class _ComposerSheetState extends ConsumerState<ComposerSheet> {
                           child: CircularProgressIndicator(strokeWidth: 2.5),
                         )
                       : const Icon(Icons.send_rounded),
-                  label: Text(_busy ? 'Publicando…' : 'Publicar'),
+                  label: Text(
+                    _busy ? context.l.publicando : context.l.publicar,
+                  ),
                 ),
               ),
             ),
@@ -227,7 +235,8 @@ class _ComposerSheetState extends ConsumerState<ComposerSheet> {
         Semantics(
           button: true,
           selected: _kind == k,
-          label: '${NeedLabels.kind(k)}. ${NeedLabels.hint(k)}',
+          label:
+              '${NeedLabels.kind(context.l, k)}. ${NeedLabels.hint(context.l, k)}',
           child: InkWell(
             borderRadius: BorderRadius.circular(20),
             onTap: () => setState(() => _kind = k),
@@ -260,7 +269,7 @@ class _ComposerSheetState extends ConsumerState<ComposerSheet> {
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
-                            NeedLabels.kind(k),
+                            NeedLabels.kind(context.l, k),
                             style: context.tt.titleSmall,
                           ),
                         ),
@@ -268,7 +277,7 @@ class _ComposerSheetState extends ConsumerState<ComposerSheet> {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      NeedLabels.hint(k),
+                      NeedLabels.hint(context.l, k),
                       style: context.tt.bodySmall?.copyWith(
                         color: context.tones.muted,
                       ),

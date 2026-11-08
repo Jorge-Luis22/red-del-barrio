@@ -12,6 +12,9 @@ import '../../needs/presentation/need_labels.dart';
 import '../../settings/domain/app_settings.dart';
 import '../domain/emergency.dart';
 import 'sos_sheet.dart';
+import '../../../app/l10n.dart';
+import 'sos_labels.dart';
+import '../../../app/ui/failure_text.dart';
 
 /// Emergencia. Orden fijo e intencional: 1) servicios oficiales, 2) pedir ayuda al barrio,
 /// 3) mis avisos, 4) un barrio preparado. La institución oficial siempre va primero.
@@ -32,8 +35,8 @@ class EmergenciaScreen extends ConsumerWidget {
         padding: EdgeInsets.zero,
         children: [
           BvSectionHeader(
-            title: 'Emergencia',
-            subtitle: 'Ayuda del barrio cuando más importa.',
+            title: context.l.emergencia,
+            subtitle: context.l.ayudaDelBarrioCuando,
             icon: Icons.crisis_alert_rounded,
             background: context.tones.emergency,
             foreground: context.cs.onError,
@@ -44,9 +47,9 @@ class EmergenciaScreen extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // 1) Oficiales primero.
-                const BvSectionTitle(
-                  'Servicios oficiales',
-                  subtitle: 'En peligro, llama aquí primero.',
+                BvSectionTitle(
+                  context.l.serviciosOficiales,
+                  subtitle: context.l.enPeligroLlamaAqui,
                 ),
                 const SizedBox(height: 12),
                 BvRows(
@@ -56,7 +59,7 @@ class EmergenciaScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: 10),
                 Text(
-                  'Verifica estos números con fuentes oficiales antes de depender de ellos.',
+                  context.l.verificaEstosNumerosCon,
                   style: context.tt.bodySmall?.copyWith(
                     color: context.tones.muted,
                   ),
@@ -64,9 +67,9 @@ class EmergenciaScreen extends ConsumerWidget {
                 const SizedBox(height: 28),
 
                 // 2) Pedir ayuda al barrio.
-                const BvSectionTitle(
-                  'Ayuda del barrio',
-                  subtitle: 'Avisa a tus vecinos. No reemplaza a los servicios oficiales.',
+                BvSectionTitle(
+                  context.l.ayudaDelBarrio,
+                  subtitle: context.l.avisaATusVecinos,
                 ),
                 const SizedBox(height: 12),
                 SizedBox(
@@ -79,7 +82,7 @@ class EmergenciaScreen extends ConsumerWidget {
                       minimumSize: const Size(64, 60),
                     ),
                     icon: const Icon(Icons.campaign_rounded),
-                    label: const Text('Necesito ayuda'),
+                    label: Text(context.l.necesitoAyuda),
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -88,7 +91,7 @@ class EmergenciaScreen extends ConsumerWidget {
                 posts.when(
                   loading: () => const BvSkeletonRows(count: 1),
                   error: (_, _) => BvErrorState(
-                    message: 'No pudimos leer tus avisos.',
+                    message: context.l.noPudimosLeerTus4,
                     onRetry: () => ref.invalidate(emergencyPostsStreamProvider),
                   ),
                   data: (list) => list.isEmpty
@@ -96,7 +99,7 @@ class EmergenciaScreen extends ConsumerWidget {
                       : Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const BvSectionTitle('Mis avisos'),
+                            BvSectionTitle(context.l.misAvisos),
                             const SizedBox(height: 12),
                             BvRows(
                               children: [
@@ -105,7 +108,7 @@ class EmergenciaScreen extends ConsumerWidget {
                             ),
                             const SizedBox(height: 8),
                             Text(
-                              'Todavía no hay vecinos conectados que respondan: nadie te escribirá desde la app.',
+                              context.l.todaviaNoHayVecinos,
                               style: context.tt.bodySmall?.copyWith(
                                 color: context.tones.muted,
                               ),
@@ -116,9 +119,9 @@ class EmergenciaScreen extends ConsumerWidget {
                 const SizedBox(height: 28),
 
                 // 4) Barrio preparado.
-                const BvSectionTitle(
-                  'Un barrio preparado',
-                  subtitle: 'Qué podrías ofrecer si pasa algo.',
+                BvSectionTitle(
+                  context.l.unBarrioPreparado,
+                  subtitle: context.l.quePodriasOfrecerSi,
                 ),
                 const SizedBox(height: 12),
                 BvPanel(
@@ -132,7 +135,7 @@ class EmergenciaScreen extends ConsumerWidget {
                         children: [
                           for (final cap in emergencyCapabilities)
                             FilterChip(
-                              label: Text(cap),
+                              label: Text(capabilityLabel(context.l, cap)),
                               selected: settings.capabilities.contains(cap),
                               showCheckmark: true,
                               onSelected: (on) => settingsRepo.update(
@@ -155,12 +158,10 @@ class EmergenciaScreen extends ConsumerWidget {
                       SwitchListTile(
                         contentPadding: EdgeInsets.zero,
                         title: Text(
-                          'Brigadista vecinal voluntario',
+                          context.l.brigadistaVecinalVoluntario,
                           style: context.tt.titleSmall,
                         ),
-                        subtitle: const Text(
-                          'Sin verificar. Solo queda guardado en tu teléfono.',
-                        ),
+                        subtitle: Text(context.l.sinVerificarSoloQueda),
                         value: settings.volunteer,
                         onChanged: (v) => settingsRepo.update(
                           (s) => s.copyWith(volunteer: v),
@@ -171,20 +172,20 @@ class EmergenciaScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: 16),
                 BvSectionTitle(
-                  'Puntos de acopio',
-                  subtitle: 'Lugares para reunir ayuda. Los que propongas quedan sin verificar.',
+                  context.l.puntosDeAcopio,
+                  subtitle: context.l.lugaresParaReunirAyuda,
                   trailing: TextButton.icon(
                     onPressed: () => _showAcopioSheet(context),
                     icon: const Icon(Icons.add_location_alt_rounded),
-                    label: const Text('Proponer'),
+                    label: Text(context.l.proponer),
                   ),
                 ),
                 const SizedBox(height: 12),
                 if (points.isEmpty)
-                  const BvBanner(
+                  BvBanner(
                     icon: Icons.place_outlined,
                     tone: BvTone.violet,
-                    message: 'Aún no hay puntos de acopio. Propón uno: un colegio, una iglesia o un local del barrio.',
+                    message: context.l.aunNoHayPuntos,
                   )
                 else
                   BvRows(
@@ -208,18 +209,21 @@ class _OfficialRow extends StatelessWidget {
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text('¿Llamar al ${contact.number}?'),
+        title: Text(context.l.llamarAl(contact.number)),
         content: Text(
-          '${contact.name} · ${contact.use}.\nEste número está por verificar con fuentes oficiales.',
+          context.l.esteNumeroEstaPor(
+            officialName(context.l, contact.id),
+            officialUse(context.l, contact.id),
+          ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancelar'),
+            child: Text(context.l.cancelar),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Llamar'),
+            child: Text(context.l.llamar),
           ),
         ],
       ),
@@ -228,11 +232,7 @@ class _OfficialRow extends StatelessWidget {
     final launched = await launchUrl(Uri(scheme: 'tel', path: contact.number));
     if (!launched && context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'No pudimos abrir el teléfono. Marca el ${contact.number} desde tu celular.',
-          ),
-        ),
+        SnackBar(content: Text(context.l.noPudimosAbrirEl(contact.number))),
       );
     }
   }
@@ -240,7 +240,10 @@ class _OfficialRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Semantics(
     button: true,
-    label: 'Llamar a ${contact.name}, número ${contact.number}',
+    label: context.l.llamarANumero(
+      officialName(context.l, contact.id),
+      contact.number,
+    ),
     child: InkWell(
       onTap: () => _call(context),
       child: Padding(
@@ -267,9 +270,12 @@ class _OfficialRow extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(contact.name, style: context.tt.titleSmall),
                   Text(
-                    contact.use,
+                    officialName(context.l, contact.id),
+                    style: context.tt.titleSmall,
+                  ),
+                  Text(
+                    officialUse(context.l, contact.id),
                     style: context.tt.bodySmall?.copyWith(
                       color: context.tones.muted,
                     ),
@@ -277,7 +283,7 @@ class _OfficialRow extends StatelessWidget {
                 ],
               ),
             ),
-            const BvPill('Por verificar', tone: BvTone.sun),
+            BvPill(context.l.porVerificar, tone: BvTone.sun),
             const SizedBox(width: 8),
             Icon(Icons.call_rounded, color: context.tones.emergency),
           ],
@@ -294,7 +300,7 @@ class _PostRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final badge = syncBadge(post.syncStatus);
+    final badge = syncBadge(context.l, post.syncStatus);
     return Padding(
       padding: const EdgeInsets.all(16),
       child: Row(
@@ -317,7 +323,10 @@ class _PostRow extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(post.situation.label, style: context.tt.titleSmall),
+                Text(
+                  sosLabel(context.l, post.situation),
+                  style: context.tt.titleSmall,
+                ),
                 const SizedBox(height: 2),
                 Text(post.text, style: context.tt.bodyMedium),
                 const SizedBox(height: 8),
@@ -327,8 +336,8 @@ class _PostRow extends StatelessWidget {
                   children: [
                     BvPill(badge.label, icon: badge.icon, tone: badge.tone),
                     if (post.situation.isPrivate)
-                      const BvPill(
-                        'Privado',
+                      BvPill(
+                        context.l.privado,
                         icon: Icons.lock_rounded,
                         tone: BvTone.violet,
                       ),
@@ -369,8 +378,8 @@ class _AcopioRow extends StatelessWidget {
                   ),
                 ),
               const SizedBox(height: 8),
-              const BvPill(
-                'Propuesto por ti · sin verificar',
+              BvPill(
+                context.l.propuestoPorTiSin,
                 icon: Icons.help_outline_rounded,
                 tone: BvTone.sun,
               ),
@@ -414,15 +423,15 @@ class _AcopioSheetState extends ConsumerState<_AcopioSheet> {
       case Ok():
         Navigator.of(context).pop();
       case Err(:final failure):
-        setState(() => _error = failure.message);
+        setState(() => _error = failureText(context.l, failure));
     }
   }
 
   @override
   Widget build(BuildContext context) => BvSheetScaffold(
-    title: 'Proponer un punto de acopio',
-    subtitle: 'Un lugar del barrio donde reunir agua, comida o abrigo.',
-    actionLabel: 'Guardar punto',
+    title: context.l.proponerUnPuntoDe,
+    subtitle: context.l.unLugarDelBarrio,
+    actionLabel: context.l.guardarPunto,
     actionIcon: Icons.add_location_alt_rounded,
     onAction: _name.text.trim().length >= 3 ? _save : null,
     children: [
@@ -430,7 +439,7 @@ class _AcopioSheetState extends ConsumerState<_AcopioSheet> {
         controller: _name,
         textCapitalization: TextCapitalization.sentences,
         decoration: InputDecoration(
-          labelText: 'Nombre del lugar',
+          labelText: context.l.nombreDelLugar,
           errorText: _error,
         ),
         onChanged: (_) => setState(() => _error = null),
@@ -439,9 +448,9 @@ class _AcopioSheetState extends ConsumerState<_AcopioSheet> {
       TextField(
         controller: _ref,
         textCapitalization: TextCapitalization.sentences,
-        decoration: const InputDecoration(
-          labelText: 'Referencia (opcional)',
-          helperText: 'Por ejemplo: frente al parque',
+        decoration: InputDecoration(
+          labelText: context.l.referenciaOpcional,
+          helperText: context.l.porEjemploFrenteAl,
         ),
       ),
     ],

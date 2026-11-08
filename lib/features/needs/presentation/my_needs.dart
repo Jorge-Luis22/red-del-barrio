@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../app/di/providers.dart';
+import '../../../app/l10n.dart';
 import '../../../app/ui/components.dart';
 import '../../proposals/domain/deal.dart';
 import '../domain/need.dart';
@@ -43,38 +44,39 @@ class MyNeed {
     NeedPhase.done => 5,
   };
 
-  ({String label, IconData icon, BvTone tone}) get badge => switch (phase) {
-    NeedPhase.sending => (
-      label: 'Pendiente de envío',
-      icon: Icons.schedule_rounded,
-      tone: BvTone.sun,
-    ),
-    NeedPhase.error => (
-      label: 'No se envió · reintentar',
-      icon: Icons.error_rounded,
-      tone: BvTone.emergency,
-    ),
-    NeedPhase.waiting => (
-      label: 'Con propuestas',
-      icon: Icons.groups_rounded,
-      tone: BvTone.violet,
-    ),
-    NeedPhase.active => (
-      label: 'En curso',
-      icon: Icons.handshake_rounded,
-      tone: BvTone.trust,
-    ),
-    NeedPhase.rate => (
-      label: 'Falta calificar',
-      icon: Icons.star_rounded,
-      tone: BvTone.coral,
-    ),
-    NeedPhase.done => (
-      label: 'Resuelta',
-      icon: Icons.check_circle_rounded,
-      tone: BvTone.trust,
-    ),
-  };
+  ({String label, IconData icon, BvTone tone}) badge(AppLocalizations l) =>
+      switch (phase) {
+        NeedPhase.sending => (
+          label: l.phaseSending,
+          icon: Icons.schedule_rounded,
+          tone: BvTone.sun,
+        ),
+        NeedPhase.error => (
+          label: l.phaseError,
+          icon: Icons.error_rounded,
+          tone: BvTone.emergency,
+        ),
+        NeedPhase.waiting => (
+          label: l.phaseWaiting,
+          icon: Icons.groups_rounded,
+          tone: BvTone.violet,
+        ),
+        NeedPhase.active => (
+          label: l.phaseActive,
+          icon: Icons.handshake_rounded,
+          tone: BvTone.trust,
+        ),
+        NeedPhase.rate => (
+          label: l.phaseRate,
+          icon: Icons.star_rounded,
+          tone: BvTone.coral,
+        ),
+        NeedPhase.done => (
+          label: l.phaseDone,
+          icon: Icons.check_circle_rounded,
+          tone: BvTone.trust,
+        ),
+      };
 }
 
 /// Pedidos de la persona con su trato, ordenados: primero lo que necesita atención,

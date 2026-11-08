@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../features/settings/domain/app_settings.dart';
 import '../features/sync/presentation/sync_controller.dart';
 import 'di/providers.dart';
+import 'l10n.dart';
 import 'router.dart';
 import 'theme/app_theme.dart';
 
@@ -18,7 +18,7 @@ class RedBarrioApp extends ConsumerWidget {
     ); // vacía la cola al abrir y al volver la red
     final settings = ref.watch(appSettingsProvider);
     return MaterialApp.router(
-      title: 'Red del barrio',
+      onGenerateTitle: (context) => AppLocalizations.of(context).appName,
       theme: AppTheme.light(highContrast: settings.highContrast),
       darkTheme: AppTheme.dark(highContrast: settings.highContrast),
       themeMode: switch (settings.theme) {
@@ -27,9 +27,18 @@ class RedBarrioApp extends ConsumerWidget {
         ThemePreference.dark => ThemeMode.dark,
       },
       routerConfig: appRouter,
-      locale: const Locale('es'),
-      supportedLocales: const [Locale('es'), Locale('en')],
-      localizationsDelegates: GlobalMaterialLocalizations.delegates,
+      // Sin elección propia sigue al sistema; si el sistema no es es/en, usa español.
+      locale: settings.languageCode == null
+          ? null
+          : Locale(settings.languageCode!),
+      supportedLocales: AppLocalizations.supportedLocales,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      localeResolutionCallback: (device, supported) {
+        for (final s in supported) {
+          if (s.languageCode == device?.languageCode) return s;
+        }
+        return const Locale('es');
+      },
       // El tamaño de texto elegido en Perfil se suma al del sistema.
       builder: (context, child) {
         final system = MediaQuery.textScalerOf(context).scale(1);

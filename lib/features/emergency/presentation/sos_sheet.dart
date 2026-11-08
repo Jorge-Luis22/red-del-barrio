@@ -8,6 +8,9 @@ import '../../../app/ui/sheet.dart';
 import '../../../core/result.dart';
 import '../../sync/presentation/sync_controller.dart';
 import '../domain/emergency.dart';
+import '../../../app/l10n.dart';
+import 'sos_labels.dart';
+import '../../../app/ui/failure_text.dart';
 
 /// "Necesito ayuda": situación → (texto ya escrito) → Enviar aviso. Tres toques.
 Future<void> showSosSheet(BuildContext context) =>
@@ -30,11 +33,20 @@ class _SosSheet extends ConsumerStatefulWidget {
 
 class _SosSheetState extends ConsumerState<_SosSheet> {
   SosSituation _situation = SosSituation.medical;
-  late final TextEditingController _text = TextEditingController(
-    text: _situation.template,
-  );
+  final TextEditingController _text = TextEditingController();
+  bool _textReady = false;
   bool _busy = false;
   String? _error;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // El texto inicial depende del idioma: se prepara una sola vez, ya con el contexto listo.
+    if (!_textReady) {
+      _textReady = true;
+      _text.text = sosTemplate(context.l, _situation);
+    }
+  }
 
   @override
   void dispose() {
@@ -44,10 +56,13 @@ class _SosSheetState extends ConsumerState<_SosSheet> {
 
   void _pick(SosSituation s) {
     // Si la persona no tocó el texto, la plantilla acompaña a la situación.
-    final untouched = SosSituation.values.any((x) => x.template == _text.text);
+    final l = context.l;
+    final untouched = SosSituation.values.any(
+      (x) => sosTemplate(l, x) == _text.text,
+    );
     setState(() {
       _situation = s;
-      if (untouched) _text.text = s.template;
+      if (untouched) _text.text = sosTemplate(l, s);
     });
   }
 
@@ -61,6 +76,7 @@ class _SosSheetState extends ConsumerState<_SosSheet> {
       text: _text.text,
     );
     if (!mounted) return;
+    final l = context.l;
     switch (r) {
       case Ok():
         final messenger = ScaffoldMessenger.of(context);
@@ -68,27 +84,25 @@ class _SosSheetState extends ConsumerState<_SosSheet> {
         confirmHaptic(enabled: ref.read(appSettingsProvider).vibration);
         await ref.read(syncControllerProvider.notifier).flushNow();
         messenger.showSnackBar(
-          const SnackBar(
+          SnackBar(
             duration: Duration(seconds: 8),
-            content: Text(
-              'Tu aviso quedó guardado. Si es grave, llama ya a los servicios oficiales.',
-            ),
+            content: Text(l.tuAvisoQuedoGuardado),
           ),
         );
       case Err(:final failure):
         // El error va dentro de la hoja: un aviso flotante quedaría tapado por ella.
         setState(() {
           _busy = false;
-          _error = failure.message;
+          _error = failureText(context.l, failure);
         });
     }
   }
 
   @override
   Widget build(BuildContext context) => BvSheetScaffold(
-    title: 'Necesito ayuda',
-    subtitle: 'Elige qué pasa. El texto ya está escrito: enviar es un toque.',
-    actionLabel: 'Enviar aviso',
+    title: context.l.necesitoAyuda,
+    subtitle: context.l.eligeQuePasaEl,
+    actionLabel: context.l.enviarAviso,
     actionIcon: Icons.campaign_rounded,
     danger: true,
     busy: _busy,
@@ -98,19 +112,19 @@ class _SosSheetState extends ConsumerState<_SosSheet> {
         BvBanner(
           icon: Icons.error_rounded,
           tone: BvTone.emergency,
-          title: 'No se pudo guardar el aviso',
-          message: '$_error Si es urgente, llama a los servicios oficiales.',
+          title: context.l.noSePudoGuardar,
+          message: context.l.siEsUrgenteLlama(_error!),
         ),
         const SizedBox(height: 16),
       ],
       BvBanner(
         icon: Icons.phone_in_talk_rounded,
         tone: BvTone.emergency,
-        title: 'Primero, los servicios oficiales',
-        message: 'Si hay peligro ahora, llama a emergencias antes de usar la app. Los vecinos no reemplazan a Bomberos, Policía ni SAMU.',
+        title: context.l.primeroLosServiciosOficiales,
+        message: context.l.siHayPeligroAhora,
       ),
       const SizedBox(height: 20),
-      Text('¿Qué pasa?', style: context.tt.titleSmall),
+      Text(context.l.quePasa, style: context.tt.titleSmall),
       const SizedBox(height: 10),
       Wrap(
         spacing: 10,
@@ -120,7 +134,7 @@ class _SosSheetState extends ConsumerState<_SosSheet> {
             Semantics(
               button: true,
               selected: _situation == s,
-              label: s.label,
+              label: sosLabel(context.l, s),
               child: InkWell(
                 borderRadius: BorderRadius.circular(16),
                 onTap: () => _pick(s),
@@ -151,7 +165,10 @@ class _SosSheetState extends ConsumerState<_SosSheet> {
                           color: context.tones.emergency,
                         ),
                         const SizedBox(width: 8),
-                        Text(s.label, style: context.tt.labelLarge),
+                        Text(
+                          sosLabel(context.l, s),
+                          style: context.tt.labelLarge,
+                        ),
                       ],
                     ),
                   ),
@@ -162,11 +179,10 @@ class _SosSheetState extends ConsumerState<_SosSheet> {
       ),
       if (_situation.isPrivate) ...[
         const SizedBox(height: 12),
-        const BvBanner(
+        BvBanner(
           icon: Icons.lock_rounded,
           tone: BvTone.violet,
-          message:
-              'Este aviso es privado: no se muestra en el muro del barrio.',
+          message: context.l.esteAvisoEsPrivado,
         ),
       ],
       const SizedBox(height: 16),
@@ -176,12 +192,12 @@ class _SosSheetState extends ConsumerState<_SosSheet> {
         maxLines: 4,
         maxLength: 200,
         textCapitalization: TextCapitalization.sentences,
-        decoration: const InputDecoration(
-          labelText: 'Qué pasó (puedes cambiarlo)',
+        decoration: InputDecoration(
+          labelText: context.l.quePasoPuedesCambiarlo,
         ),
       ),
       Text(
-        'Tu ubicación exacta no se comparte. Se guarda en tu teléfono y se envía cuando haya internet.',
+        context.l.tuUbicacionExactaNo,
         style: context.tt.bodySmall?.copyWith(color: context.tones.muted),
       ),
     ],

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../theme/brand.dart';
-import 'components.dart';
 
 /// Cabecera de color de una sección (Vecinos, Mensajes, Emergencia, Perfil).
 /// Cada sección tiene su propio color de la paleta, pero comparten forma y tipografía.
@@ -71,74 +70,4 @@ class BvSectionHeader extends StatelessWidget {
       ],
     ),
   );
-}
-
-/// Pantalla de una sección que todavía no se migró a esta versión. Dice la verdad:
-/// no promete funciones ni muestra datos inventados.
-class BvComingSoonScreen extends StatelessWidget {
-  const BvComingSoonScreen({
-    super.key,
-    required this.title,
-    required this.subtitle,
-    required this.icon,
-    required this.tone,
-    required this.message,
-    this.notice,
-  });
-
-  final String title;
-  final String subtitle;
-  final IconData icon;
-  final BvTone tone;
-  final String message;
-
-  /// Aviso extra (p. ej. que en una urgencia se llama primero a los servicios oficiales).
-  final String? notice;
-
-  @override
-  Widget build(BuildContext context) {
-    final (bg, fg) = switch (tone) {
-      BvTone.coral => (context.tones.coral, context.cs.onSecondary),
-      BvTone.trust => (context.tones.trust, context.cs.onTertiary),
-      BvTone.emergency => (context.tones.emergency, context.cs.onError),
-      _ => (context.cs.primary, context.cs.onPrimary),
-    };
-    final accent = tone == BvTone.emergency
-        ? context.tones.emergency
-        : (tone == BvTone.trust ? context.tones.trust : null);
-    return Scaffold(
-      body: ListView(
-        padding: EdgeInsets.zero,
-        children: [
-          BvSectionHeader(
-            title: title,
-            subtitle: subtitle,
-            icon: icon,
-            background: bg,
-            foreground: fg,
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-            child: Column(
-              children: [
-                BvEmptyState(
-                  title: 'Esta sección llega pronto',
-                  message: message,
-                  accent: accent,
-                ),
-                if (notice != null)
-                  BvBanner(
-                    icon: Icons.info_outline_rounded,
-                    tone: tone == BvTone.emergency
-                        ? BvTone.emergency
-                        : BvTone.sun,
-                    message: notice!,
-                  ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 }

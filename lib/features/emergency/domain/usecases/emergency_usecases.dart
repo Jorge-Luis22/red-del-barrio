@@ -30,7 +30,7 @@ class PublishSos {
     required SosSituation situation,
     required String text,
   }) async {
-    final clean = text.trim().isEmpty ? situation.template : text.trim();
+    final clean = text.trim().isEmpty ? situation.name : text.trim();
     final now = clock.now();
     final post = EmergencyPost(
       id: ids.newUuid(),

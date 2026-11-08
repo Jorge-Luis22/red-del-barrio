@@ -26,6 +26,7 @@ class DriftSettingsRepository implements SettingsRepository {
       'tutorialSeen': next.tutorialSeen.toString(),
       'volunteer': next.volunteer.toString(),
       'capabilities': next.capabilities.join('|'),
+      'language': next.languageCode ?? '',
     };
     await _db.batch((b) {
       values.forEach((k, v) {
@@ -59,6 +60,7 @@ class DriftSettingsRepository implements SettingsRepository {
       vibration: m['vibration'] != 'false',
       tutorialSeen: m['tutorialSeen'] == 'true',
       volunteer: m['volunteer'] == 'true',
+      languageCode: (m['language'] ?? '').isEmpty ? null : m['language'],
       capabilities: (m['capabilities'] ?? '')
           .split('|')
           .where((e) => e.isNotEmpty)

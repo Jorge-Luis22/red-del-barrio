@@ -1,21 +1,22 @@
 import 'package:flutter/material.dart';
 
+import '../../../app/l10n.dart';
 import '../../../app/ui/components.dart';
 import '../domain/offer.dart';
 
 class ModalityLabels {
   ModalityLabels._();
 
-  static String name(Modality m) => switch (m) {
-    Modality.free => 'Gratis',
-    Modality.barter => 'Trueque',
-    Modality.rent => 'Alquiler',
+  static String name(AppLocalizations l, Modality m) => switch (m) {
+    Modality.free => l.modFree,
+    Modality.barter => l.modBarter,
+    Modality.rent => l.modRent,
   };
 
-  static String hint(Modality m) => switch (m) {
-    Modality.free => 'Sin costo: un favor entre vecinos.',
-    Modality.barter => 'Cambias una cosa o un favor por otro.',
-    Modality.rent => 'Lo prestas a cambio de un pago acordado entre ustedes.',
+  static String hint(AppLocalizations l, Modality m) => switch (m) {
+    Modality.free => l.modFreeHint,
+    Modality.barter => l.modBarterHint,
+    Modality.rent => l.modRentHint,
   };
 
   static IconData icon(Modality m) => switch (m) {
