@@ -2,6 +2,7 @@ import { useState, type FormEvent } from 'react';
 import {
   activeEmergency,
   closeEmergency,
+  countResourceNeeds,
   countUrgentForMe,
   createEmergency,
   defaultPoint,
@@ -11,13 +12,16 @@ import {
   offerHelp,
   withdrawHelp,
 } from '../db/repo';
+import MapaBarrio from '../components/MapaBarrio';
+import RecursosCriticos from '../components/RecursosCriticos';
 import ServiciosUrgencia from '../components/ServiciosUrgencia';
 import { formatDistance } from '../lib/geo';
+import { isProxyReport, stripProxy } from '../lib/solidarity';
 import { ago } from '../lib/time';
 import { useApp } from '../state/app';
 import { EMERGENCY_LABEL, type EmergencyKind } from '../types';
 
-type Section = 'alertas' | 'servicios';
+type Section = 'alertas' | 'servicios' | 'recursos' | 'mapa';
 /** Recuerda la pestaña al volver de ver un pedido; también permite abrirla desde el aviso de Inicio. */
 let lastSection: Section = 'alertas';
 export function showEmergencySection(section: Section): void {
@@ -41,6 +45,7 @@ export default function Emergencia() {
   const [kind, setKind] = useState<EmergencyKind>('medico');
   const [description, setDescription] = useState('');
   const [zone, setZone] = useState('');
+  const [forOther, setForOther] = useState(false);
 
   if (!me) return null;
 
@@ -48,6 +53,7 @@ export default function Emergencia() {
   const wall = listEmergencyWall(me.id, defaultPoint());
   const myHelpers = active ? helpersOf(active.id) : [];
   const forMe = countUrgentForMe(me.id);
+  const resourceNeeds = countResourceNeeds(me.id);
 
   async function create(event: FormEvent) {
     event.preventDefault();
@@ -58,9 +64,11 @@ export default function Emergencia() {
       description,
       zone: zone.trim() || me!.zone,
       point: defaultPoint(),
+      forOther,
     });
     setDescription('');
     setZone('');
+    setForOther(false);
     setShowForm(false);
     bump();
   }
@@ -104,9 +112,29 @@ export default function Emergencia() {
           <strong>🛠️ Servicios de urgencia{forMe > 0 ? ` (${forMe})` : ''}</strong>
           <span>Vecinos que cobran por atender</span>
         </button>
+        <button
+          type="button"
+          className={section === 'recursos' ? 'seg-btn on' : 'seg-btn'}
+          aria-pressed={section === 'recursos'}
+          onClick={() => setSection('recursos')}
+        >
+          <strong>📦 Recursos críticos{resourceNeeds > 0 ? ` (${resourceNeeds})` : ''}</strong>
+          <span>Agua, comida, abrigo · sin dinero</span>
+        </button>
+        <button
+          type="button"
+          className={section === 'mapa' ? 'seg-btn on' : 'seg-btn'}
+          aria-pressed={section === 'mapa'}
+          onClick={() => setSection('mapa')}
+        >
+          <strong>🗺️ Mapa del barrio</strong>
+          <span>Qué pasa cerca de ti</span>
+        </button>
       </div>
 
       {section === 'servicios' && <ServiciosUrgencia />}
+      {section === 'recursos' && <RecursosCriticos />}
+      {section === 'mapa' && <MapaBarrio onShowAlerts={() => setSection('alertas')} />}
 
       {section === 'alertas' && (
         <>
@@ -116,8 +144,9 @@ export default function Emergencia() {
             <h3>Tu alerta activa</h3>
             <span className="badge danger">{EMERGENCY_LABEL[active.kind]}</span>
           </div>
-          <p>{active.description}</p>
+          <p>{stripProxy(active.description)}</p>
           <div className="meta">
+            {isProxyReport(active.description) && <span className="badge">👥 Reportada por otra persona</span>}
             {active.kind === 'violencia' && (
               <span className="badge danger">Privado: no aparece en el muro público</span>
             )}
@@ -198,6 +227,21 @@ export default function Emergencia() {
           />
           <label htmlFor="zone">Zona</label>
           <input id="zone" value={zone} onChange={(e) => setZone(e.target.value)} placeholder={me.zone} maxLength={60} />
+          <label style={{ display: 'flex', gap: 6, alignItems: 'center', marginTop: 10 }}>
+            <input
+              type="checkbox"
+              style={{ width: 'auto', margin: 0 }}
+              checked={forOther}
+              onChange={(e) => setForOther(e.target.checked)}
+            />
+            Lo reporto por otra persona (adulto mayor o alguien sin celular)
+          </label>
+          {forOther && (
+            <p style={{ fontSize: '0.75rem' }}>
+              La zona que se publica es la tuya. Si la persona está en otro lugar, escríbelo en la descripción
+              (calle o referencia, nunca datos personales).
+            </p>
+          )}
           {kind === 'violencia' && (
             <p className="badge danger" style={{ marginTop: 8 }}>
               Caso sensible: se comparte solo con personas de confianza, no en el muro.
@@ -231,8 +275,9 @@ export default function Emergencia() {
               <h3>{EMERGENCY_LABEL[alert.kind]}</h3>
               <span className="badge danger">{ago(alert.createdAt)}</span>
             </div>
-            <p style={{ color: 'var(--text)' }}>{alert.description}</p>
+            <p style={{ color: 'var(--text)' }}>{stripProxy(alert.description)}</p>
             <div className="meta">
+              {isProxyReport(alert.description) && <span className="badge">👥 Reportada por otra persona</span>}
               <span className="badge">
                 {alert.authorName} · {alert.zone || 'zona aprox.'}
                 {alert.distanceKm !== null && ` · ~${formatDistance(alert.distanceKm)}`}

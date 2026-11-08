@@ -457,3 +457,138 @@ form.panel .row > * {
   box-shadow: inset 0 0 0 1px var(--teal);
   background: #e6f2f1;
 }
+
+/* ---- Chips de filtro ---- */
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0 0 8px;
+}
+
+.chip {
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 5px 10px;
+  background: var(--card);
+  color: inherit;
+  font: inherit;
+  font-size: 0.78rem;
+  cursor: pointer;
+}
+
+.chip.on {
+  border-color: var(--teal);
+  background: #e6f2f1;
+  color: var(--teal-dark);
+  font-weight: 600;
+}
+
+/* ---- Mapa esquemático del barrio ---- */
+.map-wrap {
+  background: var(--card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 6px;
+  margin-bottom: 6px;
+}
+
+.map-wrap svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 70vh;
+}
+
+.map-bg {
+  fill: #f1f6f4;
+  stroke: var(--line);
+}
+
+.map-ring {
+  fill: none;
+  stroke: var(--line);
+  stroke-dasharray: 3 3;
+}
+
+.map-ring-label,
+.map-n,
+.map-me-label {
+  fill: var(--muted);
+  font-size: 9px;
+}
+
+.map-n {
+  font-weight: 700;
+}
+
+.map-me-label {
+  font-weight: 700;
+  fill: var(--teal-dark);
+  paint-order: stroke;
+  stroke: #fff;
+  stroke-width: 3px;
+}
+
+.map-axis {
+  stroke: var(--line);
+  stroke-width: 0.6;
+}
+
+.map-me {
+  fill: var(--teal);
+  stroke: #fff;
+  stroke-width: 2;
+}
+
+.map-mark {
+  cursor: pointer;
+  outline: none;
+}
+
+.map-mark:focus-visible .map-dot,
+.map-mark.sel .map-dot {
+  stroke: var(--text);
+  stroke-width: 2.5;
+}
+
+.map-halo {
+  opacity: 0.16;
+  pointer-events: none;
+}
+
+.map-dot {
+  stroke: #fff;
+  stroke-width: 1.5;
+}
+
+.map-icon {
+  font-size: 11px;
+  pointer-events: none;
+}
+
+.layer-alerta.map-halo,
+.layer-alerta .map-dot {
+  fill: var(--danger);
+}
+
+.layer-urgente.map-halo,
+.layer-urgente .map-dot {
+  fill: #d98a1f;
+}
+
+.layer-recurso.map-halo,
+.layer-recurso .map-dot {
+  fill: #2b8a5a;
+}
+
+.layer-solidario .map-dot {
+  fill: var(--teal);
+}
+
+.layer-alerta .map-icon,
+.layer-urgente .map-icon,
+.layer-recurso .map-icon,
+.layer-solidario .map-icon {
+  fill: #fff;
+}

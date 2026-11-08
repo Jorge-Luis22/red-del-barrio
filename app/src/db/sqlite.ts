@@ -3,6 +3,7 @@ import { del, get, set } from 'idb-keyval';
 import schemaSql from './schema.sql?raw';
 import seedSql from './seed.sql?raw';
 import seedOffersSql from './seed-offers.sql?raw';
+import seedSolidarioSql from './seed-solidario.sql?raw';
 
 const DB_KEY = 'redvecinal.sqlite.v1';
 
@@ -65,6 +66,7 @@ async function openInternal(): Promise<Database> {
     db.exec(seedSql);
   }
   db.exec(seedOffersSql);
+  db.exec(seedSolidarioSql);
 
   await persist();
   return db;

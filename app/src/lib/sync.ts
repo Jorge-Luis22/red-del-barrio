@@ -343,6 +343,20 @@ async function pull(): Promise<number> {
   return applied;
 }
 
+/**
+ * Quien quiera enterarse de que llegaron cambios de otros teléfonos se suscribe aquí.
+ * (No basta con el valor que devuelve syncNow: si una sincronización se pidió mientras otra corría,
+ * la repetición automática traía los cambios pero nadie recibía el resultado y la pantalla quedaba
+ * desactualizada hasta el siguiente toque.)
+ */
+const changeListeners = new Set<() => void>();
+export function onSyncChanged(listener: () => void): () => void {
+  changeListeners.add(listener);
+  return () => {
+    changeListeners.delete(listener);
+  };
+}
+
 /** Sube lo pendiente y baja lo nuevo. Devuelve true si llegaron cambios de otros teléfonos. */
 export async function syncNow(): Promise<boolean> {
   if (!syncConfigured) return false;
@@ -369,6 +383,7 @@ export async function syncNow(): Promise<boolean> {
       lastOkAt: new Date().toISOString(),
       pendingUp: count(`SELECT COUNT(*) AS n FROM sync_queue`),
     });
+    if (changed) changeListeners.forEach((listener) => listener());
     return changed;
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);

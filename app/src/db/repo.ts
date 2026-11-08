@@ -4,6 +4,15 @@ import { hashMeetCode, meetCode as makeMeetCode, txnId, uid } from '../lib/ids';
 import { chat } from '../lib/matrix';
 import { enqueue, pendingOutbox } from '../lib/outbox';
 import { markDirty } from '../lib/sync';
+import {
+  PROXY_PREFIX,
+  RESOURCE_PREFIX,
+  RESOURCE_WINDOW_HOURS,
+  directionOf,
+  isSolidary,
+  resourceName,
+  type Direction,
+} from '../lib/solidarity';
 import type {
   Conversation,
   Emergency,
@@ -17,6 +26,7 @@ import type {
   NeedType,
   Proposal,
   Provider,
+  ResourcePost,
   Stats,
   User,
 } from '../types';
@@ -286,6 +296,26 @@ export async function createNeed(input: {
   const created = getNeed(id, input.point);
   if (!created) throw new Error('No se pudo guardar la necesidad');
   return created;
+}
+
+/** El autor da por resuelta (o cubierta) su publicación. Solo avanza: nunca reabre una cerrada. */
+export async function closeNeed(needId: string): Promise<void> {
+  run(`UPDATE needs SET status = 'cerrada' WHERE id = ? AND status IN ('abierta','en_curso')`, [needId]);
+  markDirty('need', needId);
+  await persist();
+}
+
+/** Muro "Sin dinero": publicaciones solidarias (préstamo, ayuda, donación, intercambio, movilidad). */
+export function listSolidary(
+  viewer: Point,
+  opts: { category?: string; direction?: Direction | 'todas' } = {},
+): Need[] {
+  return listNeeds(viewer, {}).filter((need) => {
+    if (!isSolidary(need.category)) return false;
+    if (opts.category && opts.category !== 'todas' && need.category !== opts.category) return false;
+    if (opts.direction && opts.direction !== 'todas' && directionOf(need.title) !== opts.direction) return false;
+    return true;
+  });
 }
 
 /* ------------------------------------------------------------------ */
@@ -650,6 +680,8 @@ export async function createEmergency(input: {
   description: string;
   zone: string;
   point: Point;
+  /** Reportada por un vecino en nombre de otra persona (adulto mayor, alguien sin celular). */
+  forOther?: boolean;
 }): Promise<Emergency> {
   const id = uid('e');
   // Zona pública de ~1 km (2 decimales): el muro lo ven todos, la ubicación exacta no sale del teléfono.
@@ -663,7 +695,7 @@ export async function createEmergency(input: {
       id,
       input.authorId,
       input.kind,
-      input.description.trim(),
+      (input.forOther ? PROXY_PREFIX : '') + input.description.trim(),
       input.zone,
       published.lat,
       published.lng,
@@ -901,6 +933,7 @@ export function listUrgentRequests(viewerId: string, viewer: Point): UrgentReque
   const rows = all<NeedRow>(
     `${NEED_SELECT}
       WHERE n.is_emergency = 1 AND n.status = 'abierta' AND n.author_id <> ? AND n.created_at >= ?
+        AND n.category NOT LIKE '${RESOURCE_PREFIX}%'
       ORDER BY n.created_at DESC`,
     [viewerId, since],
   );
@@ -924,6 +957,7 @@ export function listMyUrgentRequests(userId: string, viewer: Point): UrgentReque
   const rows = all<NeedRow>(
     `${NEED_SELECT}
       WHERE n.is_emergency = 1 AND n.author_id = ?
+        AND n.category NOT LIKE '${RESOURCE_PREFIX}%'
         AND (n.status = 'en_curso' OR (n.status = 'abierta' AND n.created_at >= ?))
       ORDER BY n.created_at DESC`,
     [userId, since],
@@ -936,6 +970,60 @@ export function listMyUrgentRequests(userId: string, viewer: Point): UrgentReque
 
 export function countUrgentForMe(userId: string): number {
   return listUrgentRequests(userId, DEFAULT_POINT).filter((r) => r.matchesMe).length;
+}
+
+/* ---- Recursos críticos (economía solidaria en emergencia, sin dinero) ---- */
+
+/**
+ * Lo que los vecinos necesitan u ofrecen en una emergencia (agua, alimentos, abrigo, medicinas, energía,
+ * transporte). Son `needs` de emergencia con categoría "Recurso · …": se coordinan por propuestas y chat.
+ * La zona pública es de ~1 km, igual que las alertas. Abiertas de otros + las mías mientras sigan vivas.
+ */
+export function listResourcePosts(
+  viewerId: string,
+  viewer: Point,
+  opts: { resource?: string; direction?: Direction | 'todas' } = {},
+): ResourcePost[] {
+  const since = new Date(Date.now() - RESOURCE_WINDOW_HOURS * 3_600_000).toISOString();
+  const rows = all<NeedRow>(
+    `${NEED_SELECT}
+      WHERE n.is_emergency = 1 AND n.category LIKE '${RESOURCE_PREFIX}%'
+        AND ((n.status = 'abierta' AND n.created_at >= ?) OR (n.author_id = ? AND n.status = 'en_curso'))
+      ORDER BY n.created_at DESC`,
+    [since, viewerId],
+  );
+  const posts = rows
+    .map((row) => {
+      const need = toNeed(row, viewer);
+      return {
+        need,
+        direction: (directionOf(need.title) ?? 'necesito') as Direction,
+        resource: resourceName(need.category),
+        proposals: proposalCount(need.id),
+        mine: need.authorId === viewerId,
+        matches: 0,
+      };
+    })
+    // Coincidencias: lo que alguien necesita y otro vecino ofrece (o al revés), del mismo recurso.
+    .map((post, _i, all_) => ({
+      ...post,
+      matches: all_.filter(
+        (o) => o.resource === post.resource && o.direction !== post.direction && o.need.authorId !== post.need.authorId,
+      ).length,
+    }));
+  return posts
+    .filter((p) => !opts.resource || opts.resource === 'todos' || p.resource === opts.resource)
+    .filter((p) => !opts.direction || opts.direction === 'todas' || p.direction === opts.direction)
+    .sort(
+      (a, b) =>
+        Number(b.direction === 'necesito') - Number(a.direction === 'necesito') ||
+        (a.need.distanceKm ?? 99) - (b.need.distanceKm ?? 99),
+    );
+}
+
+/** Cuántos vecinos necesitan algún recurso ahora mismo (cifra de la pestaña). */
+export function countResourceNeeds(viewerId: string): number {
+  return listResourcePosts(viewerId, DEFAULT_POINT).filter((p) => !p.mine && p.direction === 'necesito').length;
 }
 
 /** Lo que muestra el punto rojo del menú: alertas de vecinos + pedidos urgentes de mi oficio. */

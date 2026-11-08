@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { emergencySignal, getUser } from '../db/repo';
 import { requestPosition, type GpsStatus } from '../lib/geo';
-import { syncConfigured, syncNow } from '../lib/sync';
+import { onSyncChanged, syncConfigured, syncNow } from '../lib/sync';
 import { openDb } from '../db/sqlite';
 import type { Tab, User } from '../types';
 
@@ -70,16 +70,18 @@ export function AppProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!ready || !syncConfigured) return;
     let alive = true;
-    const tick = () =>
-      void syncNow().then((changed) => {
-        if (alive && changed) setVersion((v) => v + 1);
-      });
+    // Cualquier sincronización que traiga cambios (también las repetidas) refresca la pantalla.
+    const unsubscribe = onSyncChanged(() => {
+      if (alive) setVersion((v) => v + 1);
+    });
+    const tick = () => void syncNow();
     tick();
     const timer = window.setInterval(tick, 4000);
     window.addEventListener('online', tick);
     document.addEventListener('visibilitychange', tick);
     return () => {
       alive = false;
+      unsubscribe();
       window.clearInterval(timer);
       window.removeEventListener('online', tick);
       document.removeEventListener('visibilitychange', tick);

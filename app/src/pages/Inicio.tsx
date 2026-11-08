@@ -1,14 +1,25 @@
 import { useState, type FormEvent } from 'react';
-import { createNeed, defaultPoint, listEmergencyWall, listNeeds, listUrgentRequests } from '../db/repo';
+import { createNeed, defaultPoint, listEmergencyWall, listNeeds, listSolidary, listUrgentRequests } from '../db/repo';
+import MuroSolidario from '../components/MuroSolidario';
+import NeedCard from '../components/NeedCard';
 import { showEmergencySection } from './Emergencia';
 import { useApp } from '../state/app';
 import { EMERGENCY_LABEL, NEED_LABEL, type NeedType } from '../types';
 
+type Mode = 'todo' | 'sin_dinero';
+/** Recuerda la vista al volver de ver una publicación. */
+let lastMode: Mode = 'todo';
+
 export default function Inicio() {
-  const { me, version, bump, go, setTab } = useApp();
+  const { me, version, bump, setTab } = useApp();
   const [q, setQ] = useState('');
   const [type, setType] = useState<NeedType | 'todos'>('todos');
   const [showForm, setShowForm] = useState(false);
+  const [mode, setModeState] = useState<Mode>(lastMode);
+  const setMode = (next: Mode) => {
+    lastMode = next;
+    setModeState(next);
+  };
 
   const [formType, setFormType] = useState<NeedType>('servicio');
   const [title, setTitle] = useState('');
@@ -19,6 +30,7 @@ export default function Inicio() {
   if (!me) return null;
 
   const needs = listNeeds(defaultPoint(), { q, type });
+  const solidaryCount = listSolidary(defaultPoint()).length;
   const alerts = listEmergencyWall(me.id, defaultPoint());
   const urgentForMe = listUrgentRequests(me.id, defaultPoint()).filter((r) => r.matchesMe);
 
@@ -51,11 +63,13 @@ export default function Inicio() {
             {me.name} · {me.zone}
           </p>
         </div>
-        <div className="actions">
-          <button type="button" className="btn" onClick={() => setShowForm((v) => !v)}>
-            {showForm ? 'Cerrar' : '+ Pedir / Ofrecer'}
-          </button>
-        </div>
+        {mode === 'todo' && (
+          <div className="actions">
+            <button type="button" className="btn" onClick={() => setShowForm((v) => !v)}>
+              {showForm ? 'Cerrar' : '+ Pedir / Ofrecer'}
+            </button>
+          </div>
+        )}
       </header>
 
       {alerts.length > 0 ? (
@@ -94,7 +108,30 @@ export default function Inicio() {
         )
       )}
 
-      {showForm && (
+      <div className="seg" role="group" aria-label="Vista del muro" style={{ marginTop: 0 }}>
+        <button
+          type="button"
+          className={mode === 'todo' ? 'seg-btn on' : 'seg-btn'}
+          aria-pressed={mode === 'todo'}
+          onClick={() => setMode('todo')}
+        >
+          <strong>🏘️ Todo el barrio</strong>
+          <span>Pedidos y ofertas</span>
+        </button>
+        <button
+          type="button"
+          className={mode === 'sin_dinero' ? 'seg-btn on' : 'seg-btn'}
+          aria-pressed={mode === 'sin_dinero'}
+          onClick={() => setMode('sin_dinero')}
+        >
+          <strong>🤝 Sin dinero{solidaryCount > 0 ? ` (${solidaryCount})` : ''}</strong>
+          <span>Prestar, donar, intercambiar</span>
+        </button>
+      </div>
+
+      {mode === 'sin_dinero' && <MuroSolidario />}
+
+      {mode === 'todo' && showForm && (
         <form className="panel" onSubmit={publish}>
           <label htmlFor="type">Tipo</label>
           <select id="type" value={formType} onChange={(e) => setFormType(e.target.value as NeedType)}>
@@ -148,6 +185,8 @@ export default function Inicio() {
         </form>
       )}
 
+      {mode === 'todo' && (
+        <>
       <div className="row-filters" style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
         <input
           value={q}
@@ -174,27 +213,10 @@ export default function Inicio() {
       {needs.length === 0 && <div className="empty">No hay publicaciones que coincidan.</div>}
 
       {needs.map((need) => (
-        <article
-          key={`${need.id}-${version}`}
-          className="card need-card"
-          onClick={() => go({ name: 'need', id: need.id })}
-        >
-          <div className="title-row">
-            <h3>{need.title}</h3>
-            <span className="badge">{NEED_LABEL[need.type]}</span>
-          </div>
-          <p>{need.description || need.category}</p>
-          <div className="meta">
-            <span className="badge">{need.category}</span>
-            {need.isEmergency && <span className="badge danger">Emergencia</span>}
-            <span style={{ fontSize: '0.75rem', color: 'var(--muted)' }}>
-              {need.authorName}
-              {need.distanceKm !== null && ` · a ${need.distanceKm.toFixed(1)} km`}
-              {need.recommendations > 0 && ` · 👍 ${need.recommendations}`}
-            </span>
-          </div>
-        </article>
+        <NeedCard key={`${need.id}-${version}`} need={need} />
       ))}
+        </>
+      )}
     </div>
   );
 }

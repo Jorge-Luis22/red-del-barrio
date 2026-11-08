@@ -1,3 +1,5 @@
+import type { Direction } from './lib/solidarity';
+
 export type NeedType = 'servicio' | 'producto' | 'prestamo' | 'ayuda';
 export type NeedStatus = 'abierta' | 'en_curso' | 'cerrada' | 'cancelada';
 export type ProposalStatus = 'enviada' | 'aceptada' | 'rechazada' | 'retirada';
@@ -146,6 +148,17 @@ export interface UrgentRequest {
   /** Verdadero si el usuario ofrece ese oficio como servicio de urgencia. */
   matchesMe: boolean;
   proposals: number;
+}
+
+/** Publicación de recurso crítico (agua, alimentos, abrigo…) que alguien necesita u ofrece en una emergencia. */
+export interface ResourcePost {
+  need: Need;
+  direction: Direction;
+  resource: string;
+  proposals: number;
+  mine: boolean;
+  /** Cuántas publicaciones de otros vecinos, del mismo recurso y en sentido contrario, encajan con esta. */
+  matches: number;
 }
 
 export interface Stats {
