@@ -1,4 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+
+import '../config.dart';
 
 import '../../features/bids/domain/usecases/place_bid.dart';
 import '../../features/deals_chat/domain/usecases/send_message.dart';
@@ -12,6 +15,8 @@ import '../../features/sync/domain/usecases/flush_outbox.dart';
 import '../../features/sync/infrastructure/connectivity_plus_monitor.dart';
 import '../../features/sync/infrastructure/demo_sync_gateway.dart';
 import '../../features/sync/infrastructure/drift_outbox.dart';
+import '../../features/sync/infrastructure/supabase_remote_store.dart';
+import '../../features/sync/infrastructure/supabase_sync_gateway.dart';
 import 'bids_providers.dart';
 import 'chat_providers.dart';
 import 'core_providers.dart';
@@ -25,9 +30,11 @@ final outboxProvider = Provider<OutboxQueue>(
   (ref) => DriftOutbox(ref.watch(appDatabaseProvider)),
 );
 
-/// mobile-ux: destino de demostración. Con servidor se cambia aquí, sin tocar pantallas.
+/// Con claves del servidor (y conexión iniciada) se envía a Supabase; si no, destino de demostración.
 final syncGatewayProvider = Provider<SyncGateway>(
-  (_) => const DemoSyncGateway(),
+  (_) => AppConfig.supabaseReady
+      ? SupabaseSyncGateway(SupabaseRemoteStore(Supabase.instance.client))
+      : const DemoSyncGateway(),
 );
 
 final connectivityProvider = Provider<ConnectivityMonitor>(

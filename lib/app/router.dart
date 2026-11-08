@@ -1,5 +1,7 @@
 import 'package:go_router/go_router.dart';
 
+import '../features/community/presentation/community_screen.dart';
+
 import '../features/bids/domain/bid.dart';
 import '../features/bids/presentation/bid_board_screen.dart';
 import '../features/deals_chat/presentation/chat_screen.dart';
@@ -48,6 +50,10 @@ final GoRouter appRouter = GoRouter(
                 GoRoute(
                   path: 'pedidos',
                   builder: (_, _) => const MyNeedsScreen(),
+                ),
+                GoRoute(
+                  path: 'barrio',
+                  builder: (_, _) => const CommunityScreen(),
                 ),
                 GoRoute(
                   path: 'explorar',

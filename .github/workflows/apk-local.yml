@@ -61,7 +61,7 @@ jobs:
       - name: Compilar APK
         run: |
           set +e
-          flutter build apk --release > build.txt 2>&1
+          flutter build apk --release --dart-define=SUPABASE_URL="${{ secrets.SUPABASE_URL }}" --dart-define=SUPABASE_ANON_KEY="${{ secrets.SUPABASE_ANON_KEY }}" > build.txt 2>&1
           code=$?
           tail -n 80 build.txt
           if [ $code -ne 0 ]; then

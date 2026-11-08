@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+
+import '../../community/presentation/community_screen.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../app/di/providers.dart';
@@ -47,7 +49,11 @@ class HomeScreen extends ConsumerWidget {
           SliverPadding(
             padding: const EdgeInsets.fromLTRB(16, 28, 16, 32),
             sliver: SliverList.list(
-              children: const [MyNeedsPreview(), ExploreSection(compact: true)],
+              children: const [
+                CommunityEntry(),
+                MyNeedsPreview(),
+                ExploreSection(compact: true),
+              ],
             ),
           ),
         ],
