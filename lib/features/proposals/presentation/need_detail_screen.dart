@@ -8,6 +8,7 @@ import '../../../app/ui/components.dart';
 import '../../../core/geo/geo_math.dart';
 import '../../../core/result.dart';
 import '../../needs/domain/need.dart';
+import '../../needs/presentation/need_extras_widgets.dart';
 import '../../needs/presentation/need_labels.dart';
 import '../../sync/presentation/sync_controller.dart';
 import '../domain/deal.dart';
@@ -70,6 +71,7 @@ class _NeedDetailScreenState extends ConsumerState<NeedDetailScreen> {
           padding: const EdgeInsets.fromLTRB(16, 4, 16, 32),
           children: [
             _NeedHeader(need: need),
+            NeedExtrasView(needId: need.id),
             const SizedBox(height: 16),
             _SyncBanner(need: need, isDemo: isDemo),
             const SizedBox(height: 24),

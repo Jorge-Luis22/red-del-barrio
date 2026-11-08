@@ -8,6 +8,9 @@ import '../../../app/ui/components.dart';
 import '../../../core/result.dart';
 import '../../sync/presentation/sync_controller.dart';
 import '../domain/need.dart';
+import '../domain/need_extras.dart';
+import 'need_extras_widgets.dart';
+import '../../assistant/presentation/tr.dart';
 import 'need_labels.dart';
 import '../../../app/l10n.dart';
 import '../../../app/ui/failure_text.dart';
@@ -50,6 +53,9 @@ class _ComposerSheetState extends ConsumerState<ComposerSheet> {
   late final TextEditingController _text = TextEditingController(
     text: widget.initialText ?? '',
   );
+  final _detail = TextEditingController();
+  String? _imagePath;
+  bool _moreOpen = false;
   String? _error;
   bool _busy = false;
   final _assistant = const RequestAssistant();
@@ -58,6 +64,7 @@ class _ComposerSheetState extends ConsumerState<ComposerSheet> {
   @override
   void dispose() {
     _text.dispose();
+    _detail.dispose();
     super.dispose();
   }
 
@@ -96,7 +103,7 @@ class _ComposerSheetState extends ConsumerState<ComposerSheet> {
   }
 
   Future<void> _publish() async {
-    final flags = _guard.scan(_text.text);
+    final flags = _guard.scan('${_text.text} ${_detail.text}');
     if (flags.isNotEmpty) {
       final ok = await confirmSafety(context, flags);
       if (ok != true || !mounted) return;
@@ -114,6 +121,14 @@ class _ComposerSheetState extends ConsumerState<ComposerSheet> {
     final l = context.l;
     switch (result) {
       case Ok(:final value):
+        final extras = NeedExtras(detail: _detail.text, imagePath: _imagePath);
+        if (!extras.isEmpty) {
+          await ref
+              .read(needExtrasRepositoryProvider)
+              .save(value.id, extras);
+          ref.invalidate(needExtrasProvider(value.id));
+        }
+        if (!mounted) return;
         final router = GoRouter.of(context);
         final messenger = ScaffoldMessenger.of(context);
         Navigator.of(context).pop();
@@ -191,6 +206,26 @@ class _ComposerSheetState extends ConsumerState<ComposerSheet> {
                     onChanged: (_) => setState(() => _error = null),
                   ),
                   ..._assistantBlock(),
+                  const SizedBox(height: 10),
+                  if (_moreOpen)
+                    NeedExtrasEditor(
+                      detail: _detail,
+                      imagePath: _imagePath,
+                      onImageChanged: (p) => setState(() => _imagePath = p),
+                      onTextChanged: () => setState(() {}),
+                    )
+                  else
+                    TextButton.icon(
+                      onPressed: () => setState(() => _moreOpen = true),
+                      icon: const Icon(Icons.add_photo_alternate_rounded),
+                      label: Text(
+                        tr(
+                          context,
+                          'Agregar más detalle y una foto (opcional)',
+                          'Add more detail and a photo (optional)',
+                        ),
+                      ),
+                    ),
                   const SizedBox(height: 12),
                   _stepLabel(context, '3', context.l.paraCuandoLoNecesitas),
                   const SizedBox(height: 10),

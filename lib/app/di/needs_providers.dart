@@ -1,9 +1,11 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../features/needs/domain/need.dart';
+import '../../features/needs/domain/need_extras.dart';
 import '../../features/needs/domain/need_repository.dart';
 import '../../features/needs/domain/usecases/publish_need.dart';
 import '../../features/needs/infrastructure/drift_need_repository.dart';
+import '../../features/needs/infrastructure/file_need_extras_repository.dart';
 import 'core_providers.dart';
 import 'sync_providers.dart';
 
@@ -22,4 +24,13 @@ final publishNeedProvider = Provider<PublishNeed>(
 
 final needsStreamProvider = StreamProvider<List<Need>>(
   (ref) => ref.watch(needRepositoryProvider).watchAll(),
+);
+
+final needExtrasRepositoryProvider = Provider<NeedExtrasRepository>(
+  (_) => FileNeedExtrasRepository(),
+);
+
+/// Detalle y foto de un pedido. Se vuelve a leer con `ref.invalidate` al guardar.
+final needExtrasProvider = FutureProvider.family<NeedExtras, String>(
+  (ref, needId) => ref.watch(needExtrasRepositoryProvider).get(needId),
 );

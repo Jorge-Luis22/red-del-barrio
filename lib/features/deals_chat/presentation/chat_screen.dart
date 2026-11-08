@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -12,6 +14,8 @@ import '../../proposals/domain/deal.dart';
 import '../../proposals/presentation/need_detail_screen.dart';
 import '../../sync/presentation/sync_controller.dart';
 import '../domain/chat.dart';
+import '../domain/photo_message.dart';
+import '../../needs/presentation/need_extras_widgets.dart';
 import '../../../app/l10n.dart';
 import 'quick_phrases.dart';
 import '../../../app/ui/failure_text.dart';
@@ -85,6 +89,14 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     final point = await showMeetingPicker(context);
     if (point == null || !mounted) return;
     await _send(point.toMessage(), true);
+  }
+
+  Future<void> _pickPhoto() async {
+    final source = await askPhotoSource(context);
+    if (source == null || !mounted) return;
+    final path = await pickPhotoToAppFolder(context, source, 'foto_chat');
+    if (path == null || !mounted) return;
+    await _send(photoMessage(path), true);
   }
 
   Future<void> _pickQuechua() async {
@@ -223,6 +235,14 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                     ),
                   ),
                   IconButton(
+                    tooltip: tr(context, 'Enviar una foto', 'Send a photo'),
+                    onPressed: _pickPhoto,
+                    icon: const Icon(Icons.photo_camera_rounded),
+                    style: IconButton.styleFrom(
+                      minimumSize: const Size(48, 56),
+                    ),
+                  ),
+                  IconButton(
                     tooltip: tr(
                       context,
                       'Frases en quechua',
@@ -278,6 +298,7 @@ class _Bubble extends StatelessWidget {
     final badge = syncBadge(context.l, message.syncStatus);
     final sent = message.syncStatus.name == 'sent';
     final point = MeetingPoint.tryParse(message.text);
+    final photo = photoPathOf(message.text);
     return Align(
       alignment: Alignment.centerRight,
       child: Container(
@@ -298,7 +319,30 @@ class _Bubble extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
-            if (point == null)
+            if (photo != null)
+              GestureDetector(
+                onTap: () => showDialog<void>(
+                  context: context,
+                  builder: (_) => Dialog(
+                    child: InteractiveViewer(child: Image.file(File(photo))),
+                  ),
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: Image.file(
+                    File(photo),
+                    height: 180,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, _, _) => Text(
+                      tr(context, '📷 Foto no disponible', '📷 Photo unavailable'),
+                      style: context.tt.bodyMedium?.copyWith(
+                        color: context.cs.onPrimary,
+                      ),
+                    ),
+                  ),
+                ),
+              )
+            else if (point == null)
               Text(
                 message.text,
                 style: context.tt.bodyMedium?.copyWith(
