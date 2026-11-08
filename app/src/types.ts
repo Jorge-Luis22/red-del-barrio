@@ -101,6 +101,15 @@ export interface Emergency {
   createdAt: string;
 }
 
+/** Alerta de otro vecino tal como se ve en el muro (solo zona aproximada, nunca la ubicación exacta). */
+export interface EmergencyWallItem extends Emergency {
+  authorName: string;
+  authorColor: string;
+  distanceKm: number | null;
+  helpers: { id: string; name: string; zone: string }[];
+  iOffered: boolean;
+}
+
 export interface Stats {
   helps: number;
   people: number;

@@ -32,9 +32,19 @@ const TABLES: Record<string, string> = {
   rating: 'ratings',
   recommendation: 'recommendations',
   emergency: 'emergency_alerts',
+  emergency_response: 'emergency_responses',
 };
 /** Orden de dependencias: primero lo que otras filas referencian. */
-const ORDER = ['need', 'proposal', 'interaction', 'message', 'rating', 'recommendation', 'emergency'];
+const ORDER = [
+  'need',
+  'proposal',
+  'interaction',
+  'message',
+  'rating',
+  'recommendation',
+  'emergency',
+  'emergency_response',
+];
 const STRIP = ['lat_exact', 'lng_exact', 'meet_code_hash', 'meet_code_expires_at'];
 
 let status: SyncStatus = {
@@ -135,6 +145,7 @@ async function push(): Promise<void> {
 
 const RANK_NEED = `CASE %s WHEN 'abierta' THEN 0 WHEN 'en_curso' THEN 1 ELSE 2 END`;
 const RANK_DEAL = `CASE %s WHEN 'acordado' THEN 0 WHEN 'en_curso' THEN 1 ELSE 2 END`;
+const RANK_ALERT = `CASE %s WHEN 'activa' THEN 0 ELSE 1 END`;
 const rank = (tpl: string, col: string) => tpl.replace('%s', col);
 
 type Json = Record<string, unknown>;
@@ -224,15 +235,30 @@ function apply(entity: string, d: Json): boolean {
       return true;
     }
     case 'emergency': {
+      // Defensa: una alerta de violencia nunca debería estar en el servidor; si aparece, se ignora.
+      if (s(d.kind) === 'violencia') return false;
       run(
         `INSERT INTO emergency_alerts
            (id, author_id, kind, description, zone, lat_public, lng_public, lat_exact, lng_exact, status, institution_called, created_at)
          VALUES (?, ?, ?, ?, ?, ?, ?, NULL, NULL, ?, ?, ?)
          ON CONFLICT(id) DO UPDATE SET
-           status = excluded.status,
+           status = CASE WHEN ${rank(RANK_ALERT, 'excluded.status')} >= ${rank(RANK_ALERT, 'emergency_alerts.status')}
+                         THEN excluded.status ELSE emergency_alerts.status END,
            institution_called = MAX(emergency_alerts.institution_called, excluded.institution_called)`,
         [s(d.id), s(d.author_id), s(d.kind), s(d.description) ?? '', s(d.zone) ?? '', n(d.lat_public), n(d.lng_public),
          s(d.status) ?? 'activa', n(d.institution_called) ?? 0, s(d.created_at)],
+      );
+      return true;
+    }
+    case 'emergency_response': {
+      run(
+        `INSERT INTO emergency_responses (id, alert_id, helper_id, status, created_at, updated_at)
+         VALUES (?, ?, ?, ?, ?, ?)
+         ON CONFLICT(id) DO UPDATE SET
+           status = excluded.status, updated_at = excluded.updated_at
+           WHERE excluded.updated_at >= emergency_responses.updated_at`,
+        [s(d.id), s(d.alert_id), s(d.helper_id), s(d.status) === 'retirado' ? 'retirado' : 'ofrece',
+         s(d.created_at), s(d.updated_at) ?? s(d.created_at)],
       );
       return true;
     }
@@ -251,7 +277,8 @@ function fingerprint(): string {
               COALESCE((SELECT GROUP_CONCAT(status || confirmed_by_requester || confirmed_by_provider) FROM interactions), '') || '|' ||
               COALESCE((SELECT GROUP_CONCAT(status) FROM needs), '') || '|' ||
               COALESCE((SELECT GROUP_CONCAT(status) FROM proposals), '') || '|' ||
-              COALESCE((SELECT GROUP_CONCAT(status) FROM emergency_alerts), '') AS f`,
+              COALESCE((SELECT GROUP_CONCAT(status || institution_called) FROM emergency_alerts), '') || '|' ||
+              COALESCE((SELECT GROUP_CONCAT(status) FROM emergency_responses), '') AS f`,
     )?.f ?? ''
   );
 }

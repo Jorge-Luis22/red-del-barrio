@@ -1,5 +1,5 @@
-import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
-import { getUser } from '../db/repo';
+import { createContext, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { emergencySignal, getUser } from '../db/repo';
 import { requestPosition, type GpsStatus } from '../lib/geo';
 import { syncConfigured, syncNow } from '../lib/sync';
 import { openDb } from '../db/sqlite';
@@ -91,6 +91,18 @@ export function AppProvider({ children }: { children: ReactNode }) {
     const timer = window.setTimeout(() => void syncNow(), 400);
     return () => window.clearTimeout(timer);
   }, [ready, version]);
+
+  // Aviso por vibración cuando llega una alerta nueva de un vecino o alguien ofrece ayudar en la mía.
+  const lastSignal = useRef<{ user: string; n: number } | null>(null);
+  useEffect(() => {
+    if (!ready || !me) return;
+    const n = emergencySignal(me.id);
+    const prev = lastSignal.current;
+    lastSignal.current = { user: me.id, n };
+    if (prev && prev.user === me.id && n > prev.n && typeof navigator.vibrate === 'function') {
+      navigator.vibrate([200, 100, 200]);
+    }
+  }, [ready, me, version]);
 
   const value = useMemo<AppState>(
     () => ({

@@ -1,3 +1,4 @@
+import { countWallAlerts } from '../db/repo';
 import { useApp } from '../state/app';
 import type { Tab } from '../types';
 
@@ -10,7 +11,9 @@ const TABS: { id: Tab; label: string; icon: string }[] = [
 ];
 
 export default function TabBar() {
-  const { tab, setTab } = useApp();
+  const { me, tab, setTab } = useApp();
+  // Alertas activas de otros vecinos: se recalcula en cada cambio (también cuando llega algo del servidor).
+  const alerts = me ? countWallAlerts(me.id) : 0;
   return (
     <nav className="tabbar" aria-label="Navegación principal">
       {TABS.map((t) => (
@@ -23,8 +26,12 @@ export default function TabBar() {
         >
           <span className="tab-icon" aria-hidden="true">
             {t.icon}
+            {t.id === 'emergencia' && alerts > 0 ? <span className="tab-dot">{alerts > 9 ? '9+' : alerts}</span> : null}
           </span>
-          <span>{t.label}</span>
+          <span>
+            {t.label}
+            {t.id === 'emergencia' && alerts > 0 ? <span className="sr-only">, {alerts} alertas activas</span> : null}
+          </span>
         </button>
       ))}
     </nav>

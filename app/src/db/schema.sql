@@ -119,6 +119,18 @@ CREATE TABLE IF NOT EXISTS emergency_alerts (
   created_at        TEXT NOT NULL
 );
 
+-- "Puedo ayudar" en el muro de emergencia. Una fila por (alerta, vecino): el id es
+-- determinista, así dos teléfonos nunca duplican la misma oferta y retirarla es un UPDATE.
+CREATE TABLE IF NOT EXISTS emergency_responses (
+  id          TEXT PRIMARY KEY,
+  alert_id    TEXT NOT NULL REFERENCES emergency_alerts(id) ON DELETE CASCADE,
+  helper_id   TEXT NOT NULL REFERENCES users(id),
+  status      TEXT NOT NULL DEFAULT 'ofrece' CHECK (status IN ('ofrece','retirado')),
+  created_at  TEXT NOT NULL,
+  updated_at  TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_emergency_resp_alert ON emergency_responses (alert_id, status);
+
 -- Cola de salida idempotente: si se reintenta, el txn_id evita duplicados.
 CREATE TABLE IF NOT EXISTS outbox (
   id          TEXT PRIMARY KEY,

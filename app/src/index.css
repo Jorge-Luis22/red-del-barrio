@@ -367,6 +367,50 @@ form.panel .row > * {
 
 .tab-icon {
   font-size: 1.15rem;
+  position: relative;
+}
+
+.tab-dot {
+  position: absolute;
+  top: -4px;
+  right: -12px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 999px;
+  background: var(--danger);
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: 700;
+  line-height: 16px;
+  text-align: center;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.alert-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  margin-bottom: 12px;
+  padding: 10px 12px;
+  border: 0;
+  border-radius: var(--radius);
+  background: var(--danger);
+  color: #fff;
+  font: inherit;
+  font-size: 0.88rem;
+  text-align: left;
+  cursor: pointer;
 }
 
 @media (min-width: 640px) {

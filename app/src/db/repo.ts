@@ -8,6 +8,7 @@ import type {
   Conversation,
   Emergency,
   EmergencyKind,
+  EmergencyWallItem,
   Message,
   Need,
   NeedType,
@@ -645,7 +646,8 @@ export async function createEmergency(input: {
   point: Point;
 }): Promise<Emergency> {
   const id = uid('e');
-  const published = roundZone(input.point, 3);
+  // Zona pública de ~1 km (2 decimales): el muro lo ven todos, la ubicación exacta no sale del teléfono.
+  const published = roundZone(input.point, 2);
   run(
     `INSERT INTO emergency_alerts
        (id, author_id, kind, description, zone, lat_public, lng_public,
@@ -691,6 +693,82 @@ export async function markInstitutionCalled(id: string): Promise<void> {
   run(`UPDATE emergency_alerts SET institution_called = 1 WHERE id = ?`, [id]);
   markDirty('emergency', id);
   await persist();
+}
+
+/* ---- Muro de emergencia: alertas de otros vecinos ------------------ */
+
+/** Una alerta que sigue "activa" más tiempo que esto se considera olvidada y sale del muro. */
+export const WALL_WINDOW_HOURS = 12;
+
+interface WallRow extends EmergencyRow {
+  author_name: string;
+  author_color: string;
+}
+
+/** Alertas activas de OTROS vecinos (las de violencia nunca llegan aquí: son privadas). */
+export function listEmergencyWall(viewerId: string, viewer: Point): EmergencyWallItem[] {
+  const since = new Date(Date.now() - WALL_WINDOW_HOURS * 3_600_000).toISOString();
+  const rows = all<WallRow>(
+    `SELECT e.*, u.display_name AS author_name, u.avatar_color AS author_color
+       FROM emergency_alerts e JOIN users u ON u.id = e.author_id
+      WHERE e.status = 'activa' AND e.author_id != ? AND e.kind != 'violencia' AND e.created_at >= ?
+      ORDER BY e.created_at DESC`,
+    [viewerId, since],
+  );
+  return rows.map((row) => {
+    const helpers = all<{ id: string; name: string; zone: string }>(
+      `SELECT r.helper_id AS id, u.display_name AS name, u.zone AS zone
+         FROM emergency_responses r JOIN users u ON u.id = r.helper_id
+        WHERE r.alert_id = ? AND r.status = 'ofrece' ORDER BY r.updated_at`,
+      [row.id],
+    );
+    const point =
+      row.lat_public !== null && row.lng_public !== null ? { lat: row.lat_public, lng: row.lng_public } : null;
+    return {
+      ...toEmergency(row),
+      authorName: row.author_name,
+      authorColor: row.author_color,
+      distanceKm: point ? distanceKm(viewer, point) : null,
+      helpers,
+      iOffered: helpers.some((h) => h.id === viewerId),
+    };
+  });
+}
+
+export function countWallAlerts(viewerId: string): number {
+  return listEmergencyWall(viewerId, DEFAULT_POINT).length;
+}
+
+/** Vecinos que dijeron "puedo ayudar" en la alerta del propio usuario. */
+export function helpersOf(alertId: string): { id: string; name: string; zone: string }[] {
+  return all<{ id: string; name: string; zone: string }>(
+    `SELECT r.helper_id AS id, u.display_name AS name, u.zone AS zone
+       FROM emergency_responses r JOIN users u ON u.id = r.helper_id
+      WHERE r.alert_id = ? AND r.status = 'ofrece' ORDER BY r.updated_at`,
+    [alertId],
+  );
+}
+
+async function setHelp(alertId: string, helperId: string, status: 'ofrece' | 'retirado'): Promise<void> {
+  const id = `er_${alertId}_${helperId}`;
+  const ts = now();
+  run(
+    `INSERT INTO emergency_responses (id, alert_id, helper_id, status, created_at, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?)
+     ON CONFLICT(id) DO UPDATE SET status = excluded.status, updated_at = excluded.updated_at`,
+    [id, alertId, helperId, status, ts, ts],
+  );
+  markDirty('emergency_response', id);
+  await persist();
+}
+
+export const offerHelp = (alertId: string, helperId: string) => setHelp(alertId, helperId, 'ofrece');
+export const withdrawHelp = (alertId: string, helperId: string) => setHelp(alertId, helperId, 'retirado');
+
+/** Número que cambia cuando llega algo que merece avisar: una alerta nueva o alguien que ayuda en la mía. */
+export function emergencySignal(userId: string): number {
+  const mine = activeEmergency(userId);
+  return countWallAlerts(userId) + (mine ? helpersOf(mine.id).length : 0);
 }
 
 /* ------------------------------------------------------------------ */

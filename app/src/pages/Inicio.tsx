@@ -1,10 +1,10 @@
 import { useState, type FormEvent } from 'react';
-import { createNeed, defaultPoint, listNeeds } from '../db/repo';
+import { createNeed, defaultPoint, listEmergencyWall, listNeeds } from '../db/repo';
 import { useApp } from '../state/app';
-import { NEED_LABEL, type NeedType } from '../types';
+import { EMERGENCY_LABEL, NEED_LABEL, type NeedType } from '../types';
 
 export default function Inicio() {
-  const { me, version, bump, go } = useApp();
+  const { me, version, bump, go, setTab } = useApp();
   const [q, setQ] = useState('');
   const [type, setType] = useState<NeedType | 'todos'>('todos');
   const [showForm, setShowForm] = useState(false);
@@ -18,6 +18,7 @@ export default function Inicio() {
   if (!me) return null;
 
   const needs = listNeeds(defaultPoint(), { q, type });
+  const alerts = listEmergencyWall(me.id, defaultPoint());
 
   async function publish(event: FormEvent) {
     event.preventDefault();
@@ -54,6 +55,16 @@ export default function Inicio() {
           </button>
         </div>
       </header>
+
+      {alerts.length > 0 && (
+        <button type="button" className="alert-banner" onClick={() => setTab('emergencia')} role="alert">
+          <span>
+            🚨 <strong>{EMERGENCY_LABEL[alerts[0].kind]}</strong> cerca · {alerts[0].zone || 'tu barrio'}
+            {alerts.length > 1 && ` (+${alerts.length - 1} más)`}
+          </span>
+          <span aria-hidden="true">Ver ›</span>
+        </button>
+      )}
 
       {showForm && (
         <form className="panel" onSubmit={publish}>
