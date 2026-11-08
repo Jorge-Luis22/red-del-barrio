@@ -1,7 +1,8 @@
-import { useState, type FormEvent } from 'react';
-import { createNeed, defaultPoint, listEmergencyWall, listNeeds, listSolidary, listUrgentRequests } from '../db/repo';
+import { useCallback, useEffect, useState } from 'react';
+import { defaultPoint, listEmergencyWall, listNeeds, listSolidary, listUrgentRequests } from '../db/repo';
 import MuroSolidario from '../components/MuroSolidario';
 import NeedCard from '../components/NeedCard';
+import PublishSheet, { type PublishRequest } from '../components/PublishSheet';
 import { showEmergencySection } from './Emergencia';
 import { useApp } from '../state/app';
 import { EMERGENCY_LABEL, NEED_LABEL, type NeedType } from '../types';
@@ -32,18 +33,24 @@ export default function Inicio() {
     pendingDraft = null;
     return taken;
   });
-  const [showForm, setShowForm] = useState(draft !== null);
+  // Desde el Directorio ("Pedir este servicio") la hoja se abre ya en el último paso.
+  const [sheet, setSheet] = useState<PublishRequest | null>(
+    draft ? { dir: 'necesito', category: draft.category, detail: draft.description } : null,
+  );
+  const [done, setDone] = useState('');
   const [mode, setModeState] = useState<Mode>(lastMode);
   const setMode = (next: Mode) => {
     lastMode = next;
     setModeState(next);
   };
+  const closeSheet = useCallback(() => setSheet(null), []);
 
-  const [formType, setFormType] = useState<NeedType>(draft?.type ?? 'servicio');
-  const [title, setTitle] = useState(draft?.title ?? '');
-  const [category, setCategory] = useState(draft?.category ?? '');
-  const [description, setDescription] = useState(draft?.description ?? '');
-  const [zone, setZone] = useState('');
+  // El aviso "Listo" desaparece solo.
+  useEffect(() => {
+    if (!done) return;
+    const timer = window.setTimeout(() => setDone(''), 7000);
+    return () => window.clearTimeout(timer);
+  }, [done]);
 
   if (!me) return null;
 
@@ -51,26 +58,6 @@ export default function Inicio() {
   const solidaryCount = listSolidary(defaultPoint()).length;
   const alerts = listEmergencyWall(me.id, defaultPoint());
   const urgentForMe = listUrgentRequests(me.id, defaultPoint()).filter((r) => r.matchesMe);
-
-  async function publish(event: FormEvent) {
-    event.preventDefault();
-    if (!title.trim()) return;
-    await createNeed({
-      authorId: me!.id,
-      type: formType,
-      title,
-      category: category.trim() || 'Otros',
-      description,
-      zone: zone.trim() || me!.zone || (import.meta.env.VITE_DEFAULT_ZONE ?? 'Los Olivos, Lima'),
-      point: defaultPoint(),
-    });
-    setTitle('');
-    setCategory('');
-    setDescription('');
-    setZone('');
-    setShowForm(false);
-    bump();
-  }
 
   return (
     <div>
@@ -81,14 +68,32 @@ export default function Inicio() {
             {me.name} · {me.zone}
           </p>
         </div>
-        {mode === 'todo' && (
-          <div className="actions">
-            <button type="button" className="btn" onClick={() => setShowForm((v) => !v)}>
-              {showForm ? 'Cerrar' : '+ Pedir / Ofrecer'}
-            </button>
-          </div>
-        )}
       </header>
+
+      {mode === 'todo' && (
+        <div className="pub-bar" role="group" aria-label="Publicar">
+          <button type="button" className="pub-btn need" data-pub="necesito" onClick={() => setSheet({ dir: 'necesito' })}>
+            <span className="ico" aria-hidden="true">
+              🙋
+            </span>
+            <strong>Necesito</strong>
+            <span className="sub">Pido ayuda a un vecino</span>
+          </button>
+          <button type="button" className="pub-btn offer" data-pub="ofrezco" onClick={() => setSheet({ dir: 'ofrezco' })}>
+            <span className="ico" aria-hidden="true">
+              🤝
+            </span>
+            <strong>Ofrezco</strong>
+            <span className="sub">Mi servicio al barrio</span>
+          </button>
+        </div>
+      )}
+
+      {done && (
+        <p className="toast-ok" role="status">
+          ✅ {done}
+        </p>
+      )}
 
       {alerts.length > 0 ? (
         <button
@@ -149,83 +154,35 @@ export default function Inicio() {
 
       {mode === 'sin_dinero' && <MuroSolidario />}
 
-      {mode === 'todo' && showForm && (
-        <form className="panel" onSubmit={publish}>
-          <label htmlFor="type">Tipo</label>
-          <select id="type" value={formType} onChange={(e) => setFormType(e.target.value as NeedType)}>
-            {Object.entries(NEED_LABEL).map(([value, label]) => (
-              <option key={value} value={value}>
-                {label}
-              </option>
-            ))}
-          </select>
-          <label htmlFor="title">Título</label>
-          <input
-            id="title"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder="¿Qué necesitas u ofreces?"
-            maxLength={80}
-          />
-          <label htmlFor="category">Categoría</label>
-          <input
-            id="category"
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
-            placeholder="Gasfitería, Comida, Cuidado…"
-            maxLength={40}
-          />
-          <label htmlFor="description">Descripción</label>
-          <textarea
-            id="description"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            rows={3}
-            placeholder="Detalles, horario, qué ofreces a cambio…"
-            maxLength={400}
-          />
-          <label htmlFor="zone">Zona</label>
-          <input
-            id="zone"
-            value={zone}
-            onChange={(e) => setZone(e.target.value)}
-            placeholder={me.zone || 'Los Olivos, Lima'}
-            maxLength={60}
-          />
-          <div className="meta">
-            <span className="badge">Ubicación aproximada: se redondea al publicar</span>
-          </div>
-          <p>
-            <button type="submit" className="btn block" disabled={!title.trim()}>
-              Publicar
-            </button>
-          </p>
-        </form>
-      )}
-
       {mode === 'todo' && (
         <>
-      <div className="row-filters" style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
-        <input
-          value={q}
-          onChange={(e) => setQ(e.target.value)}
-          placeholder="Buscar en el barrio…"
-          aria-label="Buscar"
-          style={{ flex: 2 }}
-        />
-        <select
-          value={type}
-          onChange={(e) => setType(e.target.value as NeedType | 'todos')}
-          aria-label="Filtrar por tipo"
-          style={{ flex: 1 }}
+      <input
+        value={q}
+        onChange={(e) => setQ(e.target.value)}
+        placeholder="Buscar en el barrio…"
+        aria-label="Buscar"
+        style={{ marginBottom: 8 }}
+      />
+      <div className="chips" role="group" aria-label="Filtrar por tipo">
+        <button
+          type="button"
+          className={type === 'todos' ? 'chip on' : 'chip'}
+          aria-pressed={type === 'todos'}
+          onClick={() => setType('todos')}
         >
-          <option value="todos">Todos</option>
-          {Object.entries(NEED_LABEL).map(([value, label]) => (
-            <option key={value} value={value}>
-              {label}
-            </option>
-          ))}
-        </select>
+          Todo
+        </button>
+        {Object.entries(NEED_LABEL).map(([value, label]) => (
+          <button
+            key={value}
+            type="button"
+            className={type === value ? 'chip on' : 'chip'}
+            aria-pressed={type === value}
+            onClick={() => setType(type === value ? 'todos' : (value as NeedType))}
+          >
+            {label}
+          </button>
+        ))}
       </div>
 
       {needs.length === 0 && <div className="empty">No hay publicaciones que coincidan.</div>}
@@ -234,6 +191,18 @@ export default function Inicio() {
         <NeedCard key={`${need.id}-${version}`} need={need} />
       ))}
         </>
+      )}
+
+      {sheet && (
+        <PublishSheet
+          request={sheet}
+          onClose={closeSheet}
+          onDone={(message) => {
+            setSheet(null);
+            setDone(message);
+            bump();
+          }}
+        />
       )}
     </div>
   );

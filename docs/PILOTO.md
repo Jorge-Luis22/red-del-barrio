@@ -70,3 +70,17 @@ descargado en otros teléfonos no se retira.
 1. 5–10 vecinos conocidos una semana (un grupo de WhatsApp para dudas).
 2. Revisar `pilot_reports` cada día los primeros días.
 3. Abrir a más gente solo si hay reportes atendidos y los términos fueron revisados.
+
+## Publicar en 3 toques (vecinos que no escriben)
+
+Pedir o anunciar un servicio no exige escribir nada:
+
+1. **Necesito** o **Ofrezco** (los dos botones grandes de Inicio).
+2. Tocar el rubro (Gasfitería, Electricidad, Cerrajería, Carpintería, Limpieza y jardín, Cuidado de personas, Comida, Transporte, Costura, Clases, Herramientas, u "Otra cosa").
+3. **Publicar**.
+
+- "Necesito" publica un pedido en el muro (`Necesito: Gasfitería`). Opcional, también con botones: qué pasó ("Fuga de agua"), para cuándo (Hoy / Mañana / Esta semana / Sin apuro) y un detalle corto.
+- "Ofrezco" anota al vecino en el Directorio con ese oficio (opcional: "Disponible ahora", horario, "Atiendo urgencias"). Prestar o regalar sin dinero sigue en la pestaña "Sin dinero".
+- Desde el Directorio, "Pedir este servicio" abre la hoja ya en el último paso (2 toques).
+- El muro se filtra con botones: Todo / Servicio / Producto / Préstamo / Ayuda.
+- No cambia el servidor: usa las mismas tablas (`needs`, `service_offers`).
