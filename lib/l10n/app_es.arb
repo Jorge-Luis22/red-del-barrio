@@ -664,5 +664,47 @@
   "wall3": "Cambio clases de tejido por ayuda con el celular.",
   "wall4": "Busco quien me ayude a mover un mueble el sábado.",
   "wall5": "Alquilo una máquina de coser por día.",
-  "wall6": "Necesito una carretilla prestada para el fin de semana."
+  "wall6": "Necesito una carretilla prestada para el fin de semana.",
+  "locBannerLastTitle": "Usando tu última zona conocida",
+  "locBannerLastBody": "Las distancias son aproximadas hasta que vuelva la señal del GPS.",
+  "locSourceLive": "ubicación activa",
+  "locSourceLast": "última posición conocida",
+  "locSourceSaved": "zona guardada",
+  "locZoneLine": "{zone} · {source}",
+  "@locZoneLine": {
+    "placeholders": {
+      "zone": {
+        "type": "String"
+      },
+      "source": {
+        "type": "String"
+      }
+    }
+  },
+  "locRefresh": "Actualizar ubicación",
+  "locEnable": "Activar ubicación",
+  "locOpenSettings": "Abrir ajustes",
+  "failLocationBlocked": "El permiso de ubicación está bloqueado. Actívalo en los ajustes del teléfono.",
+  "locSettingTitle": "Usar mi ubicación",
+  "locSettingHint": "Sirve para ver lo que hay cerca. Solo se recuerda tu zona de ~1 km, nunca tu ubicación exacta.",
+  "locForget": "Olvidar mi zona guardada",
+  "locForgotten": "Listo: olvidamos tu zona guardada.",
+  "connOffline": "Sin conexión · puedes seguir usando la app",
+  "connOfflinePending": "Sin conexión · {n, plural, =1{1 envío pendiente} other{{n} envíos pendientes}}",
+  "@connOfflinePending": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "connSyncing": "Enviando {n, plural, =1{1 pendiente} other{{n} pendientes}}…",
+  "@connSyncing": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "connSynced": "Todo enviado"
 }

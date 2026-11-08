@@ -64,6 +64,9 @@ class FakeOutbox implements OutboxQueue {
   Future<List<OutboxOp>> pending() async => ops.values.toList();
 
   @override
+  Stream<int> watchPendingCount() => Stream.value(ops.length);
+
+  @override
   Future<Result<void>> remove(String id) async {
     ops.remove(id);
     return const Ok(null);

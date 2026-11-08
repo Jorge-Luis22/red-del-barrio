@@ -12,6 +12,9 @@ class AppSettings {
     this.volunteer = false,
     this.capabilities = const {},
     this.languageCode,
+    this.useLocation = false,
+    this.lastZoneLat,
+    this.lastZoneLng,
   });
 
   /// 1.0 normal · 1.15 grande · 1.3 muy grande.
@@ -32,6 +35,14 @@ class AppSettings {
   /// Idioma elegido: `es`, `en` o `null` para seguir al sistema.
   final String? languageCode;
 
+  /// La persona pidió usar su ubicación para ver lo que hay cerca.
+  final bool useLocation;
+
+  /// Última zona (redondeada a ~1 km) para mostrar algo sin GPS ni internet.
+  /// Nunca son coordenadas exactas.
+  final double? lastZoneLat;
+  final double? lastZoneLng;
+
   AppSettings copyWith({
     double? textScale,
     bool? highContrast,
@@ -42,6 +53,10 @@ class AppSettings {
     Set<String>? capabilities,
     String? languageCode,
     bool useSystemLanguage = false,
+    bool? useLocation,
+    double? lastZoneLat,
+    double? lastZoneLng,
+    bool clearLastZone = false,
   }) => AppSettings(
     textScale: textScale ?? this.textScale,
     highContrast: highContrast ?? this.highContrast,
@@ -53,6 +68,9 @@ class AppSettings {
     languageCode: useSystemLanguage
         ? null
         : (languageCode ?? this.languageCode),
+    useLocation: useLocation ?? this.useLocation,
+    lastZoneLat: clearLastZone ? null : (lastZoneLat ?? this.lastZoneLat),
+    lastZoneLng: clearLastZone ? null : (lastZoneLng ?? this.lastZoneLng),
   );
 }
 

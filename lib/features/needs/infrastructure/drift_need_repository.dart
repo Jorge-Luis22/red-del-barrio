@@ -1,10 +1,10 @@
 import 'package:drift/drift.dart';
 
 import '../../../core/db/app_database.dart';
-import '../../../core/failure.dart';
 import '../../../core/result.dart';
 import '../domain/need.dart';
 import '../domain/need_repository.dart';
+import '../../../core/storage_guard.dart';
 
 class DriftNeedRepository implements NeedRepository {
   DriftNeedRepository(this._db);
@@ -13,7 +13,7 @@ class DriftNeedRepository implements NeedRepository {
 
   @override
   Future<Result<void>> save(Need need) async {
-    try {
+    return guardStorage('No se pudo guardar en tu teléfono.', () async {
       await _db
           .into(_db.needs)
           .insertOnConflictUpdate(
@@ -26,22 +26,16 @@ class DriftNeedRepository implements NeedRepository {
               syncStatus: need.syncStatus.name,
             ),
           );
-      return const Ok(null);
-    } catch (_) {
-      return const Err(StorageFailure('No se pudo guardar en tu teléfono.'));
-    }
+    });
   }
 
   @override
   Future<Result<void>> updateStatus(String id, SyncStatus status) async {
-    try {
+    return guardStorage('No se pudo actualizar el estado.', () async {
       await (_db.update(_db.needs)..where((t) => t.id.equals(id))).write(
         NeedsCompanion(syncStatus: Value(status.name)),
       );
-      return const Ok(null);
-    } catch (_) {
-      return const Err(StorageFailure('No se pudo actualizar el estado.'));
-    }
+    });
   }
 
   @override

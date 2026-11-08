@@ -2335,6 +2335,114 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Necesito una carretilla prestada para el fin de semana.'**
   String get wall6;
+
+  /// No description provided for @locBannerLastTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Usando tu última zona conocida'**
+  String get locBannerLastTitle;
+
+  /// No description provided for @locBannerLastBody.
+  ///
+  /// In es, this message translates to:
+  /// **'Las distancias son aproximadas hasta que vuelva la señal del GPS.'**
+  String get locBannerLastBody;
+
+  /// No description provided for @locSourceLive.
+  ///
+  /// In es, this message translates to:
+  /// **'ubicación activa'**
+  String get locSourceLive;
+
+  /// No description provided for @locSourceLast.
+  ///
+  /// In es, this message translates to:
+  /// **'última posición conocida'**
+  String get locSourceLast;
+
+  /// No description provided for @locSourceSaved.
+  ///
+  /// In es, this message translates to:
+  /// **'zona guardada'**
+  String get locSourceSaved;
+
+  /// No description provided for @locZoneLine.
+  ///
+  /// In es, this message translates to:
+  /// **'{zone} · {source}'**
+  String locZoneLine(String zone, String source);
+
+  /// No description provided for @locRefresh.
+  ///
+  /// In es, this message translates to:
+  /// **'Actualizar ubicación'**
+  String get locRefresh;
+
+  /// No description provided for @locEnable.
+  ///
+  /// In es, this message translates to:
+  /// **'Activar ubicación'**
+  String get locEnable;
+
+  /// No description provided for @locOpenSettings.
+  ///
+  /// In es, this message translates to:
+  /// **'Abrir ajustes'**
+  String get locOpenSettings;
+
+  /// No description provided for @failLocationBlocked.
+  ///
+  /// In es, this message translates to:
+  /// **'El permiso de ubicación está bloqueado. Actívalo en los ajustes del teléfono.'**
+  String get failLocationBlocked;
+
+  /// No description provided for @locSettingTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Usar mi ubicación'**
+  String get locSettingTitle;
+
+  /// No description provided for @locSettingHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Sirve para ver lo que hay cerca. Solo se recuerda tu zona de ~1 km, nunca tu ubicación exacta.'**
+  String get locSettingHint;
+
+  /// No description provided for @locForget.
+  ///
+  /// In es, this message translates to:
+  /// **'Olvidar mi zona guardada'**
+  String get locForget;
+
+  /// No description provided for @locForgotten.
+  ///
+  /// In es, this message translates to:
+  /// **'Listo: olvidamos tu zona guardada.'**
+  String get locForgotten;
+
+  /// No description provided for @connOffline.
+  ///
+  /// In es, this message translates to:
+  /// **'Sin conexión · puedes seguir usando la app'**
+  String get connOffline;
+
+  /// No description provided for @connOfflinePending.
+  ///
+  /// In es, this message translates to:
+  /// **'Sin conexión · {n, plural, =1{1 envío pendiente} other{{n} envíos pendientes}}'**
+  String connOfflinePending(int n);
+
+  /// No description provided for @connSyncing.
+  ///
+  /// In es, this message translates to:
+  /// **'Enviando {n, plural, =1{1 pendiente} other{{n} pendientes}}…'**
+  String connSyncing(int n);
+
+  /// No description provided for @connSynced.
+  ///
+  /// In es, this message translates to:
+  /// **'Todo enviado'**
+  String get connSynced;
 }
 
 class _AppLocalizationsDelegate

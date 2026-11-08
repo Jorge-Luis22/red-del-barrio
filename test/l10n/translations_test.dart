@@ -36,8 +36,9 @@ void main() {
           .allMatches(en[k] as String)
           .map((m) => m.group(1)!)
           .toSet();
-      if (a.length != b.length || !a.containsAll(b))
+      if (a.length != b.length || !a.containsAll(b)) {
         problems.add('$k: $a vs $b');
+      }
     }
     expect(problems, isEmpty, reason: problems.join('\n'));
   });
@@ -53,8 +54,11 @@ void main() {
       if (a == b &&
           a.length > 12 &&
           !k.startsWith('duracion') &&
-          !same.contains(a.toLowerCase()))
+          RegExp(r'[A-Za-zÁÉÍÓÚáéíóúñ]')
+              .hasMatch(a.replaceAll(RegExp(r'\{[^}]*\}'), '')) &&
+          !same.contains(a.toLowerCase())) {
         copied.add(k);
+      }
     }
     expect(copied, isEmpty, reason: 'Sin traducir: $copied');
   });

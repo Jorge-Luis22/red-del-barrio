@@ -664,5 +664,47 @@
   "wall3": "I will swap knitting lessons for help with my phone.",
   "wall4": "Looking for someone to help me move a piece of furniture on Saturday.",
   "wall5": "I rent out a sewing machine by the day.",
-  "wall6": "I need to borrow a wheelbarrow for the weekend."
+  "wall6": "I need to borrow a wheelbarrow for the weekend.",
+  "locBannerLastTitle": "Using your last known area",
+  "locBannerLastBody": "Distances are approximate until the GPS signal returns.",
+  "locSourceLive": "location on",
+  "locSourceLast": "last known position",
+  "locSourceSaved": "saved area",
+  "locZoneLine": "{zone} · {source}",
+  "@locZoneLine": {
+    "placeholders": {
+      "zone": {
+        "type": "String"
+      },
+      "source": {
+        "type": "String"
+      }
+    }
+  },
+  "locRefresh": "Update location",
+  "locEnable": "Turn on location",
+  "locOpenSettings": "Open settings",
+  "failLocationBlocked": "Location permission is blocked. Turn it on in your phone settings.",
+  "locSettingTitle": "Use my location",
+  "locSettingHint": "It shows what is nearby. Only your ~1 km area is remembered, never your exact location.",
+  "locForget": "Forget my saved area",
+  "locForgotten": "Done: we forgot your saved area.",
+  "connOffline": "No connection · you can keep using the app",
+  "connOfflinePending": "No connection · {n, plural, =1{1 item waiting to send} other{{n} items waiting to send}}",
+  "@connOfflinePending": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "connSyncing": "Sending {n, plural, =1{1 pending item} other{{n} pending items}}…",
+  "@connSyncing": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "connSynced": "Everything sent"
 }

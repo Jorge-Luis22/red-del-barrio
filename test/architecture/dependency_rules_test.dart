@@ -39,8 +39,9 @@ void main() {
     final violations = <String>[];
     for (final f in domainFiles) {
       for (final line in f.readAsLinesSync()) {
-        if (forbiddenInDomain.hasMatch(line))
+        if (forbiddenInDomain.hasMatch(line)) {
           violations.add('${norm(f.path)}: $line');
+        }
       }
     }
     expect(violations, isEmpty, reason: violations.join('\n'));

@@ -1,9 +1,9 @@
 import 'package:drift/drift.dart';
 
 import '../../../core/db/app_database.dart';
-import '../../../core/failure.dart';
 import '../../../core/result.dart';
 import '../domain/outbox_queue.dart';
+import '../../../core/storage_guard.dart';
 
 class DriftOutbox implements OutboxQueue {
   DriftOutbox(this._db);
@@ -12,7 +12,7 @@ class DriftOutbox implements OutboxQueue {
 
   @override
   Future<Result<void>> enqueue(OutboxOp op) async {
-    try {
+    return guardStorage('No se pudo guardar el envío pendiente.', () async {
       // insertOrIgnore: el mismo UUID no se encola dos veces.
       await _db
           .into(_db.outboxOps)
@@ -25,12 +25,7 @@ class DriftOutbox implements OutboxQueue {
             ),
             mode: InsertMode.insertOrIgnore,
           );
-      return const Ok(null);
-    } catch (_) {
-      return const Err(
-        StorageFailure('No se pudo guardar el envío pendiente.'),
-      );
-    }
+    });
   }
 
   @override
@@ -53,26 +48,24 @@ class DriftOutbox implements OutboxQueue {
   }
 
   @override
+  Stream<int> watchPendingCount() =>
+      _db.select(_db.outboxOps).watch().map((rows) => rows.length);
+
+  @override
   Future<Result<void>> remove(String id) async {
-    try {
+    return guardStorage('No se pudo actualizar la cola.', () async {
       await (_db.delete(_db.outboxOps)..where((t) => t.id.equals(id))).go();
-      return const Ok(null);
-    } catch (_) {
-      return const Err(StorageFailure('No se pudo actualizar la cola.'));
-    }
+    });
   }
 
   @override
   Future<Result<void>> markFailed(String id, String error) async {
-    try {
+    return guardStorage('No se pudo actualizar la cola.', () async {
       await _db.customUpdate(
         'UPDATE outbox_ops SET attempts = attempts + 1, last_error = ? WHERE id = ?',
         variables: [Variable.withString(error), Variable.withString(id)],
         updates: {_db.outboxOps},
       );
-      return const Ok(null);
-    } catch (_) {
-      return const Err(StorageFailure('No se pudo actualizar la cola.'));
-    }
+    });
   }
 }

@@ -33,6 +33,8 @@ String messageText(AppLocalizations l, String message) => switch (message) {
   "No se pudo actualizar la cola." => l.failUpdateQueue,
   'Activa la ubicación del teléfono para ver lo que hay cerca.' =>
     l.failLocationOff,
+  'El permiso de ubicación está bloqueado. Actívalo en los ajustes del teléfono.' =>
+    l.failLocationBlocked,
   'Sin permiso de ubicación. Puedes elegir tu zona a mano.' =>
     l.failLocationPermission,
   _ => message,

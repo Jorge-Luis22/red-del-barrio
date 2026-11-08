@@ -25,6 +25,9 @@ abstract interface class OutboxQueue {
 
   Future<List<OutboxOp>> pending();
 
+  /// Cuántos envíos hay en la cola ahora y cada vez que cambia.
+  Stream<int> watchPendingCount();
+
   Future<Result<void>> remove(String id);
 
   Future<Result<void>> markFailed(String id, String error);

@@ -1,11 +1,11 @@
 import 'package:drift/drift.dart';
 
 import '../../../core/db/app_database.dart';
-import '../../../core/failure.dart';
 import '../../../core/result.dart';
 import '../../needs/domain/need.dart';
 import '../domain/chat.dart';
 import '../domain/chat_repository.dart';
+import '../../../core/storage_guard.dart';
 
 class DriftChatRepository implements ChatRepository {
   DriftChatRepository(this._db);
@@ -14,7 +14,7 @@ class DriftChatRepository implements ChatRepository {
 
   @override
   Future<Result<void>> save(ChatMessage message) async {
-    try {
+    return guardStorage('No se pudo guardar tu mensaje.', () async {
       await _db
           .into(_db.chatMessages)
           .insertOnConflictUpdate(
@@ -26,22 +26,16 @@ class DriftChatRepository implements ChatRepository {
               syncStatus: message.syncStatus.name,
             ),
           );
-      return const Ok(null);
-    } catch (_) {
-      return const Err(StorageFailure('No se pudo guardar tu mensaje.'));
-    }
+    });
   }
 
   @override
   Future<Result<void>> updateStatus(String id, SyncStatus status) async {
-    try {
+    return guardStorage('No se pudo actualizar el mensaje.', () async {
       await (_db.update(_db.chatMessages)..where((t) => t.id.equals(id))).write(
         ChatMessagesCompanion(syncStatus: Value(status.name)),
       );
-      return const Ok(null);
-    } catch (_) {
-      return const Err(StorageFailure('No se pudo actualizar el mensaje.'));
-    }
+    });
   }
 
   @override

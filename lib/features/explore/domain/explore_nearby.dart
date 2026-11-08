@@ -61,7 +61,7 @@ class ExploreNearby {
           listing: l,
           provider: provider,
           distanceMeters: distance,
-          distanceIsReal: hasPosition,
+          distanceIsReal: hasPosition && !near.isApproximate,
           vistoBueno: calculateVistoBueno(
             exampleCount: provider.exampleVistoBueno,
             interactions: interactions,

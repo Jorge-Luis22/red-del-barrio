@@ -1,11 +1,11 @@
 import 'package:drift/drift.dart';
 
 import '../../../core/db/app_database.dart';
-import '../../../core/failure.dart';
 import '../../../core/result.dart';
 import '../../needs/domain/need.dart';
 import '../domain/emergency.dart';
 import '../domain/emergency_repository.dart';
+import '../../../core/storage_guard.dart';
 
 class DriftEmergencyRepository implements EmergencyRepository {
   DriftEmergencyRepository(this._db);
@@ -14,7 +14,7 @@ class DriftEmergencyRepository implements EmergencyRepository {
 
   @override
   Future<Result<void>> savePost(EmergencyPost post) async {
-    try {
+    return guardStorage('No se pudo guardar tu aviso.', () async {
       await _db
           .into(_db.emergencyPosts)
           .insertOnConflictUpdate(
@@ -26,21 +26,15 @@ class DriftEmergencyRepository implements EmergencyRepository {
               syncStatus: post.syncStatus.name,
             ),
           );
-      return const Ok(null);
-    } catch (_) {
-      return const Err(StorageFailure('No se pudo guardar tu aviso.'));
-    }
+    });
   }
 
   @override
   Future<Result<void>> updatePostStatus(String id, SyncStatus status) async {
-    try {
+    return guardStorage('No se pudo actualizar el aviso.', () async {
       await (_db.update(_db.emergencyPosts)..where((t) => t.id.equals(id)))
           .write(EmergencyPostsCompanion(syncStatus: Value(status.name)));
-      return const Ok(null);
-    } catch (_) {
-      return const Err(StorageFailure('No se pudo actualizar el aviso.'));
-    }
+    });
   }
 
   @override
@@ -63,7 +57,7 @@ class DriftEmergencyRepository implements EmergencyRepository {
 
   @override
   Future<Result<void>> saveCollectionPoint(CollectionPoint point) async {
-    try {
+    return guardStorage('No se pudo guardar el punto de acopio.', () async {
       await _db
           .into(_db.collectionPoints)
           .insertOnConflictUpdate(
@@ -74,12 +68,7 @@ class DriftEmergencyRepository implements EmergencyRepository {
               createdAt: point.createdAt,
             ),
           );
-      return const Ok(null);
-    } catch (_) {
-      return const Err(
-        StorageFailure('No se pudo guardar el punto de acopio.'),
-      );
-    }
+    });
   }
 
   @override

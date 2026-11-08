@@ -1278,4 +1278,79 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get wall6 => 'Necesito una carretilla prestada para el fin de semana.';
+
+  @override
+  String get locBannerLastTitle => 'Usando tu última zona conocida';
+
+  @override
+  String get locBannerLastBody =>
+      'Las distancias son aproximadas hasta que vuelva la señal del GPS.';
+
+  @override
+  String get locSourceLive => 'ubicación activa';
+
+  @override
+  String get locSourceLast => 'última posición conocida';
+
+  @override
+  String get locSourceSaved => 'zona guardada';
+
+  @override
+  String locZoneLine(String zone, String source) {
+    return '$zone · $source';
+  }
+
+  @override
+  String get locRefresh => 'Actualizar ubicación';
+
+  @override
+  String get locEnable => 'Activar ubicación';
+
+  @override
+  String get locOpenSettings => 'Abrir ajustes';
+
+  @override
+  String get failLocationBlocked =>
+      'El permiso de ubicación está bloqueado. Actívalo en los ajustes del teléfono.';
+
+  @override
+  String get locSettingTitle => 'Usar mi ubicación';
+
+  @override
+  String get locSettingHint =>
+      'Sirve para ver lo que hay cerca. Solo se recuerda tu zona de ~1 km, nunca tu ubicación exacta.';
+
+  @override
+  String get locForget => 'Olvidar mi zona guardada';
+
+  @override
+  String get locForgotten => 'Listo: olvidamos tu zona guardada.';
+
+  @override
+  String get connOffline => 'Sin conexión · puedes seguir usando la app';
+
+  @override
+  String connOfflinePending(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n envíos pendientes',
+      one: '1 envío pendiente',
+    );
+    return 'Sin conexión · $_temp0';
+  }
+
+  @override
+  String connSyncing(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n pendientes',
+      one: '1 pendiente',
+    );
+    return 'Enviando $_temp0…';
+  }
+
+  @override
+  String get connSynced => 'Todo enviado';
 }

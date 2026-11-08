@@ -1,10 +1,10 @@
 import 'package:drift/drift.dart' show Value;
 
 import '../../../core/db/app_database.dart';
-import '../../../core/failure.dart';
 import '../../../core/result.dart';
 import '../domain/interaction.dart';
 import '../domain/reputation_repository.dart';
+import '../../../core/storage_guard.dart';
 
 class DriftReputationRepository implements ReputationRepository {
   DriftReputationRepository(this._db);
@@ -13,7 +13,7 @@ class DriftReputationRepository implements ReputationRepository {
 
   @override
   Future<Result<void>> record(Interaction i) async {
-    try {
+    return guardStorage('No se pudo guardar tu calificación.', () async {
       await _db
           .into(_db.interactions)
           .insertOnConflictUpdate(
@@ -28,10 +28,7 @@ class DriftReputationRepository implements ReputationRepository {
               comment: Value(i.comment),
             ),
           );
-      return const Ok(null);
-    } catch (_) {
-      return const Err(StorageFailure('No se pudo guardar tu calificación.'));
-    }
+    });
   }
 
   @override

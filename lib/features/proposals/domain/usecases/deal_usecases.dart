@@ -60,8 +60,9 @@ class ValidateMeetingCode {
 
   Future<Result<Deal>> call(String dealId, String entered) async {
     final deal = await deals.byId(dealId);
-    if (deal == null)
+    if (deal == null) {
       return const Err(ValidationFailure('No encontramos este trato.'));
+    }
     if (deal.status != DealStatus.accepted) {
       return const Err(
         ValidationFailure('El código de este trato ya fue validado.'),
@@ -93,8 +94,9 @@ class CompleteDeal {
 
   Future<Result<Deal>> call(String dealId) async {
     final deal = await deals.byId(dealId);
-    if (deal == null)
+    if (deal == null) {
       return const Err(ValidationFailure('No encontramos este trato.'));
+    }
     if (deal.status != DealStatus.inProgress) {
       return const Err(
         ValidationFailure('Primero hay que validar el código de encuentro.'),
@@ -153,16 +155,18 @@ class CloseAndRate {
       return const Err(ValidationFailure('Elige de 1 a 5 estrellas.'));
     }
     final deal = await deals.byId(dealId);
-    if (deal == null)
+    if (deal == null) {
       return const Err(ValidationFailure('No encontramos este trato.'));
+    }
     if (deal.status != DealStatus.awaitingRating) {
       return const Err(
         ValidationFailure('Primero marca el servicio como hecho.'),
       );
     }
     final provider = await directory.provider(deal.providerId);
-    if (provider == null)
+    if (provider == null) {
       return const Err(ValidationFailure('No encontramos a esta persona.'));
+    }
 
     final before = await reputation.forProvider(deal.providerId);
     final interaction = Interaction(

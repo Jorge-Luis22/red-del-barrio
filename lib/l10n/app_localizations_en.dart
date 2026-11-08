@@ -1279,4 +1279,79 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get wall6 => 'I need to borrow a wheelbarrow for the weekend.';
+
+  @override
+  String get locBannerLastTitle => 'Using your last known area';
+
+  @override
+  String get locBannerLastBody =>
+      'Distances are approximate until the GPS signal returns.';
+
+  @override
+  String get locSourceLive => 'location on';
+
+  @override
+  String get locSourceLast => 'last known position';
+
+  @override
+  String get locSourceSaved => 'saved area';
+
+  @override
+  String locZoneLine(String zone, String source) {
+    return '$zone · $source';
+  }
+
+  @override
+  String get locRefresh => 'Update location';
+
+  @override
+  String get locEnable => 'Turn on location';
+
+  @override
+  String get locOpenSettings => 'Open settings';
+
+  @override
+  String get failLocationBlocked =>
+      'Location permission is blocked. Turn it on in your phone settings.';
+
+  @override
+  String get locSettingTitle => 'Use my location';
+
+  @override
+  String get locSettingHint =>
+      'It shows what is nearby. Only your ~1 km area is remembered, never your exact location.';
+
+  @override
+  String get locForget => 'Forget my saved area';
+
+  @override
+  String get locForgotten => 'Done: we forgot your saved area.';
+
+  @override
+  String get connOffline => 'No connection · you can keep using the app';
+
+  @override
+  String connOfflinePending(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n items waiting to send',
+      one: '1 item waiting to send',
+    );
+    return 'No connection · $_temp0';
+  }
+
+  @override
+  String connSyncing(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n pending items',
+      one: '1 pending item',
+    );
+    return 'Sending $_temp0…';
+  }
+
+  @override
+  String get connSynced => 'Everything sent';
 }

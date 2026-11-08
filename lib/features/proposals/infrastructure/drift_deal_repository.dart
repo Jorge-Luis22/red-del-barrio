@@ -1,10 +1,10 @@
 import 'package:drift/drift.dart';
 
 import '../../../core/db/app_database.dart';
-import '../../../core/failure.dart';
 import '../../../core/result.dart';
 import '../domain/deal.dart';
 import '../domain/deal_repository.dart';
+import '../../../core/storage_guard.dart';
 
 class DriftDealRepository implements DealRepository {
   DriftDealRepository(this._db);
@@ -13,30 +13,28 @@ class DriftDealRepository implements DealRepository {
 
   @override
   Future<Result<void>> save(Deal d) async {
-    try {
-      await _db
-          .into(_db.deals)
-          .insertOnConflictUpdate(
-            DealsCompanion.insert(
-              id: d.id,
-              needId: d.needId,
-              providerId: d.providerId,
-              providerName: d.providerName,
-              priceSoles: d.priceSoles,
-              priceLabel: d.priceLabel,
-              code: d.code,
-              status: d.status.name,
-              acceptedAt: d.acceptedAt,
-              startedAt: Value(d.startedAt),
-              completedAt: Value(d.completedAt),
-            ),
-          );
-      return const Ok(null);
-    } catch (_) {
-      return const Err(
-        StorageFailure('No se pudo guardar el trato en tu teléfono.'),
-      );
-    }
+    return guardStorage(
+      'No se pudo guardar el trato en tu teléfono.',
+      () async {
+        await _db
+            .into(_db.deals)
+            .insertOnConflictUpdate(
+              DealsCompanion.insert(
+                id: d.id,
+                needId: d.needId,
+                providerId: d.providerId,
+                providerName: d.providerName,
+                priceSoles: d.priceSoles,
+                priceLabel: d.priceLabel,
+                code: d.code,
+                status: d.status.name,
+                acceptedAt: d.acceptedAt,
+                startedAt: Value(d.startedAt),
+                completedAt: Value(d.completedAt),
+              ),
+            );
+      },
+    );
   }
 
   @override
