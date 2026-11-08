@@ -9,3 +9,8 @@ ios/
 .DS_Store
 infra/.env
 infra/synapse/data/
+
+# Supabase local
+supabase/.temp/
+supabase/.branches/
+*.pem
