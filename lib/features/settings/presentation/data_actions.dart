@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../app/di/providers.dart';
 import '../../../app/l10n.dart';
@@ -16,6 +17,12 @@ class DataActions extends ConsumerWidget {
     final l = context.l;
     return BvRows(
       children: [
+        _ActionRow(
+          icon: Icons.tune_rounded,
+          title: l.settingsTitle,
+          subtitle: l.settingsRowSub,
+          onTap: () => context.push('/perfil/ajustes'),
+        ),
         _ActionRow(
           icon: Icons.school_rounded,
           title: l.verElTutorial,

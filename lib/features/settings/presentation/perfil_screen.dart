@@ -8,7 +8,6 @@ import '../../../app/ui/section_header.dart';
 import '../../profile/presentation/my_profile_section.dart';
 import 'data_actions.dart';
 import 'help_summary.dart';
-import 'settings_panel.dart';
 
 /// Perfil: tu ayuda al barrio, tus ajustes y tus datos.
 class PerfilScreen extends ConsumerWidget {
@@ -48,9 +47,6 @@ class PerfilScreen extends ConsumerWidget {
                   ),
                 ),
                 const SizedBox(height: 28),
-                BvSectionTitle(l.verYEscucharMejor),
-                const SizedBox(height: 12),
-                const SettingsPanel(),
                 const SizedBox(height: 28),
                 BvSectionTitle(l.ayudaYDatos),
                 const SizedBox(height: 12),

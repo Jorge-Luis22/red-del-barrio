@@ -59,7 +59,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get cuentaloYLosVecinos =>
-      'Cuéntalo y los vecinos y negocios de tu zona te proponen cómo resolverlo.';
+      'Cuéntalo y tu barrio te propone cómo resolverlo.';
 
   @override
   String get pedirAlgo => 'Pedir algo';
@@ -1675,4 +1675,151 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get failSaveContact => 'No se pudo guardar el contacto.';
+
+  @override
+  String get hintNeed3 => 'Escribe al menos 3 letras para continuar.';
+
+  @override
+  String get hintAddr => 'Marca tu ubicación y ponle un nombre para guardar.';
+
+  @override
+  String get hintContact => 'Escribe un nombre y un teléfono para guardar.';
+
+  @override
+  String get hintProfile =>
+      'Escribe un usuario de 3 letras o más y acepta para continuar.';
+
+  @override
+  String get hintStars => 'Elige cuántas estrellas das para enviar.';
+
+  @override
+  String get settingsTitle => 'Ajustes';
+
+  @override
+  String get settingsRowSub =>
+      'Tamaño del texto, idioma, apariencia y ubicación.';
+
+  @override
+  String get bidOfferBtn => 'Ofertar';
+
+  @override
+  String get bidHelpBtn => 'Ofrecer mi ayuda';
+
+  @override
+  String get bidMakeOffer => 'Hacer mi oferta';
+
+  @override
+  String get bidMakeProposal => 'Hacer mi propuesta';
+
+  @override
+  String get bidChangeOffer => 'Cambiar mi oferta';
+
+  @override
+  String get bidChangeProposal => 'Cambiar mi propuesta';
+
+  @override
+  String get bidMyOffer => 'Mi oferta';
+
+  @override
+  String get bidMyProposal => 'Mi propuesta';
+
+  @override
+  String bidsTitle(int n) {
+    return 'Ofertas ($n)';
+  }
+
+  @override
+  String proposalsCount(int n) {
+    return 'Propuestas ($n)';
+  }
+
+  @override
+  String get bidRuleHigh => 'Gana la oferta más alta.';
+
+  @override
+  String bidRuleHighRef(String ref) {
+    return 'Gana la oferta más alta. Precio de referencia: $ref.';
+  }
+
+  @override
+  String get bidRuleLow =>
+      'Gana la propuesta más baja. Puedes proponer 0 para un intercambio solidario.';
+
+  @override
+  String get bidBestOffer => 'Mejor oferta';
+
+  @override
+  String get bidBestProposal => 'Mejor propuesta';
+
+  @override
+  String get bidPriceLabel => 'Precio en soles (0 = intercambio solidario)';
+
+  @override
+  String get bidPriceOfferLabel => 'Tu oferta en soles';
+
+  @override
+  String get bidMessageLabel => 'Mensaje (opcional)';
+
+  @override
+  String get bidMessageHint => 'Qué ofreces, materiales, condiciones…';
+
+  @override
+  String get bidWhenLabel => 'Cuándo puedes';
+
+  @override
+  String get bidWhenHint => 'Hoy 4:00 p. m.';
+
+  @override
+  String get bidSendOffer => 'Enviar oferta';
+
+  @override
+  String get bidSendProposal => 'Enviar propuesta';
+
+  @override
+  String get bidSaved => 'Listo: tu oferta quedó guardada en tu teléfono.';
+
+  @override
+  String get bidHint => 'Escribe un precio (0 = intercambio solidario).';
+
+  @override
+  String get bidNone => 'Aún no hay ofertas. ¡Sé el primero!';
+
+  @override
+  String bidYourOffer(String price) {
+    return 'Tu oferta: $price';
+  }
+
+  @override
+  String get bidNotFound => 'No encontramos este anuncio';
+
+  @override
+  String get bidDemoNote =>
+      'Las demás ofertas son de ejemplo. La tuya queda guardada en tu teléfono y se envía cuando haya internet.';
+
+  @override
+  String get bidDemoSale1 => 'Lo recojo hoy mismo.';
+
+  @override
+  String get bidDemoSale2 => 'Pago al contado y paso por él mañana.';
+
+  @override
+  String get bidDemoReq1 => 'Lo resuelvo con mis propias herramientas.';
+
+  @override
+  String get bidDemoReq2 => 'Puedo ir mañana a primera hora.';
+
+  @override
+  String get bidDemoWhen1 => 'Hoy 6:00 p. m.';
+
+  @override
+  String get bidDemoWhen2 => 'Mañana 9:00 a. m.';
+
+  @override
+  String get failBidAmount => 'Escribe un precio válido, de 0 a 99 999 soles.';
+
+  @override
+  String get failBidSave => 'No se pudo guardar tu oferta.';
+
+  @override
+  String get failBidUpdate => 'No se pudo actualizar la oferta.';
 }

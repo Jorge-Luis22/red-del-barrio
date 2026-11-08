@@ -31,6 +31,7 @@ class BvSheetScaffold extends StatelessWidget {
     required this.onAction,
     this.busy = false,
     this.danger = false,
+    this.disabledHint,
   });
 
   final String title;
@@ -42,6 +43,9 @@ class BvSheetScaffold extends StatelessWidget {
   /// `null` deja el botón desactivado.
   final VoidCallback? onAction;
   final bool busy;
+
+  /// Línea que explica qué falta cuando el botón está desactivado.
+  final String? disabledHint;
 
   /// Acción delicada (por ejemplo, avisar una emergencia): botón en rojo de emergencia.
   final bool danger;
@@ -88,25 +92,54 @@ class BvSheetScaffold extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
             child: SafeArea(
               top: false,
-              child: SizedBox(
-                width: double.infinity,
-                child: FilledButton.icon(
-                  onPressed: busy ? null : onAction,
-                  style: danger
-                      ? FilledButton.styleFrom(
-                          backgroundColor: context.tones.emergency,
-                          foregroundColor: context.cs.onError,
-                        )
-                      : null,
-                  icon: busy
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2.5),
-                        )
-                      : Icon(actionIcon),
-                  label: Text(busy ? context.l.unMomento : actionLabel),
-                ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (onAction == null && !busy && disabledHint != null)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.info_outline_rounded,
+                            size: 18,
+                            color: context.tones.muted,
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              disabledHint!,
+                              style: context.tt.bodySmall?.copyWith(
+                                color: context.tones.muted,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  SizedBox(
+                    width: double.infinity,
+                    child: FilledButton.icon(
+                      onPressed: busy ? null : onAction,
+                      style: danger
+                          ? FilledButton.styleFrom(
+                              backgroundColor: context.tones.emergency,
+                              foregroundColor: context.cs.onError,
+                            )
+                          : null,
+                      icon: busy
+                          ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2.5,
+                              ),
+                            )
+                          : Icon(actionIcon),
+                      label: Text(busy ? context.l.unMomento : actionLabel),
+                    ),
+                  ),
+                ],
               ),
             ),
           ),

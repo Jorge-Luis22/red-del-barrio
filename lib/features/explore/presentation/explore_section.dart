@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../app/di/providers.dart';
 import '../../../app/theme/brand.dart';
 import '../../../app/ui/components.dart';
 import '../../../core/geo/geo_math.dart';
@@ -206,15 +207,16 @@ IconData _tradeIcon(Listing l) {
       : Icons.shopping_basket_rounded;
 }
 
-class ExploreRow extends StatelessWidget {
+class ExploreRow extends ConsumerWidget {
   const ExploreRow({super.key, required this.item, this.compact = false});
 
   final ExploreItem item;
   final bool compact;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l = item.listing;
+    final myBid = ref.watch(myBidForProvider(l.id));
     final vb = item.vistoBueno;
     final isService = l.kind == ListingKind.service;
     final dist = item.distanceMeters == null
@@ -254,7 +256,6 @@ class ExploreRow extends StatelessWidget {
                           child: Text(l.title, style: context.tt.titleMedium),
                         ),
                         const SizedBox(width: 8),
-                        BvPill(context.l.ejemplo),
                       ],
                     ),
                     const SizedBox(height: 2),
@@ -316,17 +317,30 @@ class ExploreRow extends StatelessWidget {
           const SizedBox(height: 12),
           Align(
             alignment: Alignment.centerRight,
-            child: FilledButton.tonal(
-              onPressed: () => showComposer(
-                context,
-                kind: isService ? NeedKind.service : NeedKind.product,
-                text: l.requestText,
-              ),
-              style: FilledButton.styleFrom(minimumSize: const Size(64, 48)),
-              child: Text(
-                isService ? context.l.pedirEsteServicio : context.l.loQuiero,
-              ),
-            ),
+            child: isService
+                ? FilledButton.tonal(
+                    onPressed: () => showComposer(
+                      context,
+                      kind: NeedKind.service,
+                      text: l.requestText,
+                    ),
+                    style: FilledButton.styleFrom(
+                      minimumSize: const Size(64, 48),
+                    ),
+                    child: Text(context.l.pedirEsteServicio),
+                  )
+                : FilledButton.tonalIcon(
+                    onPressed: () => context.push('/oferta/sale/${l.id}'),
+                    style: FilledButton.styleFrom(
+                      minimumSize: const Size(64, 48),
+                    ),
+                    icon: const Icon(Icons.gavel_rounded),
+                    label: Text(
+                      myBid == null
+                          ? context.l.bidOfferBtn
+                          : context.l.bidChangeOffer,
+                    ),
+                  ),
           ),
         ],
       ),

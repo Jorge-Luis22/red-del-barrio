@@ -87,10 +87,10 @@ class AppTheme {
       titleSmall: _t(15, FontWeight.w700, height: 1.3),
       bodyLarge: _t(17, FontWeight.w400, height: 1.45),
       bodyMedium: _t(16, FontWeight.w400, height: 1.45),
-      bodySmall: _t(14, FontWeight.w400, height: 1.4),
+      bodySmall: _t(15, FontWeight.w400, height: 1.4),
       labelLarge: _t(16, FontWeight.w700),
-      labelMedium: _t(14, FontWeight.w700),
-      labelSmall: _t(12.5, FontWeight.w700),
+      labelMedium: _t(15, FontWeight.w700),
+      labelSmall: _t(14, FontWeight.w700),
     ).apply(bodyColor: ink, displayColor: ink);
 
     const radius = 16.0;
@@ -123,6 +123,9 @@ class AppTheme {
           padding: const EdgeInsets.symmetric(horizontal: 24),
           shape: shape,
           textStyle: text.labelLarge,
+          // Desactivado se distingue del activo pero se sigue leyendo (~4,5:1).
+          disabledBackgroundColor: tones.disabledBg,
+          disabledForegroundColor: tones.disabledFg,
         ),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
@@ -156,11 +159,11 @@ class AppTheme {
         hintStyle: text.bodyMedium?.copyWith(color: tones.muted),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(radius),
-          borderSide: BorderSide(color: tones.hairline, width: 1.5),
+          borderSide: BorderSide(color: tones.control, width: 1.5),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(radius),
-          borderSide: BorderSide(color: tones.hairline, width: 1.5),
+          borderSide: BorderSide(color: tones.control, width: 1.5),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(radius),
@@ -179,14 +182,14 @@ class AppTheme {
         backgroundColor: surface,
         selectedColor: scheme.primary,
         disabledColor: tones.hairline,
-        side: BorderSide(color: tones.hairline),
+        side: BorderSide(color: tones.control),
         shape: const StadiumBorder(),
         labelStyle: text.labelMedium,
         secondaryLabelStyle: text.labelMedium?.copyWith(
           color: scheme.onPrimary,
         ),
         checkmarkColor: scheme.onPrimary,
-        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
         showCheckmark: false,
       ),
       dividerTheme: DividerThemeData(
@@ -217,6 +220,7 @@ class AppTheme {
         labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
         labelTextStyle: WidgetStateProperty.resolveWith(
           (s) => text.labelSmall?.copyWith(
+            fontSize: 13,
             color: s.contains(WidgetState.selected)
                 ? scheme.primary
                 : tones.muted,

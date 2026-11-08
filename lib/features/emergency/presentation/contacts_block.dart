@@ -172,6 +172,7 @@ class _ContactSheetState extends ConsumerState<_ContactSheet> {
           (_name.text.trim().length >= 2 && _phone.text.trim().length >= 7)
           ? _save
           : null,
+      disabledHint: l.hintContact,
       children: [
         TextField(
           controller: _name,

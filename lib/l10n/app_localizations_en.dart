@@ -59,7 +59,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get cuentaloYLosVecinos =>
-      'Tell us and the neighbors and businesses in your area will suggest how to solve it.';
+      'Tell us and your neighborhood will suggest how to solve it.';
 
   @override
   String get pedirAlgo => 'Request something';
@@ -1676,4 +1676,150 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get failSaveContact => 'The contact could not be saved.';
+
+  @override
+  String get hintNeed3 => 'Write at least 3 letters to continue.';
+
+  @override
+  String get hintAddr => 'Mark your location and give it a name to save.';
+
+  @override
+  String get hintContact => 'Write a name and a phone number to save.';
+
+  @override
+  String get hintProfile =>
+      'Write a username of 3 or more letters and accept to continue.';
+
+  @override
+  String get hintStars => 'Choose how many stars to give in order to send.';
+
+  @override
+  String get settingsTitle => 'Settings';
+
+  @override
+  String get settingsRowSub => 'Text size, language, appearance and location.';
+
+  @override
+  String get bidOfferBtn => 'Make an offer';
+
+  @override
+  String get bidHelpBtn => 'Offer my help';
+
+  @override
+  String get bidMakeOffer => 'Make my offer';
+
+  @override
+  String get bidMakeProposal => 'Make my proposal';
+
+  @override
+  String get bidChangeOffer => 'Change my offer';
+
+  @override
+  String get bidChangeProposal => 'Change my proposal';
+
+  @override
+  String get bidMyOffer => 'My offer';
+
+  @override
+  String get bidMyProposal => 'My proposal';
+
+  @override
+  String bidsTitle(int n) {
+    return 'Offers ($n)';
+  }
+
+  @override
+  String proposalsCount(int n) {
+    return 'Proposals ($n)';
+  }
+
+  @override
+  String get bidRuleHigh => 'The highest offer wins.';
+
+  @override
+  String bidRuleHighRef(String ref) {
+    return 'The highest offer wins. Reference price: $ref.';
+  }
+
+  @override
+  String get bidRuleLow =>
+      'The lowest proposal wins. You can propose 0 for a solidarity exchange.';
+
+  @override
+  String get bidBestOffer => 'Best offer';
+
+  @override
+  String get bidBestProposal => 'Best proposal';
+
+  @override
+  String get bidPriceLabel => 'Price in soles (0 = solidarity exchange)';
+
+  @override
+  String get bidPriceOfferLabel => 'Your offer in soles';
+
+  @override
+  String get bidMessageLabel => 'Message (optional)';
+
+  @override
+  String get bidMessageHint => 'What you offer, materials, conditions…';
+
+  @override
+  String get bidWhenLabel => 'When you can';
+
+  @override
+  String get bidWhenHint => 'Today 4:00 p.m.';
+
+  @override
+  String get bidSendOffer => 'Send offer';
+
+  @override
+  String get bidSendProposal => 'Send proposal';
+
+  @override
+  String get bidSaved => 'Done: your offer was saved on your phone.';
+
+  @override
+  String get bidHint => 'Enter a price (0 = solidarity exchange).';
+
+  @override
+  String get bidNone => 'No offers yet. Be the first!';
+
+  @override
+  String bidYourOffer(String price) {
+    return 'Your offer: $price';
+  }
+
+  @override
+  String get bidNotFound => 'We couldn’t find this listing';
+
+  @override
+  String get bidDemoNote =>
+      'The other offers are examples. Yours is saved on your phone and sent when there is internet.';
+
+  @override
+  String get bidDemoSale1 => 'I can pick it up today.';
+
+  @override
+  String get bidDemoSale2 => 'I pay cash and will come by tomorrow.';
+
+  @override
+  String get bidDemoReq1 => 'I can handle it with my own tools.';
+
+  @override
+  String get bidDemoReq2 => 'I can come first thing tomorrow.';
+
+  @override
+  String get bidDemoWhen1 => 'Today 6:00 p.m.';
+
+  @override
+  String get bidDemoWhen2 => 'Tomorrow 9:00 a.m.';
+
+  @override
+  String get failBidAmount => 'Enter a valid price, from 0 to 99,999 soles.';
+
+  @override
+  String get failBidSave => 'Your offer could not be saved.';
+
+  @override
+  String get failBidUpdate => 'The offer could not be updated.';
 }

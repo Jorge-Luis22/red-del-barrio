@@ -69,6 +69,7 @@ class _OfferSheetState extends ConsumerState<_OfferSheet> {
     actionIcon: Icons.volunteer_activism_rounded,
     busy: _busy,
     onAction: _text.text.trim().length >= 3 ? _publish : null,
+    disabledHint: context.l.hintNeed3,
     children: [
       Text(context.l.comoLoOfreces, style: context.tt.titleSmall),
       const SizedBox(height: 10),
@@ -96,7 +97,7 @@ class _OfferSheetState extends ConsumerState<_OfferSheet> {
                       border: Border.all(
                         color: _modality == m
                             ? context.cs.primary
-                            : context.tones.hairline,
+                            : context.tones.control,
                         width: _modality == m ? 2 : 1.5,
                       ),
                     ),

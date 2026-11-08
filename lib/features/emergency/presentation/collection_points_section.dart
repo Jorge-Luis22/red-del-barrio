@@ -130,6 +130,7 @@ class _CollectionPointSheetState extends ConsumerState<_CollectionPointSheet> {
     actionLabel: context.l.guardarPunto,
     actionIcon: Icons.add_location_alt_rounded,
     onAction: _name.text.trim().length >= 3 ? _save : null,
+    disabledHint: context.l.hintNeed3,
     children: [
       TextField(
         controller: _name,

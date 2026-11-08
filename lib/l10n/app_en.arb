@@ -25,7 +25,7 @@
     }
   },
   "queNecesitasHoy": "What do you need today?",
-  "cuentaloYLosVecinos": "Tell us and the neighbors and businesses in your area will suggest how to solve it.",
+  "cuentaloYLosVecinos": "Tell us and your neighborhood will suggest how to solve it.",
   "pedirAlgo": "Request something",
   "noPudimosVerDonde": "We couldn’t see where you are",
   "veQueHayCerca": "See what’s near you",
@@ -873,5 +873,78 @@
   "failContactPhone": "Enter a valid phone number (numbers only).",
   "failContactDup": "You already have that contact.",
   "failContactMax": "You can have up to 5 contacts.",
-  "failSaveContact": "The contact could not be saved."
+  "failSaveContact": "The contact could not be saved.",
+  "hintNeed3": "Write at least 3 letters to continue.",
+  "hintAddr": "Mark your location and give it a name to save.",
+  "hintContact": "Write a name and a phone number to save.",
+  "hintProfile": "Write a username of 3 or more letters and accept to continue.",
+  "hintStars": "Choose how many stars to give in order to send.",
+  "settingsTitle": "Settings",
+  "settingsRowSub": "Text size, language, appearance and location.",
+  "bidOfferBtn": "Make an offer",
+  "bidHelpBtn": "Offer my help",
+  "bidMakeOffer": "Make my offer",
+  "bidMakeProposal": "Make my proposal",
+  "bidChangeOffer": "Change my offer",
+  "bidChangeProposal": "Change my proposal",
+  "bidMyOffer": "My offer",
+  "bidMyProposal": "My proposal",
+  "bidsTitle": "Offers ({n})",
+  "@bidsTitle": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "proposalsCount": "Proposals ({n})",
+  "@proposalsCount": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "bidRuleHigh": "The highest offer wins.",
+  "bidRuleHighRef": "The highest offer wins. Reference price: {ref}.",
+  "@bidRuleHighRef": {
+    "placeholders": {
+      "ref": {
+        "type": "String"
+      }
+    }
+  },
+  "bidRuleLow": "The lowest proposal wins. You can propose 0 for a solidarity exchange.",
+  "bidBestOffer": "Best offer",
+  "bidBestProposal": "Best proposal",
+  "bidPriceLabel": "Price in soles (0 = solidarity exchange)",
+  "bidPriceOfferLabel": "Your offer in soles",
+  "bidMessageLabel": "Message (optional)",
+  "bidMessageHint": "What you offer, materials, conditions…",
+  "bidWhenLabel": "When you can",
+  "bidWhenHint": "Today 4:00 p.m.",
+  "bidSendOffer": "Send offer",
+  "bidSendProposal": "Send proposal",
+  "bidSaved": "Done: your offer was saved on your phone.",
+  "bidHint": "Enter a price (0 = solidarity exchange).",
+  "bidNone": "No offers yet. Be the first!",
+  "bidYourOffer": "Your offer: {price}",
+  "@bidYourOffer": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "bidNotFound": "We couldn’t find this listing",
+  "bidDemoNote": "The other offers are examples. Yours is saved on your phone and sent when there is internet.",
+  "bidDemoSale1": "I can pick it up today.",
+  "bidDemoSale2": "I pay cash and will come by tomorrow.",
+  "bidDemoReq1": "I can handle it with my own tools.",
+  "bidDemoReq2": "I can come first thing tomorrow.",
+  "bidDemoWhen1": "Today 6:00 p.m.",
+  "bidDemoWhen2": "Tomorrow 9:00 a.m.",
+  "failBidAmount": "Enter a valid price, from 0 to 99,999 soles.",
+  "failBidSave": "Your offer could not be saved.",
+  "failBidUpdate": "The offer could not be updated."
 }

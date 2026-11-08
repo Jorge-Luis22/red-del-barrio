@@ -190,7 +190,7 @@ class _SosSheetState extends ConsumerState<_SosSheet> {
                     border: Border.all(
                       color: _situation == s
                           ? context.tones.emergency
-                          : context.tones.hairline,
+                          : context.tones.control,
                       width: _situation == s ? 2 : 1.5,
                     ),
                   ),
