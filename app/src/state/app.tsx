@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { getUser } from '../db/repo';
 import { requestPosition, type GpsStatus } from '../lib/geo';
+import { syncConfigured, syncNow } from '../lib/sync';
 import { openDb } from '../db/sqlite';
 import type { Tab, User } from '../types';
 
@@ -64,6 +65,32 @@ export function AppProvider({ children }: { children: ReactNode }) {
       alive = false;
     };
   }, []);
+
+  // Sincronización: al abrir, cada 4 s, al volver la red y poco después de cada cambio local.
+  useEffect(() => {
+    if (!ready || !syncConfigured) return;
+    let alive = true;
+    const tick = () =>
+      void syncNow().then((changed) => {
+        if (alive && changed) setVersion((v) => v + 1);
+      });
+    tick();
+    const timer = window.setInterval(tick, 4000);
+    window.addEventListener('online', tick);
+    document.addEventListener('visibilitychange', tick);
+    return () => {
+      alive = false;
+      window.clearInterval(timer);
+      window.removeEventListener('online', tick);
+      document.removeEventListener('visibilitychange', tick);
+    };
+  }, [ready]);
+
+  useEffect(() => {
+    if (!ready || !syncConfigured) return;
+    const timer = window.setTimeout(() => void syncNow(), 400);
+    return () => window.clearTimeout(timer);
+  }, [ready, version]);
 
   const value = useMemo<AppState>(
     () => ({

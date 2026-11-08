@@ -3,6 +3,7 @@ import { distanceKm, getCurrentPoint, jitter, roundZone, type Point } from '../l
 import { hashMeetCode, meetCode as makeMeetCode, txnId, uid } from '../lib/ids';
 import { chat } from '../lib/matrix';
 import { enqueue, pendingOutbox } from '../lib/outbox';
+import { markDirty } from '../lib/sync';
 import type {
   Conversation,
   Emergency,
@@ -273,6 +274,7 @@ export async function createNeed(input: {
       now(),
     ],
   );
+  markDirty('need', id);
   await persist();
   const created = getNeed(id, input.point);
   if (!created) throw new Error('No se pudo guardar la necesidad');
@@ -316,6 +318,7 @@ export async function createProposal(input: {
       now(),
     ],
   );
+  markDirty('proposal', id);
   await persist();
   const row = one<ProposalRow>(
     `SELECT p.*, u.display_name AS provider_name
@@ -388,11 +391,12 @@ export async function acceptProposal(proposalId: string): Promise<AcceptedDeal> 
       createdAt,
     ],
   );
+  const sysMsgId = uid('m');
   run(
     `INSERT INTO messages (id, interaction_id, room_id, sender_id, body, txn_id, status, created_at)
      VALUES (?, ?, ?, 'system', ?, ?, 'enviado', ?)`,
     [
-      uid('m'),
+      sysMsgId,
       interactionId,
       roomId,
       `Trato acordado por S/ ${(Number(proposal.price_cents) / 100).toFixed(2)}. Coordinen aquí la hora y el lugar. El código de encuentro se muestra solo a quien pidió el servicio.`,
@@ -401,6 +405,10 @@ export async function acceptProposal(proposalId: string): Promise<AcceptedDeal> 
     ],
   );
 
+  markDirty('proposal', proposalId);
+  markDirty('need', proposal.need_id);
+  markDirty('interaction', interactionId);
+  markDirty('message', sysMsgId);
   await persist();
   return { interactionId, code, roomId };
 }
@@ -512,6 +520,7 @@ export async function sendChatMessage(
     txnId: txn,
     payload: { roomId, body: text },
   });
+  markDirty('message', id);
   await persist();
 
   try {
@@ -595,15 +604,18 @@ export async function toggleRecommendation(providerId: string, voterId: string):
   );
   if (existing) {
     run(`DELETE FROM recommendations WHERE id = ?`, [existing.id]);
+    markDirty('recommendation', existing.id, { id: existing.id, provider_id: providerId, voter_id: voterId, _deleted: true });
     await persist();
     return false;
   }
+  const recId = uid('r');
   run(`INSERT INTO recommendations (id, provider_id, voter_id, created_at) VALUES (?, ?, ?, ?)`, [
-    uid('r'),
+    recId,
     providerId,
     voterId,
     now(),
   ]);
+  markDirty('recommendation', recId);
   await persist();
   return true;
 }
@@ -652,6 +664,7 @@ export async function createEmergency(input: {
       now(),
     ],
   );
+  markDirty('emergency', id);
   await persist();
   const row = one<EmergencyRow>(`SELECT * FROM emergency_alerts WHERE id = ?`, [id]);
   if (!row) throw new Error('No se pudo crear la alerta');
@@ -670,11 +683,13 @@ export function activeEmergency(userId: string): Emergency | null {
 
 export async function closeEmergency(id: string): Promise<void> {
   run(`UPDATE emergency_alerts SET status = 'atendida' WHERE id = ?`, [id]);
+  markDirty('emergency', id);
   await persist();
 }
 
 export async function markInstitutionCalled(id: string): Promise<void> {
   run(`UPDATE emergency_alerts SET institution_called = 1 WHERE id = ?`, [id]);
+  markDirty('emergency', id);
   await persist();
 }
 
@@ -792,6 +807,7 @@ export async function confirmDone(
   const after = dealRow(interactionId)!;
   const both = Boolean(after.confirmed_by_requester) && Boolean(after.confirmed_by_provider);
   const stamp = now();
+  const msgId = uid('m');
   const who = getUser(userId)?.name ?? 'Un vecino';
 
   if (both) {
@@ -802,7 +818,7 @@ export async function confirmDone(
     `INSERT INTO messages (id, interaction_id, room_id, sender_id, body, txn_id, status, created_at)
      SELECT ?, id, COALESCE(room_id, ''), 'system', ?, ?, 'enviado', ? FROM interactions WHERE id = ?`,
     [
-      uid('m'),
+      msgId,
       both
         ? 'Trato completado: las dos partes confirmaron. Ahora pueden calificarse.'
         : `${who} confirmó que el trato se hizo. Falta la confirmación de la otra parte.`,
@@ -818,6 +834,9 @@ export async function confirmDone(
     txnId: txnId(),
     payload: { userId, completed: both },
   });
+  markDirty('interaction', interactionId);
+  if (both) markDirty('need', row.need_id);
+  markDirty('message', msgId);
   await persist();
   return both ? 'completado' : 'esperando';
 }
@@ -849,5 +868,6 @@ export async function rateInteraction(
     txnId: txnId(),
     payload: { interactionId, fromUser, toUser, stars: value },
   });
+  markDirty('rating', ratingId);
   await persist();
 }

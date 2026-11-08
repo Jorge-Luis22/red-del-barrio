@@ -1,6 +1,7 @@
-import { useState, type FormEvent } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
 import { dbBytes, getStats, listUsers, resetAll, saveProfile } from '../db/repo';
 import { chat } from '../lib/matrix';
+import { getSyncStatus, onSyncStatus, syncConfigured, syncNow } from '../lib/sync';
 import { useApp } from '../state/app';
 
 const mb = (bytes: number) => `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
@@ -10,6 +11,9 @@ export default function Perfil() {
   const [name, setName] = useState('');
   const [zone, setZone] = useState('');
   const [saved, setSaved] = useState(false);
+  const [sync, setSync] = useState(getSyncStatus());
+
+  useEffect(() => onSyncStatus(() => setSync({ ...getSyncStatus() })), []);
 
   if (!me) return null;
 
@@ -60,6 +64,26 @@ export default function Perfil() {
         <p>
           Chat: {chat.label} · Base local: {mb(dbBytes())}
         </p>
+      </section>
+
+      <section className="card">
+        <h3>Servidor</h3>
+        <p>
+          {!syncConfigured && 'Sin servidor: la app funciona solo en este teléfono.'}
+          {syncConfigured && sync.state === 'ok' && 'Conectado. Los cambios se comparten con otros teléfonos.'}
+          {syncConfigured && sync.state === 'sincronizando' && 'Sincronizando…'}
+          {syncConfigured && sync.state === 'sin_conexion' && 'Sin conexión. Tus cambios quedan en cola y se suben solos al volver la señal.'}
+          {syncConfigured && sync.state === 'error' && `Error del servidor: ${sync.detail}`}
+        </p>
+        {syncConfigured && (
+          <div className="meta">
+            <span className="badge">{sync.pendingUp} por subir</span>
+            {sync.lastOkAt && <span className="badge">Última vez: {new Date(sync.lastOkAt).toLocaleTimeString()}</span>}
+            <button type="button" className="btn small" onClick={() => void syncNow()}>
+              Sincronizar ahora
+            </button>
+          </div>
+        )}
       </section>
 
       <section className="card">

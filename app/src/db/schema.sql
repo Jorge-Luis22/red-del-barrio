@@ -139,3 +139,11 @@ CREATE TABLE IF NOT EXISTS sync_state (
   key   TEXT PRIMARY KEY,
   value TEXT NOT NULL
 );
+
+-- Filas locales que faltan por subir al servidor (se vacía en lib/sync.ts).
+CREATE TABLE IF NOT EXISTS sync_queue (
+  entity    TEXT NOT NULL,
+  entity_id TEXT NOT NULL,
+  payload   TEXT,
+  PRIMARY KEY (entity, entity_id)
+);
