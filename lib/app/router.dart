@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../features/needs/presentation/home_screen.dart';
+import '../features/proposals/presentation/need_detail_screen.dart';
 import 'shell_scaffold.dart';
 
 /// Rutas declarativas: las cinco pestañas del PWA (Inicio, Vecinos, Mensajes, Emergencia, Perfil).
@@ -12,7 +13,16 @@ final GoRouter appRouter = GoRouter(
       builder: (context, state, shell) => ShellScaffold(shell: shell),
       branches: [
         StatefulShellBranch(routes: [
-          GoRoute(path: '/', builder: (_, _) => const HomeScreen()),
+          GoRoute(
+            path: '/',
+            builder: (_, _) => const HomeScreen(),
+            routes: [
+              GoRoute(
+                path: 'need/:id',
+                builder: (_, state) => NeedDetailScreen(needId: state.pathParameters['id']!),
+              ),
+            ],
+          ),
         ]),
         StatefulShellBranch(routes: [
           GoRoute(path: '/vecinos', builder: (_, _) => const _Pending('Vecinos')),

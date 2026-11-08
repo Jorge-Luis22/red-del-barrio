@@ -9,6 +9,10 @@ import 'package:red_barrio/features/needs/domain/need_repository.dart';
 import 'package:red_barrio/features/sync/domain/connectivity_monitor.dart';
 import 'package:red_barrio/features/sync/domain/outbox_queue.dart';
 import 'package:red_barrio/features/sync/domain/sync_gateway.dart';
+import 'package:red_barrio/features/proposals/domain/deal.dart';
+import 'package:red_barrio/features/proposals/domain/deal_repository.dart';
+import 'package:red_barrio/features/reputation/domain/interaction.dart';
+import 'package:red_barrio/features/reputation/domain/reputation_repository.dart';
 
 class FakeClock implements Clock {
   FakeClock(this.current);
@@ -103,4 +107,45 @@ class FakeGateway implements SyncGateway {
     received.add(op.id);
     return const Ok(null);
   }
+}
+
+class FakeDeals implements DealRepository {
+  final Map<String, Deal> store = {};
+
+  @override
+  Future<Result<void>> save(Deal deal) async {
+    store[deal.id] = deal;
+    return const Ok(null);
+  }
+
+  @override
+  Future<Deal?> byId(String id) async => store[id];
+
+  @override
+  Future<Deal?> byNeed(String needId) async {
+    for (final d in store.values) {
+      if (d.needId == needId) return d;
+    }
+    return null;
+  }
+
+  @override
+  Stream<List<Deal>> watchAll() => Stream.value(store.values.toList());
+}
+
+class FakeReputation implements ReputationRepository {
+  final List<Interaction> store = [];
+
+  @override
+  Future<Result<void>> record(Interaction interaction) async {
+    store.add(interaction);
+    return const Ok(null);
+  }
+
+  @override
+  Future<List<Interaction>> forProvider(String providerId) async =>
+      store.where((i) => i.providerId == providerId).toList();
+
+  @override
+  Stream<List<Interaction>> watchAll() => Stream.value(List.of(store));
 }

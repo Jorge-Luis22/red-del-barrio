@@ -1,0 +1,80 @@
+import '../../proposals/domain/proposal.dart';
+import '../../needs/domain/need.dart';
+import '../domain/listing.dart';
+import '../domain/provider_profile.dart';
+
+/// DATOS DE DEMOSTRACIÓN (no son personas reales).
+/// Vienen del PWA (`PROV`, `EXPL`, `CAT`) y siempre se rotulan "ejemplo" en pantalla.
+/// En mobile-mejoras se reemplazan por un script SQL de seed marcado como demostración.
+
+const demoProviders = <String, ProviderProfile>{
+  'carlos': ProviderProfile(id: 'carlos', name: 'Carlos Mendoza', role: 'Gasfitero', exampleRating: 4.8, exampleRatingCount: 31, exampleVistoBueno: 14),
+  'maria': ProviderProfile(id: 'maria', name: 'María Quispe', role: 'Gasfitera', exampleRating: 4.7, exampleRatingCount: 23, exampleVistoBueno: 9),
+  'jose': ProviderProfile(id: 'jose', name: 'José Ramos', role: 'Gasfitero', exampleRating: 4.6, exampleRatingCount: 12, exampleVistoBueno: 6),
+  'pedro': ProviderProfile(id: 'pedro', name: 'Pedro Lazo', role: 'Electricista', exampleRating: 4.7, exampleRatingCount: 36, exampleVistoBueno: 11),
+  'hugo': ProviderProfile(id: 'hugo', name: 'Hugo Salas', role: 'Carpintero', exampleRating: 4.7, exampleRatingCount: 22, exampleVistoBueno: 8),
+  'victor': ProviderProfile(id: 'victor', name: 'Víctor Núñez', role: 'Cerrajero', exampleRating: 4.7, exampleRatingCount: 34, exampleVistoBueno: 12),
+  'rosam': ProviderProfile(id: 'rosam', name: 'Rosa Medina', role: 'Costurera', exampleRating: 4.9, exampleRatingCount: 34, exampleVistoBueno: 9),
+  'andrea': ProviderProfile(id: 'andrea', name: 'Andrea Ríos', role: 'Profesora de clases particulares', exampleRating: 4.9, exampleRatingCount: 28, exampleVistoBueno: 10),
+  'lucia': ProviderProfile(id: 'lucia', name: 'Lucía Paredes', role: 'Paseadora de mascotas', exampleRating: 4.8, exampleRatingCount: 45, exampleVistoBueno: 13),
+  'rosa': ProviderProfile(id: 'rosa', name: 'Bodega Doña Rosa', role: 'Bodega', exampleRating: 4.7, exampleRatingCount: 64, exampleVistoBueno: 18),
+  'sol': ProviderProfile(id: 'sol', name: 'Minimarket El Sol', role: 'Minimarket', exampleRating: 4.5, exampleRatingCount: 41, exampleVistoBueno: 11),
+  'lalo': ProviderProfile(id: 'lalo', name: 'Bodega Don Lalo', role: 'Bodega', exampleRating: 4.4, exampleRatingCount: 29, exampleVistoBueno: 7),
+  'tomas': ProviderProfile(id: 'tomas', name: 'Tomás Vega', role: 'Vecino', exampleRating: 4.7, exampleRatingCount: 9, exampleVistoBueno: 7),
+  'jorge': ProviderProfile(id: 'jorge', name: 'Jorge Pinto', role: 'Vecino', exampleRating: 0, exampleRatingCount: 0, exampleVistoBueno: 4),
+  'luis': ProviderProfile(id: 'luis', name: 'Luis Paredes', role: 'Vecino', exampleRating: 4.9, exampleRatingCount: 14, exampleVistoBueno: 10),
+  'elena': ProviderProfile(id: 'elena', name: 'Elena Castro', role: 'Vecina', exampleRating: 4.8, exampleRatingCount: 10, exampleVistoBueno: 8),
+  'marco': ProviderProfile(id: 'marco', name: 'Marco Rivas', role: 'Vecino', exampleRating: 4.6, exampleRatingCount: 6, exampleVistoBueno: 5),
+  'nelly': ProviderProfile(id: 'nelly', name: 'Nelly Flores', role: 'Vecina', exampleRating: 4.9, exampleRatingCount: 17, exampleVistoBueno: 12),
+  'ines': ProviderProfile(id: 'ines', name: 'Inés Rojas', role: 'Vecina', exampleRating: 4.5, exampleRatingCount: 4, exampleVistoBueno: 3),
+};
+
+/// (distancia nominal en metros, rumbo en grados) para ubicar cada publicación alrededor del usuario.
+class DemoListing {
+  const DemoListing(this.listing, this.meters, this.bearing);
+  final Listing listing;
+  final double meters;
+  final double bearing;
+}
+
+const demoListings = <DemoListing>[
+  DemoListing(Listing(id: 'l-carlos', providerId: 'carlos', title: 'Carlos Mendoza', trade: 'Gasfitería', kind: ListingKind.service, availability: 'Disponible ahora', reference: 'Cotiza según tu pedido', requestText: 'Necesito un gasfitero para arreglar una fuga', nominalMeters: 500), 500, 40),
+  DemoListing(Listing(id: 'l-maria', providerId: 'maria', title: 'María Quispe', trade: 'Gasfitería', kind: ListingKind.service, availability: 'Disponible hoy', reference: 'Cotiza según tu pedido', requestText: 'Necesito un gasfitero para arreglar una fuga', nominalMeters: 800), 800, 130),
+  DemoListing(Listing(id: 'l-jose', providerId: 'jose', title: 'José Ramos', trade: 'Gasfitería', kind: ListingKind.service, availability: 'Disponible en 2 h', reference: 'Cotiza según tu pedido', requestText: 'Necesito un gasfitero para arreglar una fuga', nominalMeters: 1200), 1200, 250),
+  DemoListing(Listing(id: 'l-pedro', providerId: 'pedro', title: 'Pedro Lazo', trade: 'Electricidad', kind: ListingKind.service, availability: 'Disponible hoy', reference: 'Cotiza según tu pedido', requestText: 'Necesito un electricista, se fue la luz en la cocina', nominalMeters: 650), 650, 300),
+  DemoListing(Listing(id: 'l-hugo', providerId: 'hugo', title: 'Hugo Salas', trade: 'Carpintería', kind: ListingKind.service, availability: 'Fines de semana', reference: 'Cotiza según tu pedido', requestText: 'Necesito un carpintero para arreglar un mueble', nominalMeters: 900), 900, 90),
+  DemoListing(Listing(id: 'l-victor', providerId: 'victor', title: 'Víctor Núñez', trade: 'Cerrajería', kind: ListingKind.service, availability: 'Disponible ahora', reference: 'Cotiza según tu pedido', requestText: 'Necesito un cerrajero, perdí mis llaves', nominalMeters: 700), 700, 170),
+  DemoListing(Listing(id: 'l-rosam', providerId: 'rosam', title: 'Rosa Medina', trade: 'Costura', kind: ListingKind.service, availability: 'Esta semana', reference: 'Cotiza según tu pedido', requestText: 'Necesito arreglar un pantalón', nominalMeters: 550), 550, 200),
+  DemoListing(Listing(id: 'l-andrea', providerId: 'andrea', title: 'Andrea Ríos', trade: 'Clases', kind: ListingKind.service, availability: 'Por las tardes', reference: 'Cotiza según tu pedido', requestText: 'Necesito clases de matemática para mi hijo', nominalMeters: 450), 450, 20),
+  DemoListing(Listing(id: 'l-lucia', providerId: 'lucia', title: 'Lucía Paredes', trade: 'Mascotas', kind: ListingKind.service, availability: 'Por las mañanas', reference: 'Cotiza según tu pedido', requestText: 'Necesito que alguien pasee a mi perro', nominalMeters: 350), 350, 330),
+  DemoListing(Listing(id: 'l-rosa', providerId: 'rosa', title: 'Bodega Doña Rosa', trade: 'Bodega', kind: ListingKind.product, availability: 'Entrega en 10 min', reference: 'Bidón de agua S/ 12', requestText: 'Necesito 2 bidones de agua', nominalMeters: 300), 300, 70),
+  DemoListing(Listing(id: 'l-lalo', providerId: 'lalo', title: 'Bodega Don Lalo', trade: 'Bodega', kind: ListingKind.product, availability: 'Entrega en 15 min', reference: 'Bidón de agua S/ 13', requestText: 'Necesito 2 bidones de agua', nominalMeters: 450), 450, 160),
+  DemoListing(Listing(id: 'l-sol', providerId: 'sol', title: 'Minimarket El Sol', trade: 'Minimarket', kind: ListingKind.product, availability: 'Entrega en 25 min', reference: 'Bidón de agua S/ 11', requestText: 'Necesito 2 bidones de agua', nominalMeters: 600), 600, 240),
+  DemoListing(Listing(id: 'l-mesa', providerId: 'tomas', title: 'Mesa de comedor de madera', trade: 'De un vecino', kind: ListingKind.product, availability: 'Recojo hoy', reference: 'S/ 150', requestText: 'Quiero comprar una mesa de comedor de madera', nominalMeters: 600), 600, 110),
+  DemoListing(Listing(id: 'l-bici', providerId: 'jorge', title: 'Bicicleta de paseo aro 26', trade: 'De un vecino', kind: ListingKind.product, availability: 'Recojo hoy', reference: 'S/ 120', requestText: 'Quiero comprar una bicicleta de paseo', nominalMeters: 450), 450, 280),
+  DemoListing(Listing(id: 'l-plantones', providerId: 'rosa', title: 'Plantones de menta y romero', trade: 'De un vecino', kind: ListingKind.product, availability: 'Recojo hoy', reference: 'S/ 8', requestText: 'Quiero comprar plantones de menta y romero', nominalMeters: 300), 300, 70),
+];
+
+/// Propuestas de ejemplo por tipo de necesidad (paridad con `CAT[...].props` del PWA).
+const demoProposals = <NeedKind, List<Proposal>>{
+  NeedKind.service: [
+    Proposal(providerId: 'carlos', providerName: 'Carlos Mendoza', role: 'Gasfitero', priceSoles: 35, priceLabel: 'S/ 35', distanceMeters: 500, availability: 'Disponible ahora', etaHours: 0.2, isExample: true, diagnosticVisitSoles: 10),
+    Proposal(providerId: 'maria', providerName: 'María Quispe', role: 'Gasfitera', priceSoles: 40, priceLabel: 'S/ 40', distanceMeters: 800, availability: 'Disponible hoy', etaHours: 6, isExample: true, diagnosticVisitSoles: 10),
+    Proposal(providerId: 'jose', providerName: 'José Ramos', role: 'Gasfitero', priceSoles: 30, priceLabel: 'S/ 30', distanceMeters: 1200, availability: 'Disponible en 2 h', etaHours: 2, isExample: true),
+  ],
+  NeedKind.product: [
+    Proposal(providerId: 'rosa', providerName: 'Bodega Doña Rosa', role: 'Bodega', priceSoles: 12, priceLabel: 'S/ 12', distanceMeters: 300, availability: 'Entrega en 10 min', etaHours: 0.2, isExample: true),
+    Proposal(providerId: 'sol', providerName: 'Minimarket El Sol', role: 'Minimarket', priceSoles: 11, priceLabel: 'S/ 11', distanceMeters: 600, availability: 'Entrega en 25 min', etaHours: 0.4, isExample: true),
+    Proposal(providerId: 'lalo', providerName: 'Bodega Don Lalo', role: 'Bodega', priceSoles: 13, priceLabel: 'S/ 13', distanceMeters: 450, availability: 'Entrega en 15 min', etaHours: 0.25, isExample: true),
+  ],
+  NeedKind.loan: [
+    Proposal(providerId: 'luis', providerName: 'Luis Paredes', role: 'Vecino', priceSoles: 0, priceLabel: 'Préstamo gratis', distanceMeters: 250, availability: 'Disponible ahora', etaHours: 0, isExample: true),
+    Proposal(providerId: 'elena', providerName: 'Elena Castro', role: 'Vecina', priceSoles: 5, priceLabel: 'Alquiler S/ 5', distanceMeters: 400, availability: 'Disponible hoy', etaHours: 5, isExample: true),
+    Proposal(providerId: 'marco', providerName: 'Marco Rivas', role: 'Vecino', priceSoles: 0, priceLabel: 'Trueque', distanceMeters: 700, availability: 'Esta tarde', etaHours: 8, isExample: true),
+  ],
+  NeedKind.help: [
+    Proposal(providerId: 'nelly', providerName: 'Nelly Flores', role: 'Vecina', priceSoles: 0, priceLabel: 'Favor gratuito', distanceMeters: 200, availability: 'Disponible ahora', etaHours: 0, isExample: true),
+    Proposal(providerId: 'tomas', providerName: 'Tomás Vega', role: 'Vecino', priceSoles: 0, priceLabel: 'Intercambio de habilidades', distanceMeters: 600, availability: 'Hoy en la tarde', etaHours: 8, isExample: true),
+    Proposal(providerId: 'ines', providerName: 'Inés Rojas', role: 'Vecina', priceSoles: 0, priceLabel: 'A cambio de un favor', distanceMeters: 900, availability: 'Mañana', etaHours: 30, isExample: true),
+  ],
+};

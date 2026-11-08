@@ -31,7 +31,42 @@ class OutboxOps extends Table {
   Set<Column> get primaryKey => {id};
 }
 
-@DriftDatabase(tables: [Needs, OutboxOps])
+/// Tratos (propuesta aceptada → código → servicio → calificación). Desde el esquema 2.
+@DataClassName('DealRow')
+class Deals extends Table {
+  TextColumn get id => text()();
+  TextColumn get needId => text()();
+  TextColumn get providerId => text()();
+  TextColumn get providerName => text()();
+  IntColumn get priceSoles => integer()();
+  TextColumn get priceLabel => text()();
+  TextColumn get code => text()();
+  TextColumn get status => text()();
+  DateTimeColumn get acceptedAt => dateTime()();
+  DateTimeColumn get startedAt => dateTime().nullable()();
+  DateTimeColumn get completedAt => dateTime().nullable()();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
+/// Tratos cerrados y calificados: única fuente de reputación y Visto Bueno reales. Desde el esquema 2.
+@DataClassName('InteractionRow')
+class Interactions extends Table {
+  TextColumn get id => text()();
+  TextColumn get dealId => text()();
+  TextColumn get providerId => text()();
+  TextColumn get raterId => text()();
+  IntColumn get stars => integer()();
+  BoolColumn get recommended => boolean()();
+  DateTimeColumn get closedAt => dateTime()();
+  TextColumn get comment => text().withDefault(const Constant(''))();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
+@DriftDatabase(tables: [Needs, OutboxOps, Deals, Interactions])
 class AppDatabase extends _$AppDatabase {
   AppDatabase(super.e);
 
@@ -39,14 +74,18 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.open() : super(driftDatabase(name: 'red_barrio'));
 
   /// Versión del esquema. Cada cambio exige subirla y escribir su migración + prueba (R28).
+  /// 1: needs, outbox_ops · 2: + deals, interactions
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
         onCreate: (m) => m.createAll(),
         onUpgrade: (m, from, to) async {
-          // Aquí irán las migraciones numeradas (from → to). Sin cambios todavía.
+          if (from < 2) {
+            await m.createTable(deals);
+            await m.createTable(interactions);
+          }
         },
       );
 }
