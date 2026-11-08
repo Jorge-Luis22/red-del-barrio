@@ -3,6 +3,7 @@ import 'package:red_barrio/features/assistant/domain/barrio_stats.dart';
 import 'package:red_barrio/features/assistant/domain/request_assistant.dart';
 import 'package:red_barrio/features/assistant/domain/safety_guard.dart';
 import 'package:red_barrio/features/needs/domain/need.dart';
+import 'package:red_barrio/features/proposals/infrastructure/demo_proposal_repository.dart';
 
 void main() {
   const assistant = RequestAssistant();
@@ -90,6 +91,34 @@ void main() {
     test('los datos de ejemplo están rotulados como ejemplo', () {
       expect(BarrioStats.example.isExample, isTrue);
       expect(BarrioStats.example.topKind, NeedKind.service);
+    });
+  });
+
+  group('Propuestas según el oficio', () {
+    Need need(String text, {NeedKind kind = NeedKind.service}) => Need(
+      id: 'n1',
+      kind: kind,
+      text: text,
+      urgency: Urgency.today,
+      createdAt: DateTime(2026, 11, 8),
+      syncStatus: SyncStatus.sent,
+    );
+    const repo = DemoProposalRepository();
+
+    test('carpintería muestra carpinteros y no gasfiteros', () async {
+      final list = await repo.forNeed(need('Requiero un servicio de carpintería'));
+      expect(list, isNotEmpty);
+      expect(list.every((p) => p.role == 'Carpintero'), isTrue);
+    });
+
+    test('gasfitería sigue mostrando gasfiteros', () async {
+      final list = await repo.forNeed(need('Necesito un gasfitero para una fuga'));
+      expect(list.map((p) => p.providerId), contains('carlos'));
+    });
+
+    test('servicio sin oficio reconocido no inventa propuestas', () async {
+      final list = await repo.forNeed(need('Necesito pintar mi cuarto'));
+      expect(list, isEmpty);
     });
   });
 }

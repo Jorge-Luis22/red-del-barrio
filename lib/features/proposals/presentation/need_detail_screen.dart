@@ -15,6 +15,7 @@ import 'deal_panel.dart';
 import 'deal_providers.dart';
 import '../../../app/l10n.dart';
 import '../../../app/ui/failure_text.dart';
+import '../../assistant/presentation/tr.dart';
 
 enum _Sort { reputation, distance, price }
 
@@ -133,6 +134,23 @@ class _NeedDetailScreenState extends ConsumerState<NeedDetailScreen> {
                 ),
               },
             );
+          if (sorted.isEmpty) {
+            return BvEmptyState(
+              title: tr(
+                context,
+                'Todavía no hay vecinos de ejemplo para este pedido',
+                'No example neighbors for this request yet',
+              ),
+              message: tr(
+                context,
+                'En esta versión de prueba solo hay vecinos de ejemplo para algunos oficios '
+                    '(gasfitería, electricidad, carpintería, cerrajería, costura, clases y mascotas). '
+                    'Con vecinos reales aquí llegarían sus propuestas.',
+                'In this test version there are example neighbors for only some trades. '
+                    'With real neighbors, their proposals would arrive here.',
+              ),
+            );
+          }
           return Column(
             children: [
               for (final v in sorted) ...[

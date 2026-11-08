@@ -178,19 +178,22 @@ class RequestAssistant {
     'urgente',
   ];
 
+  /// Rubro que se nombra en el texto ("Carpintería", "Gasfitería"…); `null` si no hay ninguno.
+  String? detectTrade(String raw) {
+    final n = normalizeText(raw);
+    for (final entry in _tradeWords.entries) {
+      if (containsAny(n, entry.value)) return entry.key;
+    }
+    return null;
+  }
+
   /// Devuelve `null` si el texto es muy corto para opinar.
   RequestSuggestion? suggest(String raw) {
     final trimmed = raw.trim();
     if (trimmed.length < 6) return null;
     final n = normalizeText(trimmed);
 
-    String? trade;
-    for (final entry in _tradeWords.entries) {
-      if (containsAny(n, entry.value)) {
-        trade = entry.key;
-        break;
-      }
-    }
+    final String? trade = detectTrade(trimmed);
 
     final NeedKind kind;
     if (containsAny(n, _loanWords)) {
