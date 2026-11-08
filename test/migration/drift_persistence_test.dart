@@ -113,4 +113,27 @@ void main() {
         );
     expect((await db.select(db.interactions).get()).length, 1);
   });
+
+  test(
+    'migración 7 → 8: el perfil conserva sus datos y gana la columna de foto',
+    () async {
+      final executor = NativeDatabase.memory(
+        setup: (raw) {
+          raw.execute(
+            'CREATE TABLE person_profile (id TEXT NOT NULL PRIMARY KEY, username TEXT NOT NULL, email TEXT, created_at INTEGER NOT NULL)',
+          );
+          raw.execute(
+            "INSERT INTO person_profile VALUES ('me','jose_hurtado',NULL,1700000000)",
+          );
+          raw.execute('PRAGMA user_version = 7');
+        },
+      );
+      final db = AppDatabase(executor);
+      addTearDown(db.close);
+
+      final row = await db.select(db.personProfile).getSingle();
+      expect(row.username, 'jose_hurtado');
+      expect(row.photoPath, isNull);
+    },
+  );
 }

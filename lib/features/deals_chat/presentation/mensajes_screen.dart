@@ -6,6 +6,7 @@ import '../../../app/di/providers.dart';
 import '../../../app/theme/brand.dart';
 import '../../../app/ui/components.dart';
 import '../../../app/ui/section_header.dart';
+import '../../needs/presentation/composer_sheet.dart';
 import '../../proposals/domain/deal.dart';
 import '../../proposals/presentation/deal_providers.dart';
 import '../domain/chat.dart';
@@ -48,7 +49,7 @@ class MensajesScreen extends ConsumerWidget {
                       title: context.l.aunNoTienesConversaciones,
                       message: context.l.cuandoAceptesUnaPropuesta,
                       action: FilledButton.icon(
-                        onPressed: () => context.go('/'),
+                        onPressed: () => showComposer(context),
                         icon: const Icon(Icons.add_circle_rounded),
                         label: Text(context.l.pedirAlgo),
                       ),

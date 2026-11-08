@@ -833,7 +833,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String vecinosRecomiendanEjemplo(int n) {
-    return '$n vecinos lo recomiendan (ejemplo)';
+    return '$n vecinos lo recomiendan';
   }
 
   @override
@@ -844,7 +844,7 @@ class AppLocalizationsEs extends AppLocalizations {
       other: '$m tuyas',
       one: '1 tuya',
     );
-    return '$n vecinos lo recomiendan (ejemplo) + $_temp0';
+    return '$n vecinos lo recomiendan + $_temp0';
   }
 
   @override

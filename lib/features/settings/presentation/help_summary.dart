@@ -5,6 +5,7 @@ import '../../../app/di/providers.dart';
 import '../../../app/l10n.dart';
 import '../../../app/theme/brand.dart';
 import '../../../app/ui/components.dart';
+import '../../assistant/presentation/tr.dart';
 import '../../proposals/domain/deal.dart';
 
 /// Evidencia de lo que la persona aportó, calculada de sus tratos cerrados.
@@ -74,37 +75,58 @@ class HelpGrid extends StatelessWidget {
         BvTone.coral,
       ),
     ];
-    return GridView.count(
-      padding: EdgeInsets.zero,
-      crossAxisCount: 2,
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      mainAxisSpacing: 10,
-      crossAxisSpacing: 10,
-      childAspectRatio: 1.45,
+    Widget card((IconData, String, String, BvTone) it) {
+      final (icon, value, label, tone) = it;
+      return Expanded(
+        child: Container(
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color: toneColors(context, tone).bg,
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(icon, size: 26, color: toneIconColor(context, tone)),
+              const SizedBox(height: 10),
+              Text(value, style: context.tt.headlineSmall),
+              const SizedBox(height: 2),
+              Text(label, style: context.tt.bodySmall),
+            ],
+          ),
+        ),
+      );
+    }
+
+    Widget pair(int a, int b) => IntrinsicHeight(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [card(items[a]), const SizedBox(width: 10), card(items[b])],
+      ),
+    );
+
+    return Column(
       children: [
-        for (final (icon, value, label, tone) in items)
-          Container(
-            padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(
-              color: toneColors(context, tone).bg,
-              borderRadius: BorderRadius.circular(20),
+        if (help.confirmed == 0) ...[
+          BvBanner(
+            icon: Icons.hourglass_empty_rounded,
+            tone: BvTone.violet,
+            title: tr(
+              context,
+              'Aún no cierras ningún trato',
+              'You have not closed any deal yet',
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Icon(icon, color: toneIconColor(context, tone)),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(value, style: context.tt.headlineSmall),
-                    Text(label, style: context.tt.bodySmall),
-                  ],
-                ),
-              ],
+            message: tr(
+              context,
+              'Cuando cierres uno, tu aporte aparecerá aquí.',
+              'When you close one, your contribution will show up here.',
             ),
           ),
+          const SizedBox(height: 10),
+        ],
+        pair(0, 1),
+        const SizedBox(height: 10),
+        pair(2, 3),
       ],
     );
   }

@@ -218,12 +218,7 @@ class _WallRow extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  children: [
-                    Expanded(child: Text(author, style: context.tt.titleSmall)),
-                    if (entry.isExample) BvPill(context.l.ejemplo),
-                  ],
-                ),
+                Text(author, style: context.tt.titleSmall),
                 const SizedBox(height: 4),
                 Text(
                   entry.isExample
@@ -262,31 +257,64 @@ class _WallRow extends ConsumerWidget {
                 ),
                 if (canOffer) ...[
                   const SizedBox(height: 8),
-                  Wrap(
-                    spacing: 8,
-                    crossAxisAlignment: WrapCrossAlignment.center,
-                    children: [
-                      FilledButton.tonalIcon(
-                        onPressed: () =>
-                            context.push('/oferta/request/${entry.id}'),
-                        style: FilledButton.styleFrom(
-                          minimumSize: const Size(64, 48),
+                  if (myBid == null)
+                    OutlinedButton.icon(
+                      onPressed: () =>
+                          context.push('/oferta/request/${entry.id}'),
+                      style: OutlinedButton.styleFrom(
+                        minimumSize: const Size(64, 48),
+                      ),
+                      icon: const Icon(Icons.volunteer_activism_rounded),
+                      label: Text(context.l.bidHelpBtn),
+                    )
+                  else
+                    InkWell(
+                      borderRadius: BorderRadius.circular(14),
+                      onTap: () => context.push('/oferta/request/${entry.id}'),
+                      child: Container(
+                        constraints: const BoxConstraints(minHeight: 48),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 8,
                         ),
-                        icon: const Icon(Icons.volunteer_activism_rounded),
-                        label: Text(
-                          myBid == null
-                              ? context.l.bidHelpBtn
-                              : context.l.bidChangeProposal,
+                        decoration: BoxDecoration(
+                          color: context.cs.primary.withValues(alpha: 0.08),
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.check_circle_rounded,
+                                  size: 20,
+                                  color: context.cs.primary,
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  context.l.bidYourOffer(
+                                    'S/ ${myBid.amountSoles}',
+                                  ),
+                                  style: context.tt.labelLarge?.copyWith(
+                                    color: context.cs.primary,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            Text(
+                              context.l.bidChangeProposal,
+                              style: context.tt.labelMedium?.copyWith(
+                                decoration: TextDecoration.underline,
+                                color: context.cs.onSurface,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                      if (myBid != null)
-                        BvPill(
-                          context.l.bidYourOffer('S/ ${myBid.amountSoles}'),
-                          icon: Icons.gavel_rounded,
-                          tone: BvTone.violet,
-                        ),
-                    ],
-                  ),
+                    ),
                 ],
               ],
             ),

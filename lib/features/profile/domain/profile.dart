@@ -6,13 +6,24 @@ class UserProfile {
     required this.username,
     required this.createdAt,
     this.email,
+    this.photoPath,
   });
 
   final String username;
 
+  /// Foto elegida por la persona. Es un archivo guardado solo en este teléfono.
+  final String? photoPath;
+
   /// Opcional y sin verificar: solo se guarda en este teléfono.
   final String? email;
   final DateTime createdAt;
+
+  UserProfile withPhoto(String? path) => UserProfile(
+    username: username,
+    email: email,
+    createdAt: createdAt,
+    photoPath: path,
+  );
 }
 
 /// Un lugar que la persona marcó ("Casa", "Trabajo"…).

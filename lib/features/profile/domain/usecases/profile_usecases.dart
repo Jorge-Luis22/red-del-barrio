@@ -37,6 +37,7 @@ class SaveProfile {
       username: name,
       email: mail.isEmpty ? null : mail,
       createdAt: current?.createdAt ?? clock.now(),
+      photoPath: current?.photoPath,
     );
     final saved = await profiles.saveProfile(profile);
     if (saved case Err(:final failure)) return Err(failure);

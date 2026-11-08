@@ -214,7 +214,6 @@ class _BidCard extends StatelessWidget {
                 BvPill(when, icon: Icons.schedule_rounded, tone: BvTone.violet),
               if (status != null)
                 BvPill(status.label, icon: status.icon, tone: status.tone),
-              if (bid.isExample) BvPill(l.ejemplo),
             ],
           ),
         ],

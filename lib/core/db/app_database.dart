@@ -146,6 +146,7 @@ class PersonProfile extends Table {
   TextColumn get username => text()();
   TextColumn get email => text().nullable()();
   DateTimeColumn get createdAt => dateTime()();
+  TextColumn get photoPath => text().nullable()();
 
   @override
   Set<Column> get primaryKey => {id};
@@ -227,7 +228,7 @@ class AppDatabase extends _$AppDatabase {
   /// Versión del esquema. Cada cambio exige subirla y escribir su migración + prueba (R28).
   /// 1: needs, outbox_ops · 2: + deals, interactions
   @override
-  int get schemaVersion => 7;
+  int get schemaVersion => 8;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -253,6 +254,17 @@ class AppDatabase extends _$AppDatabase {
         await m.createTable(emergencyPosts);
         await m.createTable(collectionPoints);
         await m.createTable(appSettingsKv);
+      }
+      if (from < 8) {
+        // El perfil gana la foto. Si la tabla se acaba de crear ya la trae.
+        final cols = await customSelect("PRAGMA table_info('person_profile')")
+            .get();
+        final hasPhoto = cols.any(
+          (c) => c.read<String>('name') == 'photo_path',
+        );
+        if (cols.isNotEmpty && !hasPhoto) {
+          await m.addColumn(personProfile, personProfile.photoPath);
+        }
       }
     },
   );

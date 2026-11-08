@@ -444,7 +444,7 @@
       }
     }
   },
-  "vecinosRecomiendanEjemplo": "{n} neighbors recommend them (example)",
+  "vecinosRecomiendanEjemplo": "{n} neighbors recommend them",
   "@vecinosRecomiendanEjemplo": {
     "placeholders": {
       "n": {
@@ -452,7 +452,7 @@
       }
     }
   },
-  "vecinosRecomiendanEjemploTuyas": "{n} neighbors recommend them (example) + {m, plural, =1{1 of yours} other{{m} of yours}}",
+  "vecinosRecomiendanEjemploTuyas": "{n} neighbors recommend them + {m, plural, =1{1 of yours} other{{m} of yours}}",
   "@vecinosRecomiendanEjemploTuyas": {
     "placeholders": {
       "n": {

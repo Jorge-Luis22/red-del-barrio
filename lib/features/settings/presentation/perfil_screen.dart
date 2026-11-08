@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../app/l10n.dart';
 import '../../../app/theme/brand.dart';
 import '../../../app/ui/components.dart';
-import '../../../app/ui/section_header.dart';
 import '../../assistant/presentation/tablero_screen.dart';
 import '../../assistant/presentation/tr.dart';
 import '../../profile/presentation/my_profile_section.dart';
@@ -24,21 +23,23 @@ class PerfilScreen extends ConsumerWidget {
       body: ListView(
         padding: EdgeInsets.zero,
         children: [
-          BvSectionHeader(
-            title: l.perfil,
-            subtitle: l.tuAyudaAlBarrio,
-            icon: Icons.person_rounded,
-            background: context.tones.trust,
-            foreground: context.cs.onTertiary,
-          ),
+          const ProfileHeader(),
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 20, 16, 32),
+            padding: EdgeInsets.fromLTRB(
+              16,
+              24,
+              16,
+              32 + MediaQuery.paddingOf(context).bottom,
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const MyProfileSection(),
+                const MyZoneSection(),
                 const SizedBox(height: 28),
-                BvSectionTitle(l.tuAyudaAlBarrio2, subtitle: l.soloTuVesEste),
+                BvSectionTitle(
+                  tr(context, 'Mi aporte al barrio', 'My contribution'),
+                  subtitle: l.soloTuVesEste,
+                ),
                 const SizedBox(height: 12),
                 HelpGrid(help: help),
                 const SizedBox(height: 8),
@@ -49,16 +50,25 @@ class PerfilScreen extends ConsumerWidget {
                   ),
                 ),
                 const SizedBox(height: 28),
-                const SizedBox(height: 28),
                 BvSectionTitle(
                   tr(context, 'Para la municipalidad', 'For the municipality'),
                 ),
                 const SizedBox(height: 12),
                 const TableroEntry(),
                 const SizedBox(height: 28),
-                BvSectionTitle(l.ayudaYDatos),
+                BvSectionTitle(
+                  tr(context, 'Preferencias y ayuda', 'Preferences and help'),
+                ),
                 const SizedBox(height: 12),
-                const DataActions(),
+                const PreferencesRows(),
+                const SizedBox(height: 28),
+                BvSectionTitle(
+                  tr(context, 'Privacidad y datos', 'Privacy and data'),
+                ),
+                const SizedBox(height: 12),
+                const PrivacyActions(),
+                const SizedBox(height: 12),
+                const AboutLink(),
               ],
             ),
           ),

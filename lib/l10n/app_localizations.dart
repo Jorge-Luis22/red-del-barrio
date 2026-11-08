@@ -1529,13 +1529,13 @@ abstract class AppLocalizations {
   /// No description provided for @vecinosRecomiendanEjemplo.
   ///
   /// In es, this message translates to:
-  /// **'{n} vecinos lo recomiendan (ejemplo)'**
+  /// **'{n} vecinos lo recomiendan'**
   String vecinosRecomiendanEjemplo(int n);
 
   /// No description provided for @vecinosRecomiendanEjemploTuyas.
   ///
   /// In es, this message translates to:
-  /// **'{n} vecinos lo recomiendan (ejemplo) + {m, plural, =1{1 tuya} other{{m} tuyas}}'**
+  /// **'{n} vecinos lo recomiendan + {m, plural, =1{1 tuya} other{{m} tuyas}}'**
   String vecinosRecomiendanEjemploTuyas(int n, int m);
 
   /// No description provided for @codigoDigitos.

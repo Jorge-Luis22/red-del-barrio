@@ -3649,8 +3649,25 @@ class $PersonProfileTable extends PersonProfile
     type: DriftSqlType.dateTime,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _photoPathMeta = const VerificationMeta(
+    'photoPath',
+  );
   @override
-  List<GeneratedColumn> get $columns => [id, username, email, createdAt];
+  late final GeneratedColumn<String> photoPath = GeneratedColumn<String>(
+    'photo_path',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    username,
+    email,
+    createdAt,
+    photoPath,
+  ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -3690,6 +3707,12 @@ class $PersonProfileTable extends PersonProfile
     } else if (isInserting) {
       context.missing(_createdAtMeta);
     }
+    if (data.containsKey('photo_path')) {
+      context.handle(
+        _photoPathMeta,
+        photoPath.isAcceptableOrUnknown(data['photo_path']!, _photoPathMeta),
+      );
+    }
     return context;
   }
 
@@ -3715,6 +3738,10 @@ class $PersonProfileTable extends PersonProfile
         DriftSqlType.dateTime,
         data['${effectivePrefix}created_at'],
       )!,
+      photoPath: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}photo_path'],
+      ),
     );
   }
 
@@ -3729,11 +3756,13 @@ class ProfileRow extends DataClass implements Insertable<ProfileRow> {
   final String username;
   final String? email;
   final DateTime createdAt;
+  final String? photoPath;
   const ProfileRow({
     required this.id,
     required this.username,
     this.email,
     required this.createdAt,
+    this.photoPath,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -3744,6 +3773,9 @@ class ProfileRow extends DataClass implements Insertable<ProfileRow> {
       map['email'] = Variable<String>(email);
     }
     map['created_at'] = Variable<DateTime>(createdAt);
+    if (!nullToAbsent || photoPath != null) {
+      map['photo_path'] = Variable<String>(photoPath);
+    }
     return map;
   }
 
@@ -3755,6 +3787,9 @@ class ProfileRow extends DataClass implements Insertable<ProfileRow> {
           ? const Value.absent()
           : Value(email),
       createdAt: Value(createdAt),
+      photoPath: photoPath == null && nullToAbsent
+          ? const Value.absent()
+          : Value(photoPath),
     );
   }
 
@@ -3768,6 +3803,7 @@ class ProfileRow extends DataClass implements Insertable<ProfileRow> {
       username: serializer.fromJson<String>(json['username']),
       email: serializer.fromJson<String?>(json['email']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      photoPath: serializer.fromJson<String?>(json['photoPath']),
     );
   }
   @override
@@ -3778,6 +3814,7 @@ class ProfileRow extends DataClass implements Insertable<ProfileRow> {
       'username': serializer.toJson<String>(username),
       'email': serializer.toJson<String?>(email),
       'createdAt': serializer.toJson<DateTime>(createdAt),
+      'photoPath': serializer.toJson<String?>(photoPath),
     };
   }
 
@@ -3786,11 +3823,13 @@ class ProfileRow extends DataClass implements Insertable<ProfileRow> {
     String? username,
     Value<String?> email = const Value.absent(),
     DateTime? createdAt,
+    Value<String?> photoPath = const Value.absent(),
   }) => ProfileRow(
     id: id ?? this.id,
     username: username ?? this.username,
     email: email.present ? email.value : this.email,
     createdAt: createdAt ?? this.createdAt,
+    photoPath: photoPath.present ? photoPath.value : this.photoPath,
   );
   ProfileRow copyWithCompanion(PersonProfileCompanion data) {
     return ProfileRow(
@@ -3798,6 +3837,7 @@ class ProfileRow extends DataClass implements Insertable<ProfileRow> {
       username: data.username.present ? data.username.value : this.username,
       email: data.email.present ? data.email.value : this.email,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      photoPath: data.photoPath.present ? data.photoPath.value : this.photoPath,
     );
   }
 
@@ -3807,13 +3847,14 @@ class ProfileRow extends DataClass implements Insertable<ProfileRow> {
           ..write('id: $id, ')
           ..write('username: $username, ')
           ..write('email: $email, ')
-          ..write('createdAt: $createdAt')
+          ..write('createdAt: $createdAt, ')
+          ..write('photoPath: $photoPath')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, username, email, createdAt);
+  int get hashCode => Object.hash(id, username, email, createdAt, photoPath);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -3821,7 +3862,8 @@ class ProfileRow extends DataClass implements Insertable<ProfileRow> {
           other.id == this.id &&
           other.username == this.username &&
           other.email == this.email &&
-          other.createdAt == this.createdAt);
+          other.createdAt == this.createdAt &&
+          other.photoPath == this.photoPath);
 }
 
 class PersonProfileCompanion extends UpdateCompanion<ProfileRow> {
@@ -3829,12 +3871,14 @@ class PersonProfileCompanion extends UpdateCompanion<ProfileRow> {
   final Value<String> username;
   final Value<String?> email;
   final Value<DateTime> createdAt;
+  final Value<String?> photoPath;
   final Value<int> rowid;
   const PersonProfileCompanion({
     this.id = const Value.absent(),
     this.username = const Value.absent(),
     this.email = const Value.absent(),
     this.createdAt = const Value.absent(),
+    this.photoPath = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   PersonProfileCompanion.insert({
@@ -3842,6 +3886,7 @@ class PersonProfileCompanion extends UpdateCompanion<ProfileRow> {
     required String username,
     this.email = const Value.absent(),
     required DateTime createdAt,
+    this.photoPath = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        username = Value(username),
@@ -3851,6 +3896,7 @@ class PersonProfileCompanion extends UpdateCompanion<ProfileRow> {
     Expression<String>? username,
     Expression<String>? email,
     Expression<DateTime>? createdAt,
+    Expression<String>? photoPath,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -3858,6 +3904,7 @@ class PersonProfileCompanion extends UpdateCompanion<ProfileRow> {
       if (username != null) 'username': username,
       if (email != null) 'email': email,
       if (createdAt != null) 'created_at': createdAt,
+      if (photoPath != null) 'photo_path': photoPath,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -3867,6 +3914,7 @@ class PersonProfileCompanion extends UpdateCompanion<ProfileRow> {
     Value<String>? username,
     Value<String?>? email,
     Value<DateTime>? createdAt,
+    Value<String?>? photoPath,
     Value<int>? rowid,
   }) {
     return PersonProfileCompanion(
@@ -3874,6 +3922,7 @@ class PersonProfileCompanion extends UpdateCompanion<ProfileRow> {
       username: username ?? this.username,
       email: email ?? this.email,
       createdAt: createdAt ?? this.createdAt,
+      photoPath: photoPath ?? this.photoPath,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -3893,6 +3942,9 @@ class PersonProfileCompanion extends UpdateCompanion<ProfileRow> {
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
+    if (photoPath.present) {
+      map['photo_path'] = Variable<String>(photoPath.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -3906,6 +3958,7 @@ class PersonProfileCompanion extends UpdateCompanion<ProfileRow> {
           ..write('username: $username, ')
           ..write('email: $email, ')
           ..write('createdAt: $createdAt, ')
+          ..write('photoPath: $photoPath, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -7290,6 +7343,7 @@ typedef $$PersonProfileTableCreateCompanionBuilder =
       required String username,
       Value<String?> email,
       required DateTime createdAt,
+      Value<String?> photoPath,
       Value<int> rowid,
     });
 typedef $$PersonProfileTableUpdateCompanionBuilder =
@@ -7298,6 +7352,7 @@ typedef $$PersonProfileTableUpdateCompanionBuilder =
       Value<String> username,
       Value<String?> email,
       Value<DateTime> createdAt,
+      Value<String?> photoPath,
       Value<int> rowid,
     });
 
@@ -7327,6 +7382,11 @@ class $$PersonProfileTableFilterComposer
 
   ColumnFilters<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get photoPath => $composableBuilder(
+    column: $table.photoPath,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -7359,6 +7419,11 @@ class $$PersonProfileTableOrderingComposer
     column: $table.createdAt,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get photoPath => $composableBuilder(
+    column: $table.photoPath,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$PersonProfileTableAnnotationComposer
@@ -7381,6 +7446,9 @@ class $$PersonProfileTableAnnotationComposer
 
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<String> get photoPath =>
+      $composableBuilder(column: $table.photoPath, builder: (column) => column);
 }
 
 class $$PersonProfileTableTableManager
@@ -7418,12 +7486,14 @@ class $$PersonProfileTableTableManager
                 Value<String> username = const Value.absent(),
                 Value<String?> email = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
+                Value<String?> photoPath = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => PersonProfileCompanion(
                 id: id,
                 username: username,
                 email: email,
                 createdAt: createdAt,
+                photoPath: photoPath,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -7432,12 +7502,14 @@ class $$PersonProfileTableTableManager
                 required String username,
                 Value<String?> email = const Value.absent(),
                 required DateTime createdAt,
+                Value<String?> photoPath = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => PersonProfileCompanion.insert(
                 id: id,
                 username: username,
                 email: email,
                 createdAt: createdAt,
+                photoPath: photoPath,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
