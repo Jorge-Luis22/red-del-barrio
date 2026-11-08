@@ -1,0 +1,34 @@
+# Synapse (Matrix) + Caddy (HTTPS) — un servidor, ~USD 5/mes.
+# Supabase/PocketBase viven en la nube o como servicio aparte; aquí solo el chat.
+services:
+  synapse:
+    image: matrixdotorg/synapse:latest
+    restart: unless-stopped
+    environment:
+      # Genera homeserver.yaml automático en el primer arranque.
+      SYNAPSE_SERVER_NAME: ${DOMAIN}
+      SYNAPSE_REPORT_STATS: "no"
+    volumes:
+      - ./synapse/data:/data
+    ports:
+      - "127.0.0.1:8008:8008" # solo local; Caddy expone 80/443
+
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    depends_on:
+      - synapse
+    environment:
+      DOMAIN: ${DOMAIN}
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8448:8448"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+
+volumes:
+  caddy_data:
+  caddy_config:

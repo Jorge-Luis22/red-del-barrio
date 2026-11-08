@@ -1,0 +1,11 @@
+node_modules/
+dist/
+android/
+ios/
+.env
+.env.local
+.env.*.local
+*.log
+.DS_Store
+infra/.env
+infra/synapse/data/

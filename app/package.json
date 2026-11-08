@@ -1,0 +1,35 @@
+{
+  "name": "red-vecinal-app",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Red de capacidades y confianza vecinal — PWA + Android (Capacitor) + SQLite local",
+  "scripts": {
+    "predev": "node scripts/copy-sqljs.mjs",
+    "dev": "vite",
+    "prebuild": "node scripts/copy-sqljs.mjs",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview --host",
+    "postinstall": "node scripts/copy-sqljs.mjs",
+    "cap:sync": "npm run build && cap sync android",
+    "cap:open": "cap open android",
+    "android": "npm run cap:sync && cap open android"
+  },
+  "dependencies": {
+    "@capacitor/core": "^6.2.0",
+    "idb-keyval": "^6.2.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "sql.js": "^1.13.0"
+  },
+  "devDependencies": {
+    "@capacitor/android": "^6.2.0",
+    "@capacitor/cli": "^6.2.0",
+    "@types/react": "^18.3.18",
+    "@types/react-dom": "^18.3.5",
+    "@types/sql.js": "^1.4.9",
+    "@vitejs/plugin-react": "^4.3.4",
+    "typescript": "^5.7.3",
+    "vite": "^6.0.11"
+  }
+}

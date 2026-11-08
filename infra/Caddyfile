@@ -1,0 +1,18 @@
+# Caddy: HTTPS automático + respuestas .well-known de Matrix.
+# {$DOMAIN} se toma de la variable de entorno DOMAIN del contenedor.
+{$DOMAIN} {
+	handle /.well-known/matrix/client {
+		header Content-Type application/json
+		respond `{"m.homeserver":{"base_url":"https://{$DOMAIN}"}}`
+	}
+	handle /.well-known/matrix/server {
+		header Content-Type application/json
+		respond `{"m.server":"{$DOMAIN}:443"}`
+	}
+	reverse_proxy synapse:8008
+}
+
+# Puerto de federación (server-server) para otros homeservers.
+{$DOMAIN}:8448 {
+	reverse_proxy synapse:8008
+}
