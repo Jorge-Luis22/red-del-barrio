@@ -112,14 +112,20 @@ class DealElapsed extends StatefulWidget {
 }
 
 class _DealElapsedState extends State<DealElapsed> {
-  late final Timer _t = Timer.periodic(
-    const Duration(seconds: 1),
-    (_) => setState(() {}),
-  );
+  Timer? _t;
+
+  @override
+  void initState() {
+    super.initState();
+    // Antes era `late final`: se creaba tarde (solo al cerrar) y el reloj nunca avanzaba.
+    _t = Timer.periodic(const Duration(seconds: 1), (_) {
+      if (mounted) setState(() {});
+    });
+  }
 
   @override
   void dispose() {
-    _t.cancel();
+    _t?.cancel();
     super.dispose();
   }
 
