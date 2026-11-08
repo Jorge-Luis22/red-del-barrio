@@ -1,5 +1,6 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { dbBytes, getStats, listUsers, resetAll, saveProfile } from '../db/repo';
+import MisServicios from '../components/MisServicios';
 import { chat } from '../lib/matrix';
 import { getSyncStatus, onSyncStatus, syncConfigured, syncNow } from '../lib/sync';
 import { useApp } from '../state/app';
@@ -85,6 +86,8 @@ export default function Perfil() {
           </div>
         )}
       </section>
+
+      <MisServicios />
 
       <section className="card">
         <h3>Mi ubicación</h3>

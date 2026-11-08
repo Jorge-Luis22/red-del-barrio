@@ -1,4 +1,4 @@
-import { countWallAlerts } from '../db/repo';
+import { emergencyBadge } from '../db/repo';
 import { useApp } from '../state/app';
 import type { Tab } from '../types';
 
@@ -12,8 +12,8 @@ const TABS: { id: Tab; label: string; icon: string }[] = [
 
 export default function TabBar() {
   const { me, tab, setTab } = useApp();
-  // Alertas activas de otros vecinos: se recalcula en cada cambio (también cuando llega algo del servidor).
-  const alerts = me ? countWallAlerts(me.id) : 0;
+  // Alertas de vecinos y pedidos urgentes de mi oficio: se recalcula en cada cambio (también cuando llega algo del servidor).
+  const alerts = me ? emergencyBadge(me.id) : 0;
   return (
     <nav className="tabbar" aria-label="Navegación principal">
       {TABS.map((t) => (
@@ -30,7 +30,7 @@ export default function TabBar() {
           </span>
           <span>
             {t.label}
-            {t.id === 'emergencia' && alerts > 0 ? <span className="sr-only">, {alerts} alertas activas</span> : null}
+            {t.id === 'emergencia' && alerts > 0 ? <span className="sr-only">, {alerts} avisos de emergencia</span> : null}
           </span>
         </button>
       ))}

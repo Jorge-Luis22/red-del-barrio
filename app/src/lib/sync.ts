@@ -33,9 +33,11 @@ const TABLES: Record<string, string> = {
   recommendation: 'recommendations',
   emergency: 'emergency_alerts',
   emergency_response: 'emergency_responses',
+  service_offer: 'service_offers',
 };
 /** Orden de dependencias: primero lo que otras filas referencian. */
 const ORDER = [
+  'service_offer',
   'need',
   'proposal',
   'interaction',
@@ -250,6 +252,22 @@ function apply(entity: string, d: Json): boolean {
       );
       return true;
     }
+    case 'service_offer': {
+      run(
+        `INSERT INTO service_offers
+           (id, provider_id, trade, description, urgent, available_now, schedule, active, created_at, updated_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+         ON CONFLICT(id) DO UPDATE SET
+           trade = excluded.trade, description = excluded.description, urgent = excluded.urgent,
+           available_now = excluded.available_now, schedule = excluded.schedule,
+           active = excluded.active, updated_at = excluded.updated_at
+           WHERE excluded.updated_at >= service_offers.updated_at`,
+        [s(d.id), s(d.provider_id), s(d.trade) ?? 'Otros', s(d.description) ?? '', n(d.urgent) ?? 0,
+         n(d.available_now) ?? 0, s(d.schedule) ?? '', n(d.active) ?? 1, s(d.created_at),
+         s(d.updated_at) ?? s(d.created_at)],
+      );
+      return true;
+    }
     case 'emergency_response': {
       run(
         `INSERT INTO emergency_responses (id, alert_id, helper_id, status, created_at, updated_at)
@@ -278,7 +296,8 @@ function fingerprint(): string {
               COALESCE((SELECT GROUP_CONCAT(status) FROM needs), '') || '|' ||
               COALESCE((SELECT GROUP_CONCAT(status) FROM proposals), '') || '|' ||
               COALESCE((SELECT GROUP_CONCAT(status || institution_called) FROM emergency_alerts), '') || '|' ||
-              COALESCE((SELECT GROUP_CONCAT(status) FROM emergency_responses), '') AS f`,
+              COALESCE((SELECT GROUP_CONCAT(status) FROM emergency_responses), '') || '|' ||
+              COALESCE((SELECT GROUP_CONCAT(urgent || available_now || active || updated_at) FROM service_offers), '') AS f`,
     )?.f ?? ''
   );
 }

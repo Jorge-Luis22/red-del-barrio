@@ -73,6 +73,12 @@ export default function NeedView({ needId }: { needId: string }) {
           <span className="badge">{NEED_LABEL[need.type]}</span>
         </div>
         <p>{need.description}</p>
+        {need.isEmergency && (
+          <p style={{ fontSize: '0.8rem' }}>
+            <span className="badge danger">Urgente · con costo</span> Quien atiende propone el precio y quien pidió
+            decide si lo acepta. En esta versión el pago se acuerda entre ustedes.
+          </p>
+        )}
         <div className="meta">
           <span className="badge">{need.category}</span>
           <span className="badge warn">{need.status === 'abierta' ? 'Abierta' : 'En curso'}</span>
@@ -128,7 +134,7 @@ export default function NeedView({ needId }: { needId: string }) {
 
       {!isAuthor && !showPropose && (
         <button type="button" className="btn block" onClick={() => setShowPropose(true)}>
-          Ofrecer mi ayuda
+          {need.isEmergency ? 'Ofrecer mi servicio' : 'Ofrecer mi ayuda'}
         </button>
       )}
 

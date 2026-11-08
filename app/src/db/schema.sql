@@ -119,6 +119,22 @@ CREATE TABLE IF NOT EXISTS emergency_alerts (
   created_at        TEXT NOT NULL
 );
 
+-- Servicios que un vecino ofrece (oficio). Si `urgent` = 1 aparece en Emergencia → Servicios de
+-- urgencia (con costo: el precio lo propone el vecino cuando le piden, nunca se publica de antemano).
+CREATE TABLE IF NOT EXISTS service_offers (
+  id            TEXT PRIMARY KEY,
+  provider_id   TEXT NOT NULL REFERENCES users(id),
+  trade         TEXT NOT NULL,
+  description   TEXT NOT NULL DEFAULT '',
+  urgent        INTEGER NOT NULL DEFAULT 0,
+  available_now INTEGER NOT NULL DEFAULT 0,
+  schedule      TEXT NOT NULL DEFAULT '',
+  active        INTEGER NOT NULL DEFAULT 1,
+  created_at    TEXT NOT NULL,
+  updated_at    TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_service_offers_urgent ON service_offers (urgent, active, trade);
+
 -- "Puedo ayudar" en el muro de emergencia. Una fila por (alerta, vecino): el id es
 -- determinista, así dos teléfonos nunca duplican la misma oferta y retirarla es un UPDATE.
 CREATE TABLE IF NOT EXISTS emergency_responses (

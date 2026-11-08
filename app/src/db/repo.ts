@@ -10,6 +10,9 @@ import type {
   EmergencyKind,
   EmergencyWallItem,
   Message,
+  ServiceOffer,
+  UrgentRequest,
+  UrgentService,
   Need,
   NeedType,
   Proposal,
@@ -252,14 +255,16 @@ export async function createNeed(input: {
   category: string;
   zone: string;
   point: Point;
+  /** Pedido urgente (servicio con costo en una emergencia). La zona pública es de ~1 km. */
+  isEmergency?: boolean;
 }): Promise<Need> {
   const id = uid('n');
-  const published = roundZone(jitter(input.point, 30));
+  const published = input.isEmergency ? roundZone(input.point, 2) : roundZone(jitter(input.point, 30));
   run(
     `INSERT INTO needs
        (id, author_id, type, title, description, category, zone,
         lat_public, lng_public, lat_exact, lng_exact, status, is_emergency, created_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'abierta', 0, ?)`,
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'abierta', ?, ?)`,
     [
       id,
       input.authorId,
@@ -272,6 +277,7 @@ export async function createNeed(input: {
       published.lng,
       input.point.lat,
       input.point.lng,
+      input.isEmergency ? 1 : 0,
       now(),
     ],
   );
@@ -765,10 +771,182 @@ async function setHelp(alertId: string, helperId: string, status: 'ofrece' | 're
 export const offerHelp = (alertId: string, helperId: string) => setHelp(alertId, helperId, 'ofrece');
 export const withdrawHelp = (alertId: string, helperId: string) => setHelp(alertId, helperId, 'retirado');
 
-/** Número que cambia cuando llega algo que merece avisar: una alerta nueva o alguien que ayuda en la mía. */
+/* ---- Servicios de urgencia (con costo) ------------------------------ */
+
+interface OfferRow {
+  id: string;
+  provider_id: string;
+  trade: string;
+  description: string;
+  urgent: number;
+  available_now: number;
+  schedule: string;
+}
+
+const toOffer = (row: OfferRow): ServiceOffer => ({
+  id: row.id,
+  providerId: row.provider_id,
+  trade: row.trade,
+  description: row.description,
+  urgent: Boolean(row.urgent),
+  availableNow: Boolean(row.available_now),
+  schedule: row.schedule,
+});
+
+const normTrade = (value: string) =>
+  value.normalize('NFD').replace(/[̀-ͯ]/g, '').trim().toLowerCase();
+
+export function listMyServices(userId: string): ServiceOffer[] {
+  return all<OfferRow>(
+    `SELECT * FROM service_offers WHERE provider_id = ? AND active = 1 ORDER BY created_at, id`,
+    [userId],
+  ).map(toOffer);
+}
+
+export async function saveService(input: {
+  providerId: string;
+  trade: string;
+  description: string;
+  urgent: boolean;
+  availableNow: boolean;
+  schedule: string;
+}): Promise<void> {
+  const id = uid('o');
+  const ts = now();
+  run(
+    `INSERT INTO service_offers
+       (id, provider_id, trade, description, urgent, available_now, schedule, active, created_at, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, 1, ?, ?)`,
+    [id, input.providerId, input.trade, input.description.trim(), input.urgent ? 1 : 0,
+     input.availableNow ? 1 : 0, input.schedule.trim(), ts, ts],
+  );
+  markDirty('service_offer', id);
+  await persist();
+}
+
+export async function updateService(id: string, patch: { urgent?: boolean; availableNow?: boolean }): Promise<void> {
+  run(
+    `UPDATE service_offers
+        SET urgent = COALESCE(?, urgent), available_now = COALESCE(?, available_now), updated_at = ?
+      WHERE id = ?`,
+    [patch.urgent === undefined ? null : patch.urgent ? 1 : 0,
+     patch.availableNow === undefined ? null : patch.availableNow ? 1 : 0, now(), id],
+  );
+  markDirty('service_offer', id);
+  await persist();
+}
+
+export async function removeService(id: string): Promise<void> {
+  run(`UPDATE service_offers SET active = 0, updated_at = ? WHERE id = ?`, [now(), id]);
+  markDirty('service_offer', id);
+  await persist();
+}
+
+interface UrgentServiceRow extends OfferRow {
+  name: string;
+  color: string;
+  level: string;
+  lat: number | null;
+  lng: number | null;
+  recs: number;
+}
+
+/** Vecinos que atienden urgencias (otros, no tú). Primero los disponibles ahora y los más recomendados. */
+export function listUrgentServices(viewerId: string, viewer: Point, trade?: string): UrgentService[] {
+  const rows = all<UrgentServiceRow>(
+    `SELECT o.*, u.display_name AS name, u.avatar_color AS color, u.solid_level AS level, u.lat, u.lng,
+            (SELECT COUNT(*) FROM recommendations r WHERE r.provider_id = u.id) AS recs
+       FROM service_offers o JOIN users u ON u.id = o.provider_id
+      WHERE o.urgent = 1 AND o.active = 1 AND o.provider_id <> ?`,
+    [viewerId],
+  );
+  const wanted = trade ? normTrade(trade) : null;
+  return rows
+    .filter((row) => !wanted || normTrade(row.trade) === wanted)
+    .map((row) => ({
+      ...toOffer(row),
+      providerName: row.name,
+      providerColor: row.color,
+      level: row.level,
+      recommendations: Number(row.recs ?? 0),
+      distanceKm:
+        row.lat !== null && row.lng !== null ? distanceKm(viewer, { lat: row.lat, lng: row.lng }) : null,
+    }))
+    .sort(
+      (a, b) =>
+        Number(b.availableNow) - Number(a.availableNow) ||
+        b.recommendations - a.recommendations ||
+        (a.distanceKm ?? 99) - (b.distanceKm ?? 99),
+    );
+}
+
+export function listUrgentTrades(viewerId: string): string[] {
+  const seen = new Map<string, string>();
+  for (const s of listUrgentServices(viewerId, DEFAULT_POINT)) seen.set(normTrade(s.trade), s.trade);
+  return [...seen.values()].sort((a, b) => a.localeCompare(b, 'es'));
+}
+
+function proposalCount(needId: string): number {
+  return Number(
+    one<{ n: number }>(
+      `SELECT COUNT(*) AS n FROM proposals WHERE need_id = ? AND status IN ('enviada','aceptada')`,
+      [needId],
+    )?.n ?? 0,
+  );
+}
+
+/** Pedidos urgentes abiertos de otros vecinos. Primero los de tu oficio. */
+export function listUrgentRequests(viewerId: string, viewer: Point): UrgentRequest[] {
+  const since = new Date(Date.now() - WALL_WINDOW_HOURS * 3_600_000).toISOString();
+  const rows = all<NeedRow>(
+    `${NEED_SELECT}
+      WHERE n.is_emergency = 1 AND n.status = 'abierta' AND n.author_id <> ? AND n.created_at >= ?
+      ORDER BY n.created_at DESC`,
+    [viewerId, since],
+  );
+  const mine = new Set(
+    all<{ trade: string }>(
+      `SELECT trade FROM service_offers WHERE provider_id = ? AND urgent = 1 AND active = 1`,
+      [viewerId],
+    ).map((r) => normTrade(r.trade)),
+  );
+  return rows
+    .map((row) => {
+      const need = toNeed(row, viewer);
+      return { need, matchesMe: mine.has(normTrade(need.category)), proposals: proposalCount(need.id) };
+    })
+    .sort((a, b) => Number(b.matchesMe) - Number(a.matchesMe));
+}
+
+/** Mis pedidos urgentes que siguen vivos (abiertos de las últimas horas, o ya en curso). */
+export function listMyUrgentRequests(userId: string, viewer: Point): UrgentRequest[] {
+  const since = new Date(Date.now() - WALL_WINDOW_HOURS * 3_600_000).toISOString();
+  const rows = all<NeedRow>(
+    `${NEED_SELECT}
+      WHERE n.is_emergency = 1 AND n.author_id = ?
+        AND (n.status = 'en_curso' OR (n.status = 'abierta' AND n.created_at >= ?))
+      ORDER BY n.created_at DESC`,
+    [userId, since],
+  );
+  return rows.map((row) => {
+    const need = toNeed(row, viewer);
+    return { need, matchesMe: false, proposals: proposalCount(need.id) };
+  });
+}
+
+export function countUrgentForMe(userId: string): number {
+  return listUrgentRequests(userId, DEFAULT_POINT).filter((r) => r.matchesMe).length;
+}
+
+/** Lo que muestra el punto rojo del menú: alertas de vecinos + pedidos urgentes de mi oficio. */
+export function emergencyBadge(userId: string): number {
+  return countWallAlerts(userId) + countUrgentForMe(userId);
+}
+
+/** Número que cambia cuando llega algo que merece avisar (vibración): alertas, pedidos de mi oficio o quien ayuda en la mía. */
 export function emergencySignal(userId: string): number {
   const mine = activeEmergency(userId);
-  return countWallAlerts(userId) + (mine ? helpersOf(mine.id).length : 0);
+  return emergencyBadge(userId) + (mine ? helpersOf(mine.id).length : 0);
 }
 
 /* ------------------------------------------------------------------ */

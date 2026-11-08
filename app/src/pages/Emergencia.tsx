@@ -2,6 +2,7 @@ import { useState, type FormEvent } from 'react';
 import {
   activeEmergency,
   closeEmergency,
+  countUrgentForMe,
   createEmergency,
   defaultPoint,
   helpersOf,
@@ -10,9 +11,18 @@ import {
   offerHelp,
   withdrawHelp,
 } from '../db/repo';
+import ServiciosUrgencia from '../components/ServiciosUrgencia';
 import { formatDistance } from '../lib/geo';
+import { ago } from '../lib/time';
 import { useApp } from '../state/app';
 import { EMERGENCY_LABEL, type EmergencyKind } from '../types';
+
+type Section = 'alertas' | 'servicios';
+/** Recuerda la pestaña al volver de ver un pedido; también permite abrirla desde el aviso de Inicio. */
+let lastSection: Section = 'alertas';
+export function showEmergencySection(section: Section): void {
+  lastSection = section;
+}
 
 const NUMBERS = [
   { name: 'PNP (Policía)', number: '105' },
@@ -20,15 +30,13 @@ const NUMBERS = [
   { name: 'SAMU (ambulancias)', number: '106' },
 ];
 
-function ago(iso: string): string {
-  const minutes = Math.max(0, Math.round((Date.now() - new Date(iso).getTime()) / 60_000));
-  if (minutes < 1) return 'ahora mismo';
-  if (minutes < 60) return `hace ${minutes} min`;
-  return `hace ${Math.round(minutes / 60)} h`;
-}
-
 export default function Emergencia() {
   const { me, version, bump } = useApp();
+  const [section, setSectionState] = useState<Section>(lastSection);
+  const setSection = (next: Section) => {
+    lastSection = next;
+    setSectionState(next);
+  };
   const [showForm, setShowForm] = useState(false);
   const [kind, setKind] = useState<EmergencyKind>('medico');
   const [description, setDescription] = useState('');
@@ -39,6 +47,7 @@ export default function Emergencia() {
   const active = activeEmergency(me.id);
   const wall = listEmergencyWall(me.id, defaultPoint());
   const myHelpers = active ? helpersOf(active.id) : [];
+  const forMe = countUrgentForMe(me.id);
 
   async function create(event: FormEvent) {
     event.preventDefault();
@@ -76,6 +85,31 @@ export default function Emergencia() {
         </div>
       </section>
 
+      <div className="seg" role="group" aria-label="Tipo de ayuda">
+        <button
+          type="button"
+          className={section === 'alertas' ? 'seg-btn on' : 'seg-btn'}
+          aria-pressed={section === 'alertas'}
+          onClick={() => setSection('alertas')}
+        >
+          <strong>🚨 Alertas vecinales{wall.length > 0 ? ` (${wall.length})` : ''}</strong>
+          <span>Ayuda solidaria · sin costo</span>
+        </button>
+        <button
+          type="button"
+          className={section === 'servicios' ? 'seg-btn on' : 'seg-btn'}
+          aria-pressed={section === 'servicios'}
+          onClick={() => setSection('servicios')}
+        >
+          <strong>🛠️ Servicios de urgencia{forMe > 0 ? ` (${forMe})` : ''}</strong>
+          <span>Vecinos que cobran por atender</span>
+        </button>
+      </div>
+
+      {section === 'servicios' && <ServiciosUrgencia />}
+
+      {section === 'alertas' && (
+        <>
       {active && (
         <section className="card" key={`${active.id}-${version}`} style={{ borderLeft: '4px solid var(--danger)' }}>
           <div className="title-row" style={{ display: 'flex', justifyContent: 'space-between', gap: 8 }}>
@@ -181,7 +215,7 @@ export default function Emergencia() {
       )}
 
       <section aria-label="Alertas de tus vecinos" style={{ marginTop: 18 }}>
-        <h2 style={{ fontSize: '1.05rem', margin: '0 0 8px' }}>Alertas de tus vecinos</h2>
+        <h2 style={{ fontSize: '1.05rem', margin: '0 0 8px' }}>Alertas de tus vecinos · ayuda solidaria</h2>
         {wall.length === 0 && (
           <div className="empty">
             No hay alertas activas cerca. Si alguien pide ayuda, aparecerá aquí.
@@ -249,6 +283,8 @@ export default function Emergencia() {
           </article>
         ))}
       </section>
+        </>
+      )}
     </div>
   );
 }

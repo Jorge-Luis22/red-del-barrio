@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from 'react';
-import { createNeed, defaultPoint, listEmergencyWall, listNeeds } from '../db/repo';
+import { createNeed, defaultPoint, listEmergencyWall, listNeeds, listUrgentRequests } from '../db/repo';
+import { showEmergencySection } from './Emergencia';
 import { useApp } from '../state/app';
 import { EMERGENCY_LABEL, NEED_LABEL, type NeedType } from '../types';
 
@@ -19,6 +20,7 @@ export default function Inicio() {
 
   const needs = listNeeds(defaultPoint(), { q, type });
   const alerts = listEmergencyWall(me.id, defaultPoint());
+  const urgentForMe = listUrgentRequests(me.id, defaultPoint()).filter((r) => r.matchesMe);
 
   async function publish(event: FormEvent) {
     event.preventDefault();
@@ -56,14 +58,40 @@ export default function Inicio() {
         </div>
       </header>
 
-      {alerts.length > 0 && (
-        <button type="button" className="alert-banner" onClick={() => setTab('emergencia')} role="alert">
+      {alerts.length > 0 ? (
+        <button
+          type="button"
+          className="alert-banner"
+          onClick={() => {
+            showEmergencySection('alertas');
+            setTab('emergencia');
+          }}
+          role="alert"
+        >
           <span>
             🚨 <strong>{EMERGENCY_LABEL[alerts[0].kind]}</strong> cerca · {alerts[0].zone || 'tu barrio'}
             {alerts.length > 1 && ` (+${alerts.length - 1} más)`}
           </span>
           <span aria-hidden="true">Ver ›</span>
         </button>
+      ) : (
+        urgentForMe.length > 0 && (
+          <button
+            type="button"
+            className="alert-banner"
+            onClick={() => {
+              showEmergencySection('servicios');
+              setTab('emergencia');
+            }}
+            role="alert"
+          >
+            <span>
+              🛠️ <strong>Pedido urgente de {urgentForMe[0].need.category}</strong> cerca de ti
+              {urgentForMe.length > 1 && ` (+${urgentForMe.length - 1} más)`}
+            </span>
+            <span aria-hidden="true">Ver ›</span>
+          </button>
+        )
       )}
 
       {showForm && (

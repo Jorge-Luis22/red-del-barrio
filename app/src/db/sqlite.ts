@@ -2,6 +2,7 @@ import type { Database, SqlJsStatic, SqlValue } from 'sql.js';
 import { del, get, set } from 'idb-keyval';
 import schemaSql from './schema.sql?raw';
 import seedSql from './seed.sql?raw';
+import seedOffersSql from './seed-offers.sql?raw';
 
 const DB_KEY = 'redvecinal.sqlite.v1';
 
@@ -63,6 +64,7 @@ async function openInternal(): Promise<Database> {
   if (empty) {
     db.exec(seedSql);
   }
+  db.exec(seedOffersSql);
 
   await persist();
   return db;

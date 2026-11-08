@@ -110,6 +110,44 @@ export interface EmergencyWallItem extends Emergency {
   iOffered: boolean;
 }
 
+/** Oficios que un vecino puede ofrecer. "Otros" cubre lo que no esté en la lista. */
+export const TRADES = [
+  'Gasfitería',
+  'Electricidad',
+  'Cerrajería',
+  'Carpintería',
+  'Enfermería',
+  'Transporte',
+  'Agua y gas',
+  'Otros',
+] as const;
+
+export interface ServiceOffer {
+  id: string;
+  providerId: string;
+  trade: string;
+  description: string;
+  urgent: boolean;
+  availableNow: boolean;
+  schedule: string;
+}
+
+/** Servicio de urgencia de otro vecino (con costo: el precio se propone al pedirlo). */
+export interface UrgentService extends ServiceOffer {
+  providerName: string;
+  providerColor: string;
+  level: string;
+  recommendations: number;
+  distanceKm: number | null;
+}
+
+export interface UrgentRequest {
+  need: Need;
+  /** Verdadero si el usuario ofrece ese oficio como servicio de urgencia. */
+  matchesMe: boolean;
+  proposals: number;
+}
+
 export interface Stats {
   helps: number;
   people: number;
