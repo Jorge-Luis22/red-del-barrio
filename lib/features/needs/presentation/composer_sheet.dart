@@ -11,6 +11,9 @@ import '../domain/need.dart';
 import 'need_labels.dart';
 import '../../../app/l10n.dart';
 import '../../../app/ui/failure_text.dart';
+import '../../assistant/domain/request_assistant.dart';
+import '../../assistant/domain/safety_guard.dart';
+import '../../assistant/presentation/assistant_widgets.dart';
 
 /// Abre el formulario de "¿Qué necesitas?".
 ///
@@ -49,6 +52,8 @@ class _ComposerSheetState extends ConsumerState<ComposerSheet> {
   );
   String? _error;
   bool _busy = false;
+  final _assistant = const RequestAssistant();
+  final _guard = const SafetyGuard();
 
   @override
   void dispose() {
@@ -56,7 +61,46 @@ class _ComposerSheetState extends ConsumerState<ComposerSheet> {
     super.dispose();
   }
 
+  void _applySuggestion(RequestSuggestion s) {
+    final text = s.cleanedText.length > 200
+        ? s.cleanedText.substring(0, 200)
+        : s.cleanedText;
+    setState(() {
+      _kind = s.kind;
+      if (s.urgency != null) _urgency = s.urgency!;
+      _text.value = TextEditingValue(
+        text: text,
+        selection: TextSelection.collapsed(offset: text.length),
+      );
+    });
+  }
+
+  List<Widget> _assistantBlock() {
+    final out = <Widget>[];
+    final flags = _guard.scan(_text.text);
+    if (flags.isNotEmpty) {
+      out.add(const SizedBox(height: 10));
+      out.add(SafetyWarning(flags: flags));
+    }
+    final s = _assistant.suggest(_text.text);
+    if (s != null && suggestionIsUseful(s, _kind, _urgency)) {
+      out.add(const SizedBox(height: 10));
+      out.add(
+        RequestSuggestionCard(
+          suggestion: s,
+          onApply: () => _applySuggestion(s),
+        ),
+      );
+    }
+    return out;
+  }
+
   Future<void> _publish() async {
+    final flags = _guard.scan(_text.text);
+    if (flags.isNotEmpty) {
+      final ok = await confirmSafety(context, flags);
+      if (ok != true || !mounted) return;
+    }
     setState(() {
       _busy = true;
       _error = null;
@@ -146,6 +190,7 @@ class _ComposerSheetState extends ConsumerState<ComposerSheet> {
                     ),
                     onChanged: (_) => setState(() => _error = null),
                   ),
+                  ..._assistantBlock(),
                   const SizedBox(height: 12),
                   _stepLabel(context, '3', context.l.paraCuandoLoNecesitas),
                   const SizedBox(height: 10),

@@ -1,0 +1,75 @@
+name: APK local (app de José, sin servidor)
+
+# Compila la app Flutter de la raíz (GPS + datos en el teléfono) y deja el APK en "Actions".
+on:
+  push:
+    branches: [main, feat/apk-local]
+  workflow_dispatch:
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      # El proyecto pide Dart ^3.13: usamos la última versión estable de Flutter.
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - run: flutter --version
+
+      - name: Dependencias
+        run: flutter pub get
+
+      # Los errores quedan como anotaciones del flujo (se leen sin iniciar sesión).
+      - name: Revisar el código (no detiene la compilación)
+        continue-on-error: true
+        run: |
+          set +e
+          flutter analyze lib > analyze.txt 2>&1
+          code=$?
+          tail -n 60 analyze.txt
+          if [ $code -ne 0 ]; then
+            msg=$(grep -E ' error ' analyze.txt | head -40 | cut -c1-300 | awk 'BEGIN{ORS="%0A"} {print}')
+            [ -n "$msg" ] && echo "::error title=flutter analyze::${msg}"
+          fi
+          exit $code
+
+      - name: Pruebas automáticas (no detienen la compilación)
+        continue-on-error: true
+        run: |
+          set +e
+          flutter test > test.txt 2>&1
+          code=$?
+          tail -n 40 test.txt
+          if [ $code -ne 0 ]; then
+            msg=$(grep -E 'Some tests failed|\[E\]|Expected|Actual|failed' test.txt | head -30 | cut -c1-300 | awk 'BEGIN{ORS="%0A"} {print}')
+            echo "::error title=flutter test::${msg}"
+          fi
+          exit $code
+
+      - name: Compilar APK
+        run: |
+          set +e
+          flutter build apk --release > build.txt 2>&1
+          code=$?
+          tail -n 80 build.txt
+          if [ $code -ne 0 ]; then
+            msg=$(grep -E 'Error|error:|FAILURE|What went wrong|lib/' build.txt | head -40 | cut -c1-300 | awk 'BEGIN{ORS="%0A"} {print}')
+            echo "::error title=build::${msg}"
+          fi
+          exit $code
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: red-del-barrio-local-apk
+          path: build/app/outputs/flutter-apk/app-release.apk
+          if-no-files-found: error

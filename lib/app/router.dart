@@ -4,6 +4,7 @@ import '../features/deals_chat/presentation/chat_screen.dart';
 import '../features/deals_chat/presentation/mensajes_screen.dart';
 import '../features/emergency/presentation/emergencia_screen.dart';
 import '../features/explore/presentation/explore_section.dart';
+import '../features/assistant/presentation/tablero_screen.dart';
 import '../features/needs/presentation/home_screen.dart';
 import '../features/profile/presentation/welcome_screen.dart';
 import '../features/needs/presentation/my_needs_screen.dart';
@@ -74,7 +75,16 @@ final GoRouter appRouter = GoRouter(
         ),
         StatefulShellBranch(
           routes: [
-            GoRoute(path: '/perfil', builder: (_, _) => const PerfilScreen()),
+            GoRoute(
+              path: '/perfil',
+              builder: (_, _) => const PerfilScreen(),
+              routes: [
+                GoRoute(
+                  path: 'tablero',
+                  builder: (_, _) => const TableroScreen(),
+                ),
+              ],
+            ),
           ],
         ),
       ],
