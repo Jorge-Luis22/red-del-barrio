@@ -560,7 +560,6 @@ const demoProposals = <NeedKind, List<Proposal>>{
   ],
 };
 
-
 /// Propuestas de DEMOSTRACIÓN para pedidos de servicio, según el oficio que se nombra.
 /// Los nombres son ficticios y la interfaz siempre los rotula "ejemplo".
 const demoServiceProposalsByTrade = <String, List<Proposal>>{

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../../../app/l10n.dart';
-import '../../../app/theme/brand.dart';
 import '../../../app/ui/components.dart';
 import '../../needs/domain/need.dart';
 import '../../needs/presentation/need_labels.dart';
@@ -109,7 +108,9 @@ Future<bool?> confirmSafety(BuildContext context, List<SafetyFlag> flags) =>
       builder: (ctx) => AlertDialog(
         title: Text(tr(ctx, 'Antes de enviar', 'Before sending')),
         content: SingleChildScrollView(
-          child: Text(flags.map((f) => '• ${safetyMessage(ctx, f)}').join('\n\n')),
+          child: Text(
+            flags.map((f) => '• ${safetyMessage(ctx, f)}').join('\n\n'),
+          ),
         ),
         actions: [
           TextButton(

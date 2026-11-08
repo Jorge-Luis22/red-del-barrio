@@ -1,43 +1,85 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../app/di/providers.dart';
 import '../../../app/l10n.dart';
 import '../../../app/theme/brand.dart';
 import '../../../app/ui/components.dart';
+import '../../assistant/presentation/tr.dart';
 import 'tutorial_sheet.dart';
 
-/// "Ayuda y datos": tutorial, información del prototipo y borrado de datos.
-class DataActions extends ConsumerWidget {
-  const DataActions({super.key});
+/// "Preferencias y ayuda": ajustes y tutorial en filas limpias.
+class PreferencesRows extends StatelessWidget {
+  const PreferencesRows({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final l = context.l;
     return BvRows(
       children: [
+        _ActionRow(
+          icon: Icons.tune_rounded,
+          title: l.settingsTitle,
+          subtitle: l.settingsRowSub,
+          onTap: () => context.push('/perfil/ajustes'),
+        ),
         _ActionRow(
           icon: Icons.school_rounded,
           title: l.verElTutorial,
           subtitle: l.tresPantallasParaEmpezar,
           onTap: () => showTutorial(context),
         ),
-        _ActionRow(
-          icon: Icons.info_outline_rounded,
-          title: l.sobreEstePrototipo,
-          subtitle: l.queEsRealY,
-          onTap: () => _showAbout(context),
-        ),
-        _ActionRow(
-          icon: Icons.delete_forever_rounded,
-          title: l.borrarMisDatosDe,
-          subtitle: l.pedidosTratosMensajesY,
-          danger: true,
-          onTap: () => _confirmErase(context, ref),
-        ),
       ],
     );
   }
+}
+
+/// "Privacidad y datos": el borrado va aparte de las opciones habituales.
+class PrivacyActions extends ConsumerWidget {
+  const PrivacyActions({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = context.l;
+    return Container(
+      decoration: BoxDecoration(
+        border: Border.all(
+          color: context.tones.emergency.withValues(alpha: 0.5),
+        ),
+        borderRadius: BorderRadius.circular(22),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: _ActionRow(
+        icon: Icons.delete_forever_rounded,
+        title: l.borrarMisDatosDe,
+        subtitle: l.pedidosTratosMensajesY,
+        danger: true,
+        onTap: () => _confirmErase(context, ref),
+      ),
+    );
+  }
+}
+
+/// Enlace discreto al final de Perfil: qué es real y qué es de ejemplo.
+class AboutLink extends StatelessWidget {
+  const AboutLink({super.key});
+
+  @override
+  Widget build(BuildContext context) => Center(
+    child: TextButton.icon(
+      onPressed: () => _showAbout(context),
+      style: TextButton.styleFrom(minimumSize: const Size(48, 48)),
+      icon: const Icon(Icons.info_outline_rounded),
+      label: Text(
+        tr(
+          context,
+          'Información legal y de la versión',
+          'Legal and version info',
+        ),
+      ),
+    ),
+  );
 }
 
 class _ActionRow extends StatelessWidget {

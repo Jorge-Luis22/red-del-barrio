@@ -102,6 +102,7 @@ class _AddressSheetState extends ConsumerState<_AddressSheet> {
       actionIcon: Icons.place_rounded,
       busy: _saving,
       onAction: (loc != null && _name.text.trim().length >= 2) ? _save : null,
+      disabledHint: l.hintAddr,
       children: [
         if (_error != null) ...[
           BvBanner(

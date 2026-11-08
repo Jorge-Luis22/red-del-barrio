@@ -24,6 +24,7 @@ class DriftProfileRepository implements ProfileRepository {
                 username: r.username,
                 email: r.email,
                 createdAt: r.createdAt,
+                photoPath: r.photoPath,
               ),
       );
 
@@ -38,6 +39,7 @@ class DriftProfileRepository implements ProfileRepository {
                 username: p.username,
                 email: Value(p.email),
                 createdAt: p.createdAt,
+                photoPath: Value(p.photoPath),
               ),
             );
       });

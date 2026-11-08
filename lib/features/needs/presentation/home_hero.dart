@@ -108,7 +108,7 @@ class HomeHero extends StatelessWidget {
                     onPressed: () => showComposer(context),
                     style: FilledButton.styleFrom(
                       backgroundColor: context.tones.coral,
-                      foregroundColor: cs.onSecondary,
+                      foregroundColor: BarrioPalette.white,
                       minimumSize: const Size(64, 60),
                       textStyle: context.tt.titleMedium,
                     ),

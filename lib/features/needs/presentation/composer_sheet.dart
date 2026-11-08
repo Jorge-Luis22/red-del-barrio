@@ -224,21 +224,50 @@ class _ComposerSheetState extends ConsumerState<ComposerSheet> {
             padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
             child: SafeArea(
               top: false,
-              child: SizedBox(
-                width: double.infinity,
-                child: FilledButton.icon(
-                  onPressed: canPublish ? _publish : null,
-                  icon: _busy
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2.5),
-                        )
-                      : const Icon(Icons.send_rounded),
-                  label: Text(
-                    _busy ? context.l.publicando : context.l.publicar,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (!canPublish && !_busy)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.info_outline_rounded,
+                            size: 18,
+                            color: context.tones.muted,
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              context.l.hintNeed3,
+                              style: context.tt.bodySmall?.copyWith(
+                                color: context.tones.muted,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  SizedBox(
+                    width: double.infinity,
+                    child: FilledButton.icon(
+                      onPressed: canPublish ? _publish : null,
+                      icon: _busy
+                          ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2.5,
+                              ),
+                            )
+                          : const Icon(Icons.send_rounded),
+                      label: Text(
+                        _busy ? context.l.publicando : context.l.publicar,
+                      ),
+                    ),
                   ),
-                ),
+                ],
               ),
             ),
           ),
@@ -295,7 +324,7 @@ class _ComposerSheetState extends ConsumerState<ComposerSheet> {
                 border: Border.all(
                   color: _kind == k
                       ? context.cs.primary
-                      : context.tones.hairline,
+                      : context.tones.control,
                   width: _kind == k ? 2 : 1.5,
                 ),
               ),
@@ -365,7 +394,7 @@ class _SuggestionRow extends StatelessWidget {
             color: selected ? context.tones.violetSoft : context.cs.surface,
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: selected ? context.cs.primary : context.tones.hairline,
+              color: selected ? context.cs.primary : context.tones.control,
               width: selected ? 2 : 1.5,
             ),
           ),

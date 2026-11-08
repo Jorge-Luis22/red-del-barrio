@@ -311,7 +311,6 @@ class _ProposalCard extends StatelessWidget {
                 icon: Icons.near_me_rounded,
               ),
               BvPill(p.availability, icon: Icons.schedule_rounded),
-              if (p.isExample) BvPill(context.l.ejemplo),
             ],
           ),
           if (p.diagnosticVisitSoles != null) ...[

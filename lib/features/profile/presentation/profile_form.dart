@@ -108,6 +108,27 @@ class _ProfileFormState extends ConsumerState<ProfileForm> {
           ),
         ],
         const SizedBox(height: 16),
+        if (!canSave && !_busy) ...[
+          Row(
+            children: [
+              Icon(
+                Icons.info_outline_rounded,
+                size: 18,
+                color: context.tones.muted,
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  l.hintProfile,
+                  style: context.tt.bodySmall?.copyWith(
+                    color: context.tones.muted,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+        ],
         SizedBox(
           width: double.infinity,
           child: FilledButton.icon(

@@ -3649,8 +3649,25 @@ class $PersonProfileTable extends PersonProfile
     type: DriftSqlType.dateTime,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _photoPathMeta = const VerificationMeta(
+    'photoPath',
+  );
   @override
-  List<GeneratedColumn> get $columns => [id, username, email, createdAt];
+  late final GeneratedColumn<String> photoPath = GeneratedColumn<String>(
+    'photo_path',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    username,
+    email,
+    createdAt,
+    photoPath,
+  ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -3690,6 +3707,12 @@ class $PersonProfileTable extends PersonProfile
     } else if (isInserting) {
       context.missing(_createdAtMeta);
     }
+    if (data.containsKey('photo_path')) {
+      context.handle(
+        _photoPathMeta,
+        photoPath.isAcceptableOrUnknown(data['photo_path']!, _photoPathMeta),
+      );
+    }
     return context;
   }
 
@@ -3715,6 +3738,10 @@ class $PersonProfileTable extends PersonProfile
         DriftSqlType.dateTime,
         data['${effectivePrefix}created_at'],
       )!,
+      photoPath: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}photo_path'],
+      ),
     );
   }
 
@@ -3729,11 +3756,13 @@ class ProfileRow extends DataClass implements Insertable<ProfileRow> {
   final String username;
   final String? email;
   final DateTime createdAt;
+  final String? photoPath;
   const ProfileRow({
     required this.id,
     required this.username,
     this.email,
     required this.createdAt,
+    this.photoPath,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -3744,6 +3773,9 @@ class ProfileRow extends DataClass implements Insertable<ProfileRow> {
       map['email'] = Variable<String>(email);
     }
     map['created_at'] = Variable<DateTime>(createdAt);
+    if (!nullToAbsent || photoPath != null) {
+      map['photo_path'] = Variable<String>(photoPath);
+    }
     return map;
   }
 
@@ -3755,6 +3787,9 @@ class ProfileRow extends DataClass implements Insertable<ProfileRow> {
           ? const Value.absent()
           : Value(email),
       createdAt: Value(createdAt),
+      photoPath: photoPath == null && nullToAbsent
+          ? const Value.absent()
+          : Value(photoPath),
     );
   }
 
@@ -3768,6 +3803,7 @@ class ProfileRow extends DataClass implements Insertable<ProfileRow> {
       username: serializer.fromJson<String>(json['username']),
       email: serializer.fromJson<String?>(json['email']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      photoPath: serializer.fromJson<String?>(json['photoPath']),
     );
   }
   @override
@@ -3778,6 +3814,7 @@ class ProfileRow extends DataClass implements Insertable<ProfileRow> {
       'username': serializer.toJson<String>(username),
       'email': serializer.toJson<String?>(email),
       'createdAt': serializer.toJson<DateTime>(createdAt),
+      'photoPath': serializer.toJson<String?>(photoPath),
     };
   }
 
@@ -3786,11 +3823,13 @@ class ProfileRow extends DataClass implements Insertable<ProfileRow> {
     String? username,
     Value<String?> email = const Value.absent(),
     DateTime? createdAt,
+    Value<String?> photoPath = const Value.absent(),
   }) => ProfileRow(
     id: id ?? this.id,
     username: username ?? this.username,
     email: email.present ? email.value : this.email,
     createdAt: createdAt ?? this.createdAt,
+    photoPath: photoPath.present ? photoPath.value : this.photoPath,
   );
   ProfileRow copyWithCompanion(PersonProfileCompanion data) {
     return ProfileRow(
@@ -3798,6 +3837,7 @@ class ProfileRow extends DataClass implements Insertable<ProfileRow> {
       username: data.username.present ? data.username.value : this.username,
       email: data.email.present ? data.email.value : this.email,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      photoPath: data.photoPath.present ? data.photoPath.value : this.photoPath,
     );
   }
 
@@ -3807,13 +3847,14 @@ class ProfileRow extends DataClass implements Insertable<ProfileRow> {
           ..write('id: $id, ')
           ..write('username: $username, ')
           ..write('email: $email, ')
-          ..write('createdAt: $createdAt')
+          ..write('createdAt: $createdAt, ')
+          ..write('photoPath: $photoPath')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, username, email, createdAt);
+  int get hashCode => Object.hash(id, username, email, createdAt, photoPath);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -3821,7 +3862,8 @@ class ProfileRow extends DataClass implements Insertable<ProfileRow> {
           other.id == this.id &&
           other.username == this.username &&
           other.email == this.email &&
-          other.createdAt == this.createdAt);
+          other.createdAt == this.createdAt &&
+          other.photoPath == this.photoPath);
 }
 
 class PersonProfileCompanion extends UpdateCompanion<ProfileRow> {
@@ -3829,12 +3871,14 @@ class PersonProfileCompanion extends UpdateCompanion<ProfileRow> {
   final Value<String> username;
   final Value<String?> email;
   final Value<DateTime> createdAt;
+  final Value<String?> photoPath;
   final Value<int> rowid;
   const PersonProfileCompanion({
     this.id = const Value.absent(),
     this.username = const Value.absent(),
     this.email = const Value.absent(),
     this.createdAt = const Value.absent(),
+    this.photoPath = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   PersonProfileCompanion.insert({
@@ -3842,6 +3886,7 @@ class PersonProfileCompanion extends UpdateCompanion<ProfileRow> {
     required String username,
     this.email = const Value.absent(),
     required DateTime createdAt,
+    this.photoPath = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        username = Value(username),
@@ -3851,6 +3896,7 @@ class PersonProfileCompanion extends UpdateCompanion<ProfileRow> {
     Expression<String>? username,
     Expression<String>? email,
     Expression<DateTime>? createdAt,
+    Expression<String>? photoPath,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -3858,6 +3904,7 @@ class PersonProfileCompanion extends UpdateCompanion<ProfileRow> {
       if (username != null) 'username': username,
       if (email != null) 'email': email,
       if (createdAt != null) 'created_at': createdAt,
+      if (photoPath != null) 'photo_path': photoPath,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -3867,6 +3914,7 @@ class PersonProfileCompanion extends UpdateCompanion<ProfileRow> {
     Value<String>? username,
     Value<String?>? email,
     Value<DateTime>? createdAt,
+    Value<String?>? photoPath,
     Value<int>? rowid,
   }) {
     return PersonProfileCompanion(
@@ -3874,6 +3922,7 @@ class PersonProfileCompanion extends UpdateCompanion<ProfileRow> {
       username: username ?? this.username,
       email: email ?? this.email,
       createdAt: createdAt ?? this.createdAt,
+      photoPath: photoPath ?? this.photoPath,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -3893,6 +3942,9 @@ class PersonProfileCompanion extends UpdateCompanion<ProfileRow> {
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
+    if (photoPath.present) {
+      map['photo_path'] = Variable<String>(photoPath.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -3906,6 +3958,7 @@ class PersonProfileCompanion extends UpdateCompanion<ProfileRow> {
           ..write('username: $username, ')
           ..write('email: $email, ')
           ..write('createdAt: $createdAt, ')
+          ..write('photoPath: $photoPath, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -4669,6 +4722,558 @@ class TrustedContactsCompanion extends UpdateCompanion<TrustedContactRow> {
   }
 }
 
+class $NeighborBidsTable extends NeighborBids
+    with TableInfo<$NeighborBidsTable, BidRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $NeighborBidsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _subjectIdMeta = const VerificationMeta(
+    'subjectId',
+  );
+  @override
+  late final GeneratedColumn<String> subjectId = GeneratedColumn<String>(
+    'subject_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _kindMeta = const VerificationMeta('kind');
+  @override
+  late final GeneratedColumn<String> kind = GeneratedColumn<String>(
+    'kind',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _bidderMeta = const VerificationMeta('bidder');
+  @override
+  late final GeneratedColumn<String> bidder = GeneratedColumn<String>(
+    'bidder',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _amountMeta = const VerificationMeta('amount');
+  @override
+  late final GeneratedColumn<int> amount = GeneratedColumn<int>(
+    'amount',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _messageMeta = const VerificationMeta(
+    'message',
+  );
+  @override
+  late final GeneratedColumn<String> message = GeneratedColumn<String>(
+    'message',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  static const VerificationMeta _whenTextMeta = const VerificationMeta(
+    'whenText',
+  );
+  @override
+  late final GeneratedColumn<String> whenText = GeneratedColumn<String>(
+    'when_text',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _syncStatusMeta = const VerificationMeta(
+    'syncStatus',
+  );
+  @override
+  late final GeneratedColumn<String> syncStatus = GeneratedColumn<String>(
+    'sync_status',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    subjectId,
+    kind,
+    bidder,
+    amount,
+    message,
+    whenText,
+    createdAt,
+    syncStatus,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'neighbor_bids';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<BidRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('subject_id')) {
+      context.handle(
+        _subjectIdMeta,
+        subjectId.isAcceptableOrUnknown(data['subject_id']!, _subjectIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_subjectIdMeta);
+    }
+    if (data.containsKey('kind')) {
+      context.handle(
+        _kindMeta,
+        kind.isAcceptableOrUnknown(data['kind']!, _kindMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_kindMeta);
+    }
+    if (data.containsKey('bidder')) {
+      context.handle(
+        _bidderMeta,
+        bidder.isAcceptableOrUnknown(data['bidder']!, _bidderMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_bidderMeta);
+    }
+    if (data.containsKey('amount')) {
+      context.handle(
+        _amountMeta,
+        amount.isAcceptableOrUnknown(data['amount']!, _amountMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_amountMeta);
+    }
+    if (data.containsKey('message')) {
+      context.handle(
+        _messageMeta,
+        message.isAcceptableOrUnknown(data['message']!, _messageMeta),
+      );
+    }
+    if (data.containsKey('when_text')) {
+      context.handle(
+        _whenTextMeta,
+        whenText.isAcceptableOrUnknown(data['when_text']!, _whenTextMeta),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('sync_status')) {
+      context.handle(
+        _syncStatusMeta,
+        syncStatus.isAcceptableOrUnknown(data['sync_status']!, _syncStatusMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_syncStatusMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  BidRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return BidRow(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      subjectId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}subject_id'],
+      )!,
+      kind: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}kind'],
+      )!,
+      bidder: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}bidder'],
+      )!,
+      amount: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}amount'],
+      )!,
+      message: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}message'],
+      )!,
+      whenText: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}when_text'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      syncStatus: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}sync_status'],
+      )!,
+    );
+  }
+
+  @override
+  $NeighborBidsTable createAlias(String alias) {
+    return $NeighborBidsTable(attachedDatabase, alias);
+  }
+}
+
+class BidRow extends DataClass implements Insertable<BidRow> {
+  final String id;
+  final String subjectId;
+  final String kind;
+  final String bidder;
+  final int amount;
+  final String message;
+  final String whenText;
+  final DateTime createdAt;
+  final String syncStatus;
+  const BidRow({
+    required this.id,
+    required this.subjectId,
+    required this.kind,
+    required this.bidder,
+    required this.amount,
+    required this.message,
+    required this.whenText,
+    required this.createdAt,
+    required this.syncStatus,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['subject_id'] = Variable<String>(subjectId);
+    map['kind'] = Variable<String>(kind);
+    map['bidder'] = Variable<String>(bidder);
+    map['amount'] = Variable<int>(amount);
+    map['message'] = Variable<String>(message);
+    map['when_text'] = Variable<String>(whenText);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['sync_status'] = Variable<String>(syncStatus);
+    return map;
+  }
+
+  NeighborBidsCompanion toCompanion(bool nullToAbsent) {
+    return NeighborBidsCompanion(
+      id: Value(id),
+      subjectId: Value(subjectId),
+      kind: Value(kind),
+      bidder: Value(bidder),
+      amount: Value(amount),
+      message: Value(message),
+      whenText: Value(whenText),
+      createdAt: Value(createdAt),
+      syncStatus: Value(syncStatus),
+    );
+  }
+
+  factory BidRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return BidRow(
+      id: serializer.fromJson<String>(json['id']),
+      subjectId: serializer.fromJson<String>(json['subjectId']),
+      kind: serializer.fromJson<String>(json['kind']),
+      bidder: serializer.fromJson<String>(json['bidder']),
+      amount: serializer.fromJson<int>(json['amount']),
+      message: serializer.fromJson<String>(json['message']),
+      whenText: serializer.fromJson<String>(json['whenText']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      syncStatus: serializer.fromJson<String>(json['syncStatus']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'subjectId': serializer.toJson<String>(subjectId),
+      'kind': serializer.toJson<String>(kind),
+      'bidder': serializer.toJson<String>(bidder),
+      'amount': serializer.toJson<int>(amount),
+      'message': serializer.toJson<String>(message),
+      'whenText': serializer.toJson<String>(whenText),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'syncStatus': serializer.toJson<String>(syncStatus),
+    };
+  }
+
+  BidRow copyWith({
+    String? id,
+    String? subjectId,
+    String? kind,
+    String? bidder,
+    int? amount,
+    String? message,
+    String? whenText,
+    DateTime? createdAt,
+    String? syncStatus,
+  }) => BidRow(
+    id: id ?? this.id,
+    subjectId: subjectId ?? this.subjectId,
+    kind: kind ?? this.kind,
+    bidder: bidder ?? this.bidder,
+    amount: amount ?? this.amount,
+    message: message ?? this.message,
+    whenText: whenText ?? this.whenText,
+    createdAt: createdAt ?? this.createdAt,
+    syncStatus: syncStatus ?? this.syncStatus,
+  );
+  BidRow copyWithCompanion(NeighborBidsCompanion data) {
+    return BidRow(
+      id: data.id.present ? data.id.value : this.id,
+      subjectId: data.subjectId.present ? data.subjectId.value : this.subjectId,
+      kind: data.kind.present ? data.kind.value : this.kind,
+      bidder: data.bidder.present ? data.bidder.value : this.bidder,
+      amount: data.amount.present ? data.amount.value : this.amount,
+      message: data.message.present ? data.message.value : this.message,
+      whenText: data.whenText.present ? data.whenText.value : this.whenText,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      syncStatus: data.syncStatus.present
+          ? data.syncStatus.value
+          : this.syncStatus,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('BidRow(')
+          ..write('id: $id, ')
+          ..write('subjectId: $subjectId, ')
+          ..write('kind: $kind, ')
+          ..write('bidder: $bidder, ')
+          ..write('amount: $amount, ')
+          ..write('message: $message, ')
+          ..write('whenText: $whenText, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('syncStatus: $syncStatus')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    subjectId,
+    kind,
+    bidder,
+    amount,
+    message,
+    whenText,
+    createdAt,
+    syncStatus,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is BidRow &&
+          other.id == this.id &&
+          other.subjectId == this.subjectId &&
+          other.kind == this.kind &&
+          other.bidder == this.bidder &&
+          other.amount == this.amount &&
+          other.message == this.message &&
+          other.whenText == this.whenText &&
+          other.createdAt == this.createdAt &&
+          other.syncStatus == this.syncStatus);
+}
+
+class NeighborBidsCompanion extends UpdateCompanion<BidRow> {
+  final Value<String> id;
+  final Value<String> subjectId;
+  final Value<String> kind;
+  final Value<String> bidder;
+  final Value<int> amount;
+  final Value<String> message;
+  final Value<String> whenText;
+  final Value<DateTime> createdAt;
+  final Value<String> syncStatus;
+  final Value<int> rowid;
+  const NeighborBidsCompanion({
+    this.id = const Value.absent(),
+    this.subjectId = const Value.absent(),
+    this.kind = const Value.absent(),
+    this.bidder = const Value.absent(),
+    this.amount = const Value.absent(),
+    this.message = const Value.absent(),
+    this.whenText = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.syncStatus = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  NeighborBidsCompanion.insert({
+    required String id,
+    required String subjectId,
+    required String kind,
+    required String bidder,
+    required int amount,
+    this.message = const Value.absent(),
+    this.whenText = const Value.absent(),
+    required DateTime createdAt,
+    required String syncStatus,
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       subjectId = Value(subjectId),
+       kind = Value(kind),
+       bidder = Value(bidder),
+       amount = Value(amount),
+       createdAt = Value(createdAt),
+       syncStatus = Value(syncStatus);
+  static Insertable<BidRow> custom({
+    Expression<String>? id,
+    Expression<String>? subjectId,
+    Expression<String>? kind,
+    Expression<String>? bidder,
+    Expression<int>? amount,
+    Expression<String>? message,
+    Expression<String>? whenText,
+    Expression<DateTime>? createdAt,
+    Expression<String>? syncStatus,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (subjectId != null) 'subject_id': subjectId,
+      if (kind != null) 'kind': kind,
+      if (bidder != null) 'bidder': bidder,
+      if (amount != null) 'amount': amount,
+      if (message != null) 'message': message,
+      if (whenText != null) 'when_text': whenText,
+      if (createdAt != null) 'created_at': createdAt,
+      if (syncStatus != null) 'sync_status': syncStatus,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  NeighborBidsCompanion copyWith({
+    Value<String>? id,
+    Value<String>? subjectId,
+    Value<String>? kind,
+    Value<String>? bidder,
+    Value<int>? amount,
+    Value<String>? message,
+    Value<String>? whenText,
+    Value<DateTime>? createdAt,
+    Value<String>? syncStatus,
+    Value<int>? rowid,
+  }) {
+    return NeighborBidsCompanion(
+      id: id ?? this.id,
+      subjectId: subjectId ?? this.subjectId,
+      kind: kind ?? this.kind,
+      bidder: bidder ?? this.bidder,
+      amount: amount ?? this.amount,
+      message: message ?? this.message,
+      whenText: whenText ?? this.whenText,
+      createdAt: createdAt ?? this.createdAt,
+      syncStatus: syncStatus ?? this.syncStatus,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (subjectId.present) {
+      map['subject_id'] = Variable<String>(subjectId.value);
+    }
+    if (kind.present) {
+      map['kind'] = Variable<String>(kind.value);
+    }
+    if (bidder.present) {
+      map['bidder'] = Variable<String>(bidder.value);
+    }
+    if (amount.present) {
+      map['amount'] = Variable<int>(amount.value);
+    }
+    if (message.present) {
+      map['message'] = Variable<String>(message.value);
+    }
+    if (whenText.present) {
+      map['when_text'] = Variable<String>(whenText.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (syncStatus.present) {
+      map['sync_status'] = Variable<String>(syncStatus.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('NeighborBidsCompanion(')
+          ..write('id: $id, ')
+          ..write('subjectId: $subjectId, ')
+          ..write('kind: $kind, ')
+          ..write('bidder: $bidder, ')
+          ..write('amount: $amount, ')
+          ..write('message: $message, ')
+          ..write('whenText: $whenText, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('syncStatus: $syncStatus, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -4690,6 +5295,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $TrustedContactsTable trustedContacts = $TrustedContactsTable(
     this,
   );
+  late final $NeighborBidsTable neighborBids = $NeighborBidsTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -4707,6 +5313,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     personProfile,
     personAddresses,
     trustedContacts,
+    neighborBids,
   ];
 }
 
@@ -6736,6 +7343,7 @@ typedef $$PersonProfileTableCreateCompanionBuilder =
       required String username,
       Value<String?> email,
       required DateTime createdAt,
+      Value<String?> photoPath,
       Value<int> rowid,
     });
 typedef $$PersonProfileTableUpdateCompanionBuilder =
@@ -6744,6 +7352,7 @@ typedef $$PersonProfileTableUpdateCompanionBuilder =
       Value<String> username,
       Value<String?> email,
       Value<DateTime> createdAt,
+      Value<String?> photoPath,
       Value<int> rowid,
     });
 
@@ -6773,6 +7382,11 @@ class $$PersonProfileTableFilterComposer
 
   ColumnFilters<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get photoPath => $composableBuilder(
+    column: $table.photoPath,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -6805,6 +7419,11 @@ class $$PersonProfileTableOrderingComposer
     column: $table.createdAt,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get photoPath => $composableBuilder(
+    column: $table.photoPath,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$PersonProfileTableAnnotationComposer
@@ -6827,6 +7446,9 @@ class $$PersonProfileTableAnnotationComposer
 
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<String> get photoPath =>
+      $composableBuilder(column: $table.photoPath, builder: (column) => column);
 }
 
 class $$PersonProfileTableTableManager
@@ -6864,12 +7486,14 @@ class $$PersonProfileTableTableManager
                 Value<String> username = const Value.absent(),
                 Value<String?> email = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
+                Value<String?> photoPath = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => PersonProfileCompanion(
                 id: id,
                 username: username,
                 email: email,
                 createdAt: createdAt,
+                photoPath: photoPath,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -6878,12 +7502,14 @@ class $$PersonProfileTableTableManager
                 required String username,
                 Value<String?> email = const Value.absent(),
                 required DateTime createdAt,
+                Value<String?> photoPath = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => PersonProfileCompanion.insert(
                 id: id,
                 username: username,
                 email: email,
                 createdAt: createdAt,
+                photoPath: photoPath,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
@@ -7365,6 +7991,287 @@ typedef $$TrustedContactsTableProcessedTableManager =
       TrustedContactRow,
       PrefetchHooks Function()
     >;
+typedef $$NeighborBidsTableCreateCompanionBuilder =
+    NeighborBidsCompanion Function({
+      required String id,
+      required String subjectId,
+      required String kind,
+      required String bidder,
+      required int amount,
+      Value<String> message,
+      Value<String> whenText,
+      required DateTime createdAt,
+      required String syncStatus,
+      Value<int> rowid,
+    });
+typedef $$NeighborBidsTableUpdateCompanionBuilder =
+    NeighborBidsCompanion Function({
+      Value<String> id,
+      Value<String> subjectId,
+      Value<String> kind,
+      Value<String> bidder,
+      Value<int> amount,
+      Value<String> message,
+      Value<String> whenText,
+      Value<DateTime> createdAt,
+      Value<String> syncStatus,
+      Value<int> rowid,
+    });
+
+class $$NeighborBidsTableFilterComposer
+    extends Composer<_$AppDatabase, $NeighborBidsTable> {
+  $$NeighborBidsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get subjectId => $composableBuilder(
+    column: $table.subjectId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get kind => $composableBuilder(
+    column: $table.kind,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get bidder => $composableBuilder(
+    column: $table.bidder,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get amount => $composableBuilder(
+    column: $table.amount,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get message => $composableBuilder(
+    column: $table.message,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get whenText => $composableBuilder(
+    column: $table.whenText,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get syncStatus => $composableBuilder(
+    column: $table.syncStatus,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$NeighborBidsTableOrderingComposer
+    extends Composer<_$AppDatabase, $NeighborBidsTable> {
+  $$NeighborBidsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get subjectId => $composableBuilder(
+    column: $table.subjectId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get kind => $composableBuilder(
+    column: $table.kind,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get bidder => $composableBuilder(
+    column: $table.bidder,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get amount => $composableBuilder(
+    column: $table.amount,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get message => $composableBuilder(
+    column: $table.message,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get whenText => $composableBuilder(
+    column: $table.whenText,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get syncStatus => $composableBuilder(
+    column: $table.syncStatus,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$NeighborBidsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $NeighborBidsTable> {
+  $$NeighborBidsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get subjectId =>
+      $composableBuilder(column: $table.subjectId, builder: (column) => column);
+
+  GeneratedColumn<String> get kind =>
+      $composableBuilder(column: $table.kind, builder: (column) => column);
+
+  GeneratedColumn<String> get bidder =>
+      $composableBuilder(column: $table.bidder, builder: (column) => column);
+
+  GeneratedColumn<int> get amount =>
+      $composableBuilder(column: $table.amount, builder: (column) => column);
+
+  GeneratedColumn<String> get message =>
+      $composableBuilder(column: $table.message, builder: (column) => column);
+
+  GeneratedColumn<String> get whenText =>
+      $composableBuilder(column: $table.whenText, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<String> get syncStatus => $composableBuilder(
+    column: $table.syncStatus,
+    builder: (column) => column,
+  );
+}
+
+class $$NeighborBidsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $NeighborBidsTable,
+          BidRow,
+          $$NeighborBidsTableFilterComposer,
+          $$NeighborBidsTableOrderingComposer,
+          $$NeighborBidsTableAnnotationComposer,
+          $$NeighborBidsTableCreateCompanionBuilder,
+          $$NeighborBidsTableUpdateCompanionBuilder,
+          (BidRow, BaseReferences<_$AppDatabase, $NeighborBidsTable, BidRow>),
+          BidRow,
+          PrefetchHooks Function()
+        > {
+  $$NeighborBidsTableTableManager(_$AppDatabase db, $NeighborBidsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$NeighborBidsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$NeighborBidsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$NeighborBidsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> subjectId = const Value.absent(),
+                Value<String> kind = const Value.absent(),
+                Value<String> bidder = const Value.absent(),
+                Value<int> amount = const Value.absent(),
+                Value<String> message = const Value.absent(),
+                Value<String> whenText = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<String> syncStatus = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => NeighborBidsCompanion(
+                id: id,
+                subjectId: subjectId,
+                kind: kind,
+                bidder: bidder,
+                amount: amount,
+                message: message,
+                whenText: whenText,
+                createdAt: createdAt,
+                syncStatus: syncStatus,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String subjectId,
+                required String kind,
+                required String bidder,
+                required int amount,
+                Value<String> message = const Value.absent(),
+                Value<String> whenText = const Value.absent(),
+                required DateTime createdAt,
+                required String syncStatus,
+                Value<int> rowid = const Value.absent(),
+              }) => NeighborBidsCompanion.insert(
+                id: id,
+                subjectId: subjectId,
+                kind: kind,
+                bidder: bidder,
+                amount: amount,
+                message: message,
+                whenText: whenText,
+                createdAt: createdAt,
+                syncStatus: syncStatus,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$NeighborBidsTable, BidRow>(table),
+                  BaseReferences<_$AppDatabase, $NeighborBidsTable, BidRow>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$NeighborBidsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $NeighborBidsTable,
+      BidRow,
+      $$NeighborBidsTableFilterComposer,
+      $$NeighborBidsTableOrderingComposer,
+      $$NeighborBidsTableAnnotationComposer,
+      $$NeighborBidsTableCreateCompanionBuilder,
+      $$NeighborBidsTableUpdateCompanionBuilder,
+      (BidRow, BaseReferences<_$AppDatabase, $NeighborBidsTable, BidRow>),
+      BidRow,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -7393,4 +8300,6 @@ class $AppDatabaseManager {
       $$PersonAddressesTableTableManager(_db, _db.personAddresses);
   $$TrustedContactsTableTableManager get trustedContacts =>
       $$TrustedContactsTableTableManager(_db, _db.trustedContacts);
+  $$NeighborBidsTableTableManager get neighborBids =>
+      $$NeighborBidsTableTableManager(_db, _db.neighborBids);
 }

@@ -30,42 +30,76 @@ class TableroEntry extends StatelessWidget {
   const TableroEntry({super.key});
 
   @override
-  Widget build(BuildContext context) => BvPanel(
-    child: InkWell(
-      onTap: () => context.push('/perfil/tablero'),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Row(
-          children: [
-            const BvIconBadge(Icons.insights_rounded, tone: BvTone.trust),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    tr(context, 'Tablero del barrio', 'Neighborhood dashboard'),
-                    style: context.tt.titleSmall,
-                  ),
-                  Text(
-                    tr(
-                      context,
-                      'Vista anónima para la municipalidad (prototipo)',
-                      'Anonymous view for the municipality (prototype)',
-                    ),
-                    style: context.tt.bodySmall?.copyWith(
-                      color: context.tones.muted,
-                    ),
-                  ),
-                ],
+  Widget build(BuildContext context) {
+    final fg = context.cs.onPrimary;
+    return Material(
+      color: context.cs.primary,
+      borderRadius: BorderRadius.circular(22),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: () => context.push('/perfil/tablero'),
+        child: Padding(
+          padding: const EdgeInsets.all(18),
+          child: Row(
+            children: [
+              Container(
+                width: 52,
+                height: 52,
+                decoration: BoxDecoration(
+                  color: fg.withValues(alpha: 0.18),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(Icons.insights_rounded, color: fg, size: 28),
               ),
-            ),
-            Icon(Icons.chevron_right_rounded, color: context.tones.muted),
-          ],
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      tr(
+                        context,
+                        'Tablero del barrio',
+                        'Neighborhood dashboard',
+                      ),
+                      style: context.tt.titleMedium?.copyWith(color: fg),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      tr(
+                        context,
+                        'Vista anónima para la municipalidad',
+                        'Anonymous view for the municipality',
+                      ),
+                      style: context.tt.bodySmall?.copyWith(
+                        color: fg.withValues(alpha: 0.92),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: fg.withValues(alpha: 0.18),
+                        borderRadius: BorderRadius.circular(99),
+                      ),
+                      child: Text(
+                        tr(context, 'Datos de demostración', 'Demo data'),
+                        style: context.tt.labelSmall?.copyWith(color: fg),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(Icons.chevron_right_rounded, color: fg, size: 28),
+            ],
+          ),
         ),
       ),
-    ),
-  );
+    );
+  }
 }
 
 class TableroScreen extends ConsumerStatefulWidget {
@@ -87,7 +121,9 @@ class _TableroScreenState extends ConsumerState<TableroScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(tr(context, 'Tablero del barrio', 'Neighborhood dashboard')),
+        title: Text(
+          tr(context, 'Tablero del barrio', 'Neighborhood dashboard'),
+        ),
       ),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
@@ -124,7 +160,11 @@ class _TableroScreenState extends ConsumerState<TableroScreen> {
             Padding(
               padding: const EdgeInsets.only(bottom: 8),
               child: BvPill(
-                tr(context, 'EJEMPLO · no son personas reales', 'EXAMPLE · not real people'),
+                tr(
+                  context,
+                  'EJEMPLO · no son personas reales',
+                  'EXAMPLE · not real people',
+                ),
                 tone: BvTone.sun,
               ),
             ),
@@ -139,7 +179,9 @@ class _TableroScreenState extends ConsumerState<TableroScreen> {
           if (stats.needs == 0)
             Text(
               tr(context, 'Todavía no hay pedidos.', 'No requests yet.'),
-              style: context.tt.bodyMedium?.copyWith(color: context.tones.muted),
+              style: context.tt.bodyMedium?.copyWith(
+                color: context.tones.muted,
+              ),
             )
           else
             for (final k in NeedKind.values)
@@ -252,18 +294,42 @@ class _StatGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final items = [
-      (Icons.assignment_rounded, '${stats.needs}',
-          tr(context, 'Pedidos', 'Requests'), BvTone.violet),
-      (Icons.bolt_rounded, '${stats.urgentPercent}%',
-          tr(context, 'Urgentes (ahora u hoy)', 'Urgent (now or today)'), BvTone.coral),
-      (Icons.volunteer_activism_rounded, '${stats.offers}',
-          tr(context, 'Ofertas (${stats.freeOffers} gratis)',
-              'Offers (${stats.freeOffers} free)'), BvTone.trust),
-      (Icons.task_alt_rounded, '${stats.closedDeals}/${stats.deals}',
-          tr(context, 'Tratos cerrados', 'Deals closed'), BvTone.sun),
-      (Icons.star_rounded,
-          stats.averageStars == null ? '—' : stats.averageStars!.toStringAsFixed(1),
-          tr(context, 'Calificación media', 'Average rating'), BvTone.sun),
+      (
+        Icons.assignment_rounded,
+        '${stats.needs}',
+        tr(context, 'Pedidos', 'Requests'),
+        BvTone.violet,
+      ),
+      (
+        Icons.bolt_rounded,
+        '${stats.urgentPercent}%',
+        tr(context, 'Urgentes (ahora u hoy)', 'Urgent (now or today)'),
+        BvTone.coral,
+      ),
+      (
+        Icons.volunteer_activism_rounded,
+        '${stats.offers}',
+        tr(
+          context,
+          'Ofertas (${stats.freeOffers} gratis)',
+          'Offers (${stats.freeOffers} free)',
+        ),
+        BvTone.trust,
+      ),
+      (
+        Icons.task_alt_rounded,
+        '${stats.closedDeals}/${stats.deals}',
+        tr(context, 'Tratos cerrados', 'Deals closed'),
+        BvTone.sun,
+      ),
+      (
+        Icons.star_rounded,
+        stats.averageStars == null
+            ? '—'
+            : stats.averageStars!.toStringAsFixed(1),
+        tr(context, 'Calificación media', 'Average rating'),
+        BvTone.sun,
+      ),
     ];
     return GridView.count(
       padding: EdgeInsets.zero,

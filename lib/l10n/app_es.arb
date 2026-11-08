@@ -25,7 +25,7 @@
     }
   },
   "queNecesitasHoy": "¿Qué necesitas hoy?",
-  "cuentaloYLosVecinos": "Cuéntalo y los vecinos y negocios de tu zona te proponen cómo resolverlo.",
+  "cuentaloYLosVecinos": "Cuéntalo y tu barrio te propone cómo resolverlo.",
   "pedirAlgo": "Pedir algo",
   "noPudimosVerDonde": "No pudimos ver dónde estás",
   "veQueHayCerca": "Ve qué hay cerca de ti",
@@ -444,7 +444,7 @@
       }
     }
   },
-  "vecinosRecomiendanEjemplo": "{n} vecinos lo recomiendan (ejemplo)",
+  "vecinosRecomiendanEjemplo": "{n} vecinos lo recomiendan",
   "@vecinosRecomiendanEjemplo": {
     "placeholders": {
       "n": {
@@ -452,7 +452,7 @@
       }
     }
   },
-  "vecinosRecomiendanEjemploTuyas": "{n} vecinos lo recomiendan (ejemplo) + {m, plural, =1{1 tuya} other{{m} tuyas}}",
+  "vecinosRecomiendanEjemploTuyas": "{n} vecinos lo recomiendan + {m, plural, =1{1 tuya} other{{m} tuyas}}",
   "@vecinosRecomiendanEjemploTuyas": {
     "placeholders": {
       "n": {
@@ -873,5 +873,78 @@
   "failContactPhone": "Escribe un teléfono válido (solo números).",
   "failContactDup": "Ya tienes ese contacto.",
   "failContactMax": "Puedes tener hasta 5 contactos.",
-  "failSaveContact": "No se pudo guardar el contacto."
+  "failSaveContact": "No se pudo guardar el contacto.",
+  "hintNeed3": "Escribe al menos 3 letras para continuar.",
+  "hintAddr": "Marca tu ubicación y ponle un nombre para guardar.",
+  "hintContact": "Escribe un nombre y un teléfono para guardar.",
+  "hintProfile": "Escribe un usuario de 3 letras o más y acepta para continuar.",
+  "hintStars": "Elige cuántas estrellas das para enviar.",
+  "settingsTitle": "Ajustes",
+  "settingsRowSub": "Tamaño del texto, idioma, apariencia y ubicación.",
+  "bidOfferBtn": "Ofertar",
+  "bidHelpBtn": "Ofrecer mi ayuda",
+  "bidMakeOffer": "Hacer mi oferta",
+  "bidMakeProposal": "Hacer mi propuesta",
+  "bidChangeOffer": "Cambiar mi oferta",
+  "bidChangeProposal": "Cambiar mi propuesta",
+  "bidMyOffer": "Mi oferta",
+  "bidMyProposal": "Mi propuesta",
+  "bidsTitle": "Ofertas ({n})",
+  "@bidsTitle": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "proposalsCount": "Propuestas ({n})",
+  "@proposalsCount": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "bidRuleHigh": "Gana la oferta más alta.",
+  "bidRuleHighRef": "Gana la oferta más alta. Precio de referencia: {ref}.",
+  "@bidRuleHighRef": {
+    "placeholders": {
+      "ref": {
+        "type": "String"
+      }
+    }
+  },
+  "bidRuleLow": "Gana la propuesta más baja. Puedes proponer 0 para un intercambio solidario.",
+  "bidBestOffer": "Mejor oferta",
+  "bidBestProposal": "Mejor propuesta",
+  "bidPriceLabel": "Precio en soles (0 = intercambio solidario)",
+  "bidPriceOfferLabel": "Tu oferta en soles",
+  "bidMessageLabel": "Mensaje (opcional)",
+  "bidMessageHint": "Qué ofreces, materiales, condiciones…",
+  "bidWhenLabel": "Cuándo puedes",
+  "bidWhenHint": "Hoy 4:00 p. m.",
+  "bidSendOffer": "Enviar oferta",
+  "bidSendProposal": "Enviar propuesta",
+  "bidSaved": "Listo: tu oferta quedó guardada en tu teléfono.",
+  "bidHint": "Escribe un precio (0 = intercambio solidario).",
+  "bidNone": "Aún no hay ofertas. ¡Sé el primero!",
+  "bidYourOffer": "Tu oferta: {price}",
+  "@bidYourOffer": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "bidNotFound": "No encontramos este anuncio",
+  "bidDemoNote": "Las demás ofertas son de ejemplo. La tuya queda guardada en tu teléfono y se envía cuando haya internet.",
+  "bidDemoSale1": "Lo recojo hoy mismo.",
+  "bidDemoSale2": "Pago al contado y paso por él mañana.",
+  "bidDemoReq1": "Lo resuelvo con mis propias herramientas.",
+  "bidDemoReq2": "Puedo ir mañana a primera hora.",
+  "bidDemoWhen1": "Hoy 6:00 p. m.",
+  "bidDemoWhen2": "Mañana 9:00 a. m.",
+  "failBidAmount": "Escribe un precio válido, de 0 a 99 999 soles.",
+  "failBidSave": "No se pudo guardar tu oferta.",
+  "failBidUpdate": "No se pudo actualizar la oferta."
 }

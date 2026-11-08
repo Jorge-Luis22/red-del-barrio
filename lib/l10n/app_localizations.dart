@@ -191,7 +191,7 @@ abstract class AppLocalizations {
   /// No description provided for @cuentaloYLosVecinos.
   ///
   /// In es, this message translates to:
-  /// **'Cuéntalo y los vecinos y negocios de tu zona te proponen cómo resolverlo.'**
+  /// **'Cuéntalo y tu barrio te propone cómo resolverlo.'**
   String get cuentaloYLosVecinos;
 
   /// No description provided for @pedirAlgo.
@@ -1529,13 +1529,13 @@ abstract class AppLocalizations {
   /// No description provided for @vecinosRecomiendanEjemplo.
   ///
   /// In es, this message translates to:
-  /// **'{n} vecinos lo recomiendan (ejemplo)'**
+  /// **'{n} vecinos lo recomiendan'**
   String vecinosRecomiendanEjemplo(int n);
 
   /// No description provided for @vecinosRecomiendanEjemploTuyas.
   ///
   /// In es, this message translates to:
-  /// **'{n} vecinos lo recomiendan (ejemplo) + {m, plural, =1{1 tuya} other{{m} tuyas}}'**
+  /// **'{n} vecinos lo recomiendan + {m, plural, =1{1 tuya} other{{m} tuyas}}'**
   String vecinosRecomiendanEjemploTuyas(int n, int m);
 
   /// No description provided for @codigoDigitos.
@@ -3019,6 +3019,276 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'No se pudo guardar el contacto.'**
   String get failSaveContact;
+
+  /// No description provided for @hintNeed3.
+  ///
+  /// In es, this message translates to:
+  /// **'Escribe al menos 3 letras para continuar.'**
+  String get hintNeed3;
+
+  /// No description provided for @hintAddr.
+  ///
+  /// In es, this message translates to:
+  /// **'Marca tu ubicación y ponle un nombre para guardar.'**
+  String get hintAddr;
+
+  /// No description provided for @hintContact.
+  ///
+  /// In es, this message translates to:
+  /// **'Escribe un nombre y un teléfono para guardar.'**
+  String get hintContact;
+
+  /// No description provided for @hintProfile.
+  ///
+  /// In es, this message translates to:
+  /// **'Escribe un usuario de 3 letras o más y acepta para continuar.'**
+  String get hintProfile;
+
+  /// No description provided for @hintStars.
+  ///
+  /// In es, this message translates to:
+  /// **'Elige cuántas estrellas das para enviar.'**
+  String get hintStars;
+
+  /// No description provided for @settingsTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Ajustes'**
+  String get settingsTitle;
+
+  /// No description provided for @settingsRowSub.
+  ///
+  /// In es, this message translates to:
+  /// **'Tamaño del texto, idioma, apariencia y ubicación.'**
+  String get settingsRowSub;
+
+  /// No description provided for @bidOfferBtn.
+  ///
+  /// In es, this message translates to:
+  /// **'Ofertar'**
+  String get bidOfferBtn;
+
+  /// No description provided for @bidHelpBtn.
+  ///
+  /// In es, this message translates to:
+  /// **'Ofrecer mi ayuda'**
+  String get bidHelpBtn;
+
+  /// No description provided for @bidMakeOffer.
+  ///
+  /// In es, this message translates to:
+  /// **'Hacer mi oferta'**
+  String get bidMakeOffer;
+
+  /// No description provided for @bidMakeProposal.
+  ///
+  /// In es, this message translates to:
+  /// **'Hacer mi propuesta'**
+  String get bidMakeProposal;
+
+  /// No description provided for @bidChangeOffer.
+  ///
+  /// In es, this message translates to:
+  /// **'Cambiar mi oferta'**
+  String get bidChangeOffer;
+
+  /// No description provided for @bidChangeProposal.
+  ///
+  /// In es, this message translates to:
+  /// **'Cambiar mi propuesta'**
+  String get bidChangeProposal;
+
+  /// No description provided for @bidMyOffer.
+  ///
+  /// In es, this message translates to:
+  /// **'Mi oferta'**
+  String get bidMyOffer;
+
+  /// No description provided for @bidMyProposal.
+  ///
+  /// In es, this message translates to:
+  /// **'Mi propuesta'**
+  String get bidMyProposal;
+
+  /// No description provided for @bidsTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Ofertas ({n})'**
+  String bidsTitle(int n);
+
+  /// No description provided for @proposalsCount.
+  ///
+  /// In es, this message translates to:
+  /// **'Propuestas ({n})'**
+  String proposalsCount(int n);
+
+  /// No description provided for @bidRuleHigh.
+  ///
+  /// In es, this message translates to:
+  /// **'Gana la oferta más alta.'**
+  String get bidRuleHigh;
+
+  /// No description provided for @bidRuleHighRef.
+  ///
+  /// In es, this message translates to:
+  /// **'Gana la oferta más alta. Precio de referencia: {ref}.'**
+  String bidRuleHighRef(String ref);
+
+  /// No description provided for @bidRuleLow.
+  ///
+  /// In es, this message translates to:
+  /// **'Gana la propuesta más baja. Puedes proponer 0 para un intercambio solidario.'**
+  String get bidRuleLow;
+
+  /// No description provided for @bidBestOffer.
+  ///
+  /// In es, this message translates to:
+  /// **'Mejor oferta'**
+  String get bidBestOffer;
+
+  /// No description provided for @bidBestProposal.
+  ///
+  /// In es, this message translates to:
+  /// **'Mejor propuesta'**
+  String get bidBestProposal;
+
+  /// No description provided for @bidPriceLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Precio en soles (0 = intercambio solidario)'**
+  String get bidPriceLabel;
+
+  /// No description provided for @bidPriceOfferLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Tu oferta en soles'**
+  String get bidPriceOfferLabel;
+
+  /// No description provided for @bidMessageLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Mensaje (opcional)'**
+  String get bidMessageLabel;
+
+  /// No description provided for @bidMessageHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Qué ofreces, materiales, condiciones…'**
+  String get bidMessageHint;
+
+  /// No description provided for @bidWhenLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Cuándo puedes'**
+  String get bidWhenLabel;
+
+  /// No description provided for @bidWhenHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Hoy 4:00 p. m.'**
+  String get bidWhenHint;
+
+  /// No description provided for @bidSendOffer.
+  ///
+  /// In es, this message translates to:
+  /// **'Enviar oferta'**
+  String get bidSendOffer;
+
+  /// No description provided for @bidSendProposal.
+  ///
+  /// In es, this message translates to:
+  /// **'Enviar propuesta'**
+  String get bidSendProposal;
+
+  /// No description provided for @bidSaved.
+  ///
+  /// In es, this message translates to:
+  /// **'Listo: tu oferta quedó guardada en tu teléfono.'**
+  String get bidSaved;
+
+  /// No description provided for @bidHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Escribe un precio (0 = intercambio solidario).'**
+  String get bidHint;
+
+  /// No description provided for @bidNone.
+  ///
+  /// In es, this message translates to:
+  /// **'Aún no hay ofertas. ¡Sé el primero!'**
+  String get bidNone;
+
+  /// No description provided for @bidYourOffer.
+  ///
+  /// In es, this message translates to:
+  /// **'Tu oferta: {price}'**
+  String bidYourOffer(String price);
+
+  /// No description provided for @bidNotFound.
+  ///
+  /// In es, this message translates to:
+  /// **'No encontramos este anuncio'**
+  String get bidNotFound;
+
+  /// No description provided for @bidDemoNote.
+  ///
+  /// In es, this message translates to:
+  /// **'Las demás ofertas son de ejemplo. La tuya queda guardada en tu teléfono y se envía cuando haya internet.'**
+  String get bidDemoNote;
+
+  /// No description provided for @bidDemoSale1.
+  ///
+  /// In es, this message translates to:
+  /// **'Lo recojo hoy mismo.'**
+  String get bidDemoSale1;
+
+  /// No description provided for @bidDemoSale2.
+  ///
+  /// In es, this message translates to:
+  /// **'Pago al contado y paso por él mañana.'**
+  String get bidDemoSale2;
+
+  /// No description provided for @bidDemoReq1.
+  ///
+  /// In es, this message translates to:
+  /// **'Lo resuelvo con mis propias herramientas.'**
+  String get bidDemoReq1;
+
+  /// No description provided for @bidDemoReq2.
+  ///
+  /// In es, this message translates to:
+  /// **'Puedo ir mañana a primera hora.'**
+  String get bidDemoReq2;
+
+  /// No description provided for @bidDemoWhen1.
+  ///
+  /// In es, this message translates to:
+  /// **'Hoy 6:00 p. m.'**
+  String get bidDemoWhen1;
+
+  /// No description provided for @bidDemoWhen2.
+  ///
+  /// In es, this message translates to:
+  /// **'Mañana 9:00 a. m.'**
+  String get bidDemoWhen2;
+
+  /// No description provided for @failBidAmount.
+  ///
+  /// In es, this message translates to:
+  /// **'Escribe un precio válido, de 0 a 99 999 soles.'**
+  String get failBidAmount;
+
+  /// No description provided for @failBidSave.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudo guardar tu oferta.'**
+  String get failBidSave;
+
+  /// No description provided for @failBidUpdate.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudo actualizar la oferta.'**
+  String get failBidUpdate;
 }
 
 class _AppLocalizationsDelegate

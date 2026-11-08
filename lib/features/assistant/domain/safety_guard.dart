@@ -39,13 +39,7 @@ class SafetyGuard {
     'numero de cuenta',
     'cuenta bancaria',
   ];
-  static const _secretWords = [
-    'codigo',
-    'clave',
-    'contrasena',
-    'cvv',
-    'token',
-  ];
+  static const _secretWords = ['codigo', 'clave', 'contrasena', 'cvv', 'token'];
 
   List<SafetyFlag> scan(String raw) {
     final n = normalizeText(raw);

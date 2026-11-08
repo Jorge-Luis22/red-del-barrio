@@ -35,6 +35,11 @@ class BarrioTones extends ThemeExtension<BarrioTones> {
     required this.violetSoft,
     required this.muted,
     required this.hairline,
+    required this.control,
+    required this.trustText,
+    required this.disabledBg,
+    required this.disabledFg,
+    required this.coralDeep,
   });
 
   final Color cream;
@@ -48,11 +53,25 @@ class BarrioTones extends ThemeExtension<BarrioTones> {
   final Color emergencySoft;
   final Color violetSoft;
 
-  /// Texto secundario (tinta al 72 %: contraste suficiente sobre crema y blanco).
+  /// Texto secundario (tinta al 80 %: unos 7:1 sobre crema y blanco).
   final Color muted;
 
   /// Líneas separadoras muy suaves.
   final Color hairline;
+
+  /// Borde de campos y chips sin marcar: ~3,4:1 sobre blanco y crema (se ve dónde tocar).
+  final Color control;
+
+  /// Verde para TEXTO sobre su fondo suave (el verde de marca solo da 4,1:1 ahí).
+  final Color trustText;
+
+  /// Botón desactivado: se distingue del activo pero el texto se sigue leyendo (~4,5:1).
+  final Color disabledBg;
+  final Color disabledFg;
+
+  /// Coral oscurecido con la tinta de la paleta: fondo de encabezados donde el texto va en blanco
+  /// (blanco sobre el coral puro da solo 2,6:1; sobre este, 5,3:1).
+  final Color coralDeep;
 
   static BarrioTones light({bool highContrast = false}) => BarrioTones(
     cream: BarrioPalette.cream,
@@ -65,8 +84,23 @@ class BarrioTones extends ThemeExtension<BarrioTones> {
     emergency: BarrioPalette.emergency,
     emergencySoft: BarrioPalette.tint(BarrioPalette.emergency, 0.10),
     violetSoft: BarrioPalette.tint(BarrioPalette.violet, 0.10),
-    muted: BarrioPalette.ink.withValues(alpha: highContrast ? 0.92 : 0.72),
+    muted: BarrioPalette.ink.withValues(alpha: highContrast ? 0.94 : 0.80),
     hairline: BarrioPalette.ink.withValues(alpha: highContrast ? 0.40 : 0.10),
+    control: BarrioPalette.ink.withValues(alpha: highContrast ? 0.75 : 0.55),
+    trustText: Color.alphaBlend(
+      BarrioPalette.ink.withValues(alpha: 0.25),
+      BarrioPalette.trust,
+    ),
+    disabledBg: BarrioPalette.tint(
+      BarrioPalette.ink,
+      0.14,
+      base: BarrioPalette.cream,
+    ),
+    disabledFg: BarrioPalette.ink.withValues(alpha: 0.70),
+    coralDeep: Color.alphaBlend(
+      BarrioPalette.ink.withValues(alpha: 0.45),
+      BarrioPalette.coral,
+    ),
   );
 
   static BarrioTones dark({bool highContrast = false}) {
@@ -97,9 +131,23 @@ class BarrioTones extends ThemeExtension<BarrioTones> {
         base: base,
       ),
       violetSoft: BarrioPalette.tint(BarrioPalette.violet, 0.40, base: base),
-      muted: BarrioPalette.white.withValues(alpha: highContrast ? 0.92 : 0.72),
+      muted: BarrioPalette.white.withValues(alpha: highContrast ? 0.94 : 0.80),
       hairline: BarrioPalette.white.withValues(
         alpha: highContrast ? 0.45 : 0.12,
+      ),
+      control: BarrioPalette.white.withValues(
+        alpha: highContrast ? 0.80 : 0.55,
+      ),
+      trustText: BarrioPalette.tint(
+        BarrioPalette.trust,
+        0.55,
+        base: BarrioPalette.white,
+      ),
+      disabledBg: BarrioPalette.white.withValues(alpha: 0.14),
+      disabledFg: BarrioPalette.white.withValues(alpha: 0.70),
+      coralDeep: Color.alphaBlend(
+        BarrioPalette.ink.withValues(alpha: 0.45),
+        BarrioPalette.coral,
       ),
     );
   }

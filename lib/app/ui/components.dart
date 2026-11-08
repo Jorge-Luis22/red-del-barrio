@@ -13,7 +13,7 @@ enum BvTone { violet, coral, trust, sun, emergency, neutral }
   return switch (tone) {
     BvTone.violet => (bg: t.violetSoft, fg: cs.primary),
     BvTone.coral => (bg: t.coralSoft, fg: cs.onSurface),
-    BvTone.trust => (bg: t.trustSoft, fg: t.trust),
+    BvTone.trust => (bg: t.trustSoft, fg: t.trustText),
     BvTone.sun => (bg: t.sunSoft, fg: cs.onSurface),
     BvTone.emergency => (bg: t.emergencySoft, fg: t.emergency),
     BvTone.neutral => (bg: t.hairline, fg: t.muted),

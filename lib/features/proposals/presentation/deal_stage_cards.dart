@@ -227,6 +227,27 @@ class _RatingCardState extends ConsumerState<RatingCard> with DealActionRunner {
             onChanged: (v) => setState(() => _recommend = v),
           ),
           const SizedBox(height: 12),
+          if (_stars == 0 && !busy) ...[
+            Row(
+              children: [
+                Icon(
+                  Icons.info_outline_rounded,
+                  size: 18,
+                  color: context.tones.muted,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    l.hintStars,
+                    style: context.tt.bodySmall?.copyWith(
+                      color: context.tones.muted,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+          ],
           SizedBox(
             width: double.infinity,
             child: FilledButton.icon(

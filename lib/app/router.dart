@@ -1,5 +1,7 @@
 import 'package:go_router/go_router.dart';
 
+import '../features/bids/domain/bid.dart';
+import '../features/bids/presentation/bid_board_screen.dart';
 import '../features/deals_chat/presentation/chat_screen.dart';
 import '../features/deals_chat/presentation/mensajes_screen.dart';
 import '../features/emergency/presentation/emergencia_screen.dart';
@@ -10,6 +12,7 @@ import '../features/profile/presentation/welcome_screen.dart';
 import '../features/needs/presentation/my_needs_screen.dart';
 import '../features/proposals/presentation/need_detail_screen.dart';
 import '../features/settings/presentation/perfil_screen.dart';
+import '../features/settings/presentation/settings_screen.dart';
 import '../features/solidarity/presentation/vecinos_screen.dart';
 import 'shell_scaffold.dart';
 
@@ -19,6 +22,15 @@ final GoRouter appRouter = GoRouter(
   initialLocation: '/',
   routes: [
     GoRoute(path: '/bienvenida', builder: (_, _) => const WelcomeScreen()),
+    GoRoute(
+      path: '/oferta/:kind/:id',
+      builder: (_, state) => BidBoardScreen(
+        kind: state.pathParameters['kind'] == 'request'
+            ? BidKind.request
+            : BidKind.sale,
+        id: state.pathParameters['id']!,
+      ),
+    ),
     StatefulShellRoute.indexedStack(
       builder: (context, state, shell) => ShellScaffold(shell: shell),
       branches: [
@@ -79,6 +91,10 @@ final GoRouter appRouter = GoRouter(
               path: '/perfil',
               builder: (_, _) => const PerfilScreen(),
               routes: [
+                GoRoute(
+                  path: 'ajustes',
+                  builder: (_, _) => const SettingsScreen(),
+                ),
                 GoRoute(
                   path: 'tablero',
                   builder: (_, _) => const TableroScreen(),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../app/di/providers.dart';
 import '../../../app/theme/brand.dart';
@@ -12,6 +13,7 @@ import '../../needs/presentation/need_labels.dart';
 import '../domain/offer.dart';
 import '../domain/wall_demo.dart';
 import 'modality_labels.dart';
+import 'wall_text.dart';
 import 'offer_sheet.dart';
 import '../../../app/l10n.dart';
 
@@ -77,8 +79,8 @@ class _VecinosScreenState extends ConsumerState<VecinosScreen> {
             title: context.l.vecinos,
             subtitle: context.l.favoresPrestamosYAyuda,
             icon: Icons.diversity_3_rounded,
-            background: context.tones.coral,
-            foreground: context.cs.onSecondary,
+            background: context.tones.coralDeep,
+            foreground: BarrioPalette.white,
           ),
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 20, 16, 32),
@@ -106,11 +108,6 @@ class _VecinosScreenState extends ConsumerState<VecinosScreen> {
                   ],
                 ),
                 const SizedBox(height: 16),
-                BvBanner(
-                  icon: Icons.info_outline_rounded,
-                  tone: BvTone.sun,
-                  message: context.l.porAhoraLosVecinos,
-                ),
                 const SizedBox(height: 20),
                 BvSegmented<bool>(
                   options: [
@@ -194,13 +191,15 @@ class _VecinosScreenState extends ConsumerState<VecinosScreen> {
   }
 }
 
-class _WallRow extends StatelessWidget {
+class _WallRow extends ConsumerWidget {
   const _WallRow({required this.entry});
 
   final WallEntry entry;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final myBid = ref.watch(myBidForProvider(entry.id));
+    final canOffer = entry.isRequest && entry.isExample;
     final m = entry.modality;
     final status = entry.syncStatus;
     final badge = status == null ? null : syncBadge(context.l, status);
@@ -219,15 +218,12 @@ class _WallRow extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  children: [
-                    Expanded(child: Text(author, style: context.tt.titleSmall)),
-                    if (entry.isExample) BvPill(context.l.ejemplo),
-                  ],
-                ),
+                Text(author, style: context.tt.titleSmall),
                 const SizedBox(height: 4),
                 Text(
-                  entry.isExample ? _demoText(context.l, entry) : entry.text,
+                  entry.isExample
+                      ? wallDemoText(context.l, entry.id, entry.text)
+                      : entry.text,
                   style: context.tt.bodyMedium,
                 ),
                 const SizedBox(height: 10),
@@ -259,6 +255,67 @@ class _WallRow extends StatelessWidget {
                       BvPill(badge.label, icon: badge.icon, tone: badge.tone),
                   ],
                 ),
+                if (canOffer) ...[
+                  const SizedBox(height: 8),
+                  if (myBid == null)
+                    OutlinedButton.icon(
+                      onPressed: () =>
+                          context.push('/oferta/request/${entry.id}'),
+                      style: OutlinedButton.styleFrom(
+                        minimumSize: const Size(64, 48),
+                      ),
+                      icon: const Icon(Icons.volunteer_activism_rounded),
+                      label: Text(context.l.bidHelpBtn),
+                    )
+                  else
+                    InkWell(
+                      borderRadius: BorderRadius.circular(14),
+                      onTap: () => context.push('/oferta/request/${entry.id}'),
+                      child: Container(
+                        constraints: const BoxConstraints(minHeight: 48),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 8,
+                        ),
+                        decoration: BoxDecoration(
+                          color: context.cs.primary.withValues(alpha: 0.08),
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.check_circle_rounded,
+                                  size: 20,
+                                  color: context.cs.primary,
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  context.l.bidYourOffer(
+                                    'S/ ${myBid.amountSoles}',
+                                  ),
+                                  style: context.tt.labelLarge?.copyWith(
+                                    color: context.cs.primary,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            Text(
+                              context.l.bidChangeProposal,
+                              style: context.tt.labelMedium?.copyWith(
+                                decoration: TextDecoration.underline,
+                                color: context.cs.onSurface,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                ],
               ],
             ),
           ),
@@ -267,14 +324,3 @@ class _WallRow extends StatelessWidget {
     );
   }
 }
-
-/// Los mensajes de ejemplo del muro se traducen; lo que escribe la persona se muestra tal cual.
-String _demoText(AppLocalizations l, WallEntry e) => switch (e.id) {
-  'w1' => l.wall1,
-  'w2' => l.wall2,
-  'w3' => l.wall3,
-  'w4' => l.wall4,
-  'w5' => l.wall5,
-  'w6' => l.wall6,
-  _ => e.text,
-};

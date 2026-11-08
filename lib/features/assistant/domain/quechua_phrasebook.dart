@@ -15,7 +15,11 @@ class QuechuaPhrase {
 /// El quechua tiene variedades y escrituras distintas según la región; antes de
 /// usarla con vecinos debe revisarla un hablante nativo.
 const quechuaPhrases = <QuechuaPhrase>[
-  QuechuaPhrase('Hola (saludo respetuoso)', 'Rimaykullayki', en: 'Hello (respectful)'),
+  QuechuaPhrase(
+    'Hola (saludo respetuoso)',
+    'Rimaykullayki',
+    en: 'Hello (respectful)',
+  ),
   QuechuaPhrase('¿Cómo estás?', 'Allillanchu?', en: 'How are you?'),
   QuechuaPhrase('Estoy bien', 'Allillanmi', en: 'I am well'),
   QuechuaPhrase('Gracias', 'Sulpayki', en: 'Thank you'),

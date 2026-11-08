@@ -5,6 +5,7 @@
 /// Las pantallas importan solo este archivo.
 library;
 
+export 'bids_providers.dart';
 export 'chat_providers.dart';
 export 'core_providers.dart';
 export 'deals_providers.dart';

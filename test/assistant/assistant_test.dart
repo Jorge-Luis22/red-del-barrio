@@ -28,7 +28,9 @@ void main() {
     });
 
     test('detecta ayuda para acompañar', () {
-      final s = assistant.suggest('busco quien acompañe a mi abuela al hospital')!;
+      final s = assistant.suggest(
+        'busco quien acompañe a mi abuela al hospital',
+      )!;
       expect(s.kind, NeedKind.help);
     });
 
@@ -106,13 +108,17 @@ void main() {
     const repo = DemoProposalRepository();
 
     test('carpintería muestra carpinteros y no gasfiteros', () async {
-      final list = await repo.forNeed(need('Requiero un servicio de carpintería'));
+      final list = await repo.forNeed(
+        need('Requiero un servicio de carpintería'),
+      );
       expect(list, isNotEmpty);
       expect(list.every((p) => p.role == 'Carpintero'), isTrue);
     });
 
     test('gasfitería sigue mostrando gasfiteros', () async {
-      final list = await repo.forNeed(need('Necesito un gasfitero para una fuga'));
+      final list = await repo.forNeed(
+        need('Necesito un gasfitero para una fuga'),
+      );
       expect(list.map((p) => p.providerId), contains('carlos'));
     });
 

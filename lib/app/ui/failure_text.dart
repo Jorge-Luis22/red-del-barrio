@@ -50,5 +50,8 @@ String messageText(AppLocalizations l, String message) => switch (message) {
   'Ya tienes ese contacto.' => l.failContactDup,
   'Puedes tener hasta 5 contactos.' => l.failContactMax,
   'No se pudo guardar el contacto.' => l.failSaveContact,
+  'Escribe un precio válido, de 0 a 99 999 soles.' => l.failBidAmount,
+  'No se pudo guardar tu oferta.' => l.failBidSave,
+  'No se pudo actualizar la oferta.' => l.failBidUpdate,
   _ => message,
 };

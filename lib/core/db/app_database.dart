@@ -146,6 +146,7 @@ class PersonProfile extends Table {
   TextColumn get username => text()();
   TextColumn get email => text().nullable()();
   DateTimeColumn get createdAt => dateTime()();
+  TextColumn get photoPath => text().nullable()();
 
   @override
   Set<Column> get primaryKey => {id};
@@ -182,6 +183,25 @@ class TrustedContacts extends Table {
   Set<Column> get primaryKey => {id};
 }
 
+@DataClassName('BidRow')
+class NeighborBids extends Table {
+  @override
+  String get tableName => 'neighbor_bids';
+
+  TextColumn get id => text()();
+  TextColumn get subjectId => text()();
+  TextColumn get kind => text()();
+  TextColumn get bidder => text()();
+  IntColumn get amount => integer()();
+  TextColumn get message => text().withDefault(const Constant(''))();
+  TextColumn get whenText => text().withDefault(const Constant(''))();
+  DateTimeColumn get createdAt => dateTime()();
+  TextColumn get syncStatus => text()();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
 @DriftDatabase(
   tables: [
     Needs,
@@ -196,6 +216,7 @@ class TrustedContacts extends Table {
     PersonProfile,
     PersonAddresses,
     TrustedContacts,
+    NeighborBids,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -207,7 +228,7 @@ class AppDatabase extends _$AppDatabase {
   /// Versión del esquema. Cada cambio exige subirla y escribir su migración + prueba (R28).
   /// 1: needs, outbox_ops · 2: + deals, interactions
   @override
-  int get schemaVersion => 6;
+  int get schemaVersion => 8;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -216,6 +237,9 @@ class AppDatabase extends _$AppDatabase {
       if (from < 2) {
         await m.createTable(deals);
         await m.createTable(interactions);
+      }
+      if (from < 7) {
+        await m.createTable(neighborBids);
       }
       if (from < 6) {
         await m.createTable(trustedContacts);
@@ -230,6 +254,17 @@ class AppDatabase extends _$AppDatabase {
         await m.createTable(emergencyPosts);
         await m.createTable(collectionPoints);
         await m.createTable(appSettingsKv);
+      }
+      if (from < 8) {
+        // El perfil gana la foto. Si la tabla se acaba de crear ya la trae.
+        final cols = await customSelect("PRAGMA table_info('person_profile')")
+            .get();
+        final hasPhoto = cols.any(
+          (c) => c.read<String>('name') == 'photo_path',
+        );
+        if (cols.isNotEmpty && !hasPhoto) {
+          await m.addColumn(personProfile, personProfile.photoPath);
+        }
       }
     },
   );

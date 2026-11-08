@@ -232,10 +232,8 @@ class RequestAssistant {
   String _clean(String text) {
     var t = text.replaceAll(RegExp(r'\s+'), ' ').trim();
     if (t.isEmpty) return t;
-    final firstWord = normalizeText(t.split(' ').first).replaceAll(
-      RegExp(r'[^a-z]'),
-      '',
-    );
+    final firstWord = normalizeText(t.split(' ').first)
+        .replaceAll(RegExp(r'[^a-z]'), '');
     final isQuestion = t.startsWith('¿') || t.endsWith('?');
     if (!isQuestion && !_starters.contains(firstWord)) {
       t = 'Necesito ${t[0].toLowerCase()}${t.substring(1)}';
