@@ -17,7 +17,11 @@ class OfficialContactsSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        BvSectionTitle(l.serviciosOficiales, subtitle: l.enPeligroLlamaAqui),
+        BvSectionTitle(
+          l.serviciosOficiales,
+          subtitle: l.enPeligroLlamaAqui,
+          trailing: BvPill(l.porVerificar, tone: BvTone.sun),
+        ),
         const SizedBox(height: 12),
         BvRows(
           children: [
@@ -81,7 +85,7 @@ class _OfficialRow extends StatelessWidget {
       child: InkWell(
         onTap: () => _call(context),
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
           child: Row(
             children: [
               Container(
@@ -117,7 +121,6 @@ class _OfficialRow extends StatelessWidget {
                   ],
                 ),
               ),
-              BvPill(l.porVerificar, tone: BvTone.sun),
               const SizedBox(width: 8),
               Icon(Icons.call_rounded, color: context.tones.emergency),
             ],

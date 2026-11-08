@@ -8,6 +8,7 @@ import '../../../app/ui/components.dart';
 import '../../../app/ui/failure_text.dart';
 import '../../../app/ui/sheet.dart';
 import '../../../core/result.dart';
+import '../../assistant/presentation/tr.dart';
 import '../domain/emergency.dart';
 
 /// Puntos de acopio: lugares para reunir ayuda. Los que propone la persona quedan sin verificar.
@@ -45,6 +46,15 @@ class CollectionPointsSection extends ConsumerWidget {
           )
         else
           BvRows(children: [for (final p in points) _PointRow(point: p)]),
+        const SizedBox(height: 6),
+        Text(
+          tr(
+            context,
+            'Ningún punto está verificado todavía.',
+            'No point is verified yet.',
+          ),
+          style: context.tt.bodySmall?.copyWith(color: context.tones.muted),
+        ),
       ],
     );
   }

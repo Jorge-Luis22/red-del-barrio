@@ -21,20 +21,19 @@ class ContactsBlock extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        BvSectionTitle(
-          l.contactsTitle,
-          subtitle: l.contactsHint,
-          trailing: contacts.length >= maxTrustedContacts
-              ? null
-              : TextButton.icon(
-                  onPressed: () => showBvSheet<void>(
-                    context,
-                    builder: (_) => const _ContactSheet(),
-                  ),
-                  icon: const Icon(Icons.person_add_alt_1_rounded),
-                  label: Text(l.contactAdd),
-                ),
-        ),
+        BvSectionTitle(l.contactsTitle, subtitle: l.contactsHint),
+        if (contacts.length < maxTrustedContacts)
+          Align(
+            alignment: Alignment.centerLeft,
+            child: TextButton.icon(
+              onPressed: () => showBvSheet<void>(
+                context,
+                builder: (_) => const _ContactSheet(),
+              ),
+              icon: const Icon(Icons.person_add_alt_1_rounded),
+              label: Text(l.contactAdd),
+            ),
+          ),
         const SizedBox(height: 12),
         if (contacts.isEmpty)
           BvBanner(
