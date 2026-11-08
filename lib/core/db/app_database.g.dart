@@ -5274,6 +5274,416 @@ class NeighborBidsCompanion extends UpdateCompanion<BidRow> {
   }
 }
 
+class $PostResponsesTable extends PostResponses
+    with TableInfo<$PostResponsesTable, PostResponseRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $PostResponsesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _postIdMeta = const VerificationMeta('postId');
+  @override
+  late final GeneratedColumn<String> postId = GeneratedColumn<String>(
+    'post_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _kindMeta = const VerificationMeta('kind');
+  @override
+  late final GeneratedColumn<String> kind = GeneratedColumn<String>(
+    'kind',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _valuesJsonMeta = const VerificationMeta(
+    'valuesJson',
+  );
+  @override
+  late final GeneratedColumn<String> valuesJson = GeneratedColumn<String>(
+    'values_json',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _syncStatusMeta = const VerificationMeta(
+    'syncStatus',
+  );
+  @override
+  late final GeneratedColumn<String> syncStatus = GeneratedColumn<String>(
+    'sync_status',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    postId,
+    kind,
+    valuesJson,
+    createdAt,
+    syncStatus,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'post_responses';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<PostResponseRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('post_id')) {
+      context.handle(
+        _postIdMeta,
+        postId.isAcceptableOrUnknown(data['post_id']!, _postIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_postIdMeta);
+    }
+    if (data.containsKey('kind')) {
+      context.handle(
+        _kindMeta,
+        kind.isAcceptableOrUnknown(data['kind']!, _kindMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_kindMeta);
+    }
+    if (data.containsKey('values_json')) {
+      context.handle(
+        _valuesJsonMeta,
+        valuesJson.isAcceptableOrUnknown(data['values_json']!, _valuesJsonMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_valuesJsonMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('sync_status')) {
+      context.handle(
+        _syncStatusMeta,
+        syncStatus.isAcceptableOrUnknown(data['sync_status']!, _syncStatusMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_syncStatusMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  PostResponseRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return PostResponseRow(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      postId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}post_id'],
+      )!,
+      kind: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}kind'],
+      )!,
+      valuesJson: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}values_json'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      syncStatus: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}sync_status'],
+      )!,
+    );
+  }
+
+  @override
+  $PostResponsesTable createAlias(String alias) {
+    return $PostResponsesTable(attachedDatabase, alias);
+  }
+}
+
+class PostResponseRow extends DataClass implements Insertable<PostResponseRow> {
+  final String id;
+  final String postId;
+  final String kind;
+  final String valuesJson;
+  final DateTime createdAt;
+  final String syncStatus;
+  const PostResponseRow({
+    required this.id,
+    required this.postId,
+    required this.kind,
+    required this.valuesJson,
+    required this.createdAt,
+    required this.syncStatus,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['post_id'] = Variable<String>(postId);
+    map['kind'] = Variable<String>(kind);
+    map['values_json'] = Variable<String>(valuesJson);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['sync_status'] = Variable<String>(syncStatus);
+    return map;
+  }
+
+  PostResponsesCompanion toCompanion(bool nullToAbsent) {
+    return PostResponsesCompanion(
+      id: Value(id),
+      postId: Value(postId),
+      kind: Value(kind),
+      valuesJson: Value(valuesJson),
+      createdAt: Value(createdAt),
+      syncStatus: Value(syncStatus),
+    );
+  }
+
+  factory PostResponseRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return PostResponseRow(
+      id: serializer.fromJson<String>(json['id']),
+      postId: serializer.fromJson<String>(json['postId']),
+      kind: serializer.fromJson<String>(json['kind']),
+      valuesJson: serializer.fromJson<String>(json['valuesJson']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      syncStatus: serializer.fromJson<String>(json['syncStatus']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'postId': serializer.toJson<String>(postId),
+      'kind': serializer.toJson<String>(kind),
+      'valuesJson': serializer.toJson<String>(valuesJson),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'syncStatus': serializer.toJson<String>(syncStatus),
+    };
+  }
+
+  PostResponseRow copyWith({
+    String? id,
+    String? postId,
+    String? kind,
+    String? valuesJson,
+    DateTime? createdAt,
+    String? syncStatus,
+  }) => PostResponseRow(
+    id: id ?? this.id,
+    postId: postId ?? this.postId,
+    kind: kind ?? this.kind,
+    valuesJson: valuesJson ?? this.valuesJson,
+    createdAt: createdAt ?? this.createdAt,
+    syncStatus: syncStatus ?? this.syncStatus,
+  );
+  PostResponseRow copyWithCompanion(PostResponsesCompanion data) {
+    return PostResponseRow(
+      id: data.id.present ? data.id.value : this.id,
+      postId: data.postId.present ? data.postId.value : this.postId,
+      kind: data.kind.present ? data.kind.value : this.kind,
+      valuesJson: data.valuesJson.present
+          ? data.valuesJson.value
+          : this.valuesJson,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      syncStatus: data.syncStatus.present
+          ? data.syncStatus.value
+          : this.syncStatus,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PostResponseRow(')
+          ..write('id: $id, ')
+          ..write('postId: $postId, ')
+          ..write('kind: $kind, ')
+          ..write('valuesJson: $valuesJson, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('syncStatus: $syncStatus')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(id, postId, kind, valuesJson, createdAt, syncStatus);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is PostResponseRow &&
+          other.id == this.id &&
+          other.postId == this.postId &&
+          other.kind == this.kind &&
+          other.valuesJson == this.valuesJson &&
+          other.createdAt == this.createdAt &&
+          other.syncStatus == this.syncStatus);
+}
+
+class PostResponsesCompanion extends UpdateCompanion<PostResponseRow> {
+  final Value<String> id;
+  final Value<String> postId;
+  final Value<String> kind;
+  final Value<String> valuesJson;
+  final Value<DateTime> createdAt;
+  final Value<String> syncStatus;
+  final Value<int> rowid;
+  const PostResponsesCompanion({
+    this.id = const Value.absent(),
+    this.postId = const Value.absent(),
+    this.kind = const Value.absent(),
+    this.valuesJson = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.syncStatus = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  PostResponsesCompanion.insert({
+    required String id,
+    required String postId,
+    required String kind,
+    required String valuesJson,
+    required DateTime createdAt,
+    required String syncStatus,
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       postId = Value(postId),
+       kind = Value(kind),
+       valuesJson = Value(valuesJson),
+       createdAt = Value(createdAt),
+       syncStatus = Value(syncStatus);
+  static Insertable<PostResponseRow> custom({
+    Expression<String>? id,
+    Expression<String>? postId,
+    Expression<String>? kind,
+    Expression<String>? valuesJson,
+    Expression<DateTime>? createdAt,
+    Expression<String>? syncStatus,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (postId != null) 'post_id': postId,
+      if (kind != null) 'kind': kind,
+      if (valuesJson != null) 'values_json': valuesJson,
+      if (createdAt != null) 'created_at': createdAt,
+      if (syncStatus != null) 'sync_status': syncStatus,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  PostResponsesCompanion copyWith({
+    Value<String>? id,
+    Value<String>? postId,
+    Value<String>? kind,
+    Value<String>? valuesJson,
+    Value<DateTime>? createdAt,
+    Value<String>? syncStatus,
+    Value<int>? rowid,
+  }) {
+    return PostResponsesCompanion(
+      id: id ?? this.id,
+      postId: postId ?? this.postId,
+      kind: kind ?? this.kind,
+      valuesJson: valuesJson ?? this.valuesJson,
+      createdAt: createdAt ?? this.createdAt,
+      syncStatus: syncStatus ?? this.syncStatus,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (postId.present) {
+      map['post_id'] = Variable<String>(postId.value);
+    }
+    if (kind.present) {
+      map['kind'] = Variable<String>(kind.value);
+    }
+    if (valuesJson.present) {
+      map['values_json'] = Variable<String>(valuesJson.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (syncStatus.present) {
+      map['sync_status'] = Variable<String>(syncStatus.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PostResponsesCompanion(')
+          ..write('id: $id, ')
+          ..write('postId: $postId, ')
+          ..write('kind: $kind, ')
+          ..write('valuesJson: $valuesJson, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('syncStatus: $syncStatus, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -5296,6 +5706,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     this,
   );
   late final $NeighborBidsTable neighborBids = $NeighborBidsTable(this);
+  late final $PostResponsesTable postResponses = $PostResponsesTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -5314,6 +5725,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     personAddresses,
     trustedContacts,
     neighborBids,
+    postResponses,
   ];
 }
 
@@ -8272,6 +8684,238 @@ typedef $$NeighborBidsTableProcessedTableManager =
       BidRow,
       PrefetchHooks Function()
     >;
+typedef $$PostResponsesTableCreateCompanionBuilder =
+    PostResponsesCompanion Function({
+      required String id,
+      required String postId,
+      required String kind,
+      required String valuesJson,
+      required DateTime createdAt,
+      required String syncStatus,
+      Value<int> rowid,
+    });
+typedef $$PostResponsesTableUpdateCompanionBuilder =
+    PostResponsesCompanion Function({
+      Value<String> id,
+      Value<String> postId,
+      Value<String> kind,
+      Value<String> valuesJson,
+      Value<DateTime> createdAt,
+      Value<String> syncStatus,
+      Value<int> rowid,
+    });
+
+class $$PostResponsesTableFilterComposer
+    extends Composer<_$AppDatabase, $PostResponsesTable> {
+  $$PostResponsesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get postId => $composableBuilder(
+    column: $table.postId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get kind => $composableBuilder(
+    column: $table.kind,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get valuesJson => $composableBuilder(
+    column: $table.valuesJson,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get syncStatus => $composableBuilder(
+    column: $table.syncStatus,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$PostResponsesTableOrderingComposer
+    extends Composer<_$AppDatabase, $PostResponsesTable> {
+  $$PostResponsesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get postId => $composableBuilder(
+    column: $table.postId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get kind => $composableBuilder(
+    column: $table.kind,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get valuesJson => $composableBuilder(
+    column: $table.valuesJson,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get syncStatus => $composableBuilder(
+    column: $table.syncStatus,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$PostResponsesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $PostResponsesTable> {
+  $$PostResponsesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get postId =>
+      $composableBuilder(column: $table.postId, builder: (column) => column);
+
+  GeneratedColumn<String> get kind =>
+      $composableBuilder(column: $table.kind, builder: (column) => column);
+
+  GeneratedColumn<String> get valuesJson => $composableBuilder(
+    column: $table.valuesJson,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<String> get syncStatus => $composableBuilder(
+    column: $table.syncStatus,
+    builder: (column) => column,
+  );
+}
+
+class $$PostResponsesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $PostResponsesTable,
+          PostResponseRow,
+          $$PostResponsesTableFilterComposer,
+          $$PostResponsesTableOrderingComposer,
+          $$PostResponsesTableAnnotationComposer,
+          $$PostResponsesTableCreateCompanionBuilder,
+          $$PostResponsesTableUpdateCompanionBuilder,
+          (
+            PostResponseRow,
+            BaseReferences<_$AppDatabase, $PostResponsesTable, PostResponseRow>,
+          ),
+          PostResponseRow,
+          PrefetchHooks Function()
+        > {
+  $$PostResponsesTableTableManager(_$AppDatabase db, $PostResponsesTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$PostResponsesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$PostResponsesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$PostResponsesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> postId = const Value.absent(),
+                Value<String> kind = const Value.absent(),
+                Value<String> valuesJson = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<String> syncStatus = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => PostResponsesCompanion(
+                id: id,
+                postId: postId,
+                kind: kind,
+                valuesJson: valuesJson,
+                createdAt: createdAt,
+                syncStatus: syncStatus,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String postId,
+                required String kind,
+                required String valuesJson,
+                required DateTime createdAt,
+                required String syncStatus,
+                Value<int> rowid = const Value.absent(),
+              }) => PostResponsesCompanion.insert(
+                id: id,
+                postId: postId,
+                kind: kind,
+                valuesJson: valuesJson,
+                createdAt: createdAt,
+                syncStatus: syncStatus,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$PostResponsesTable, PostResponseRow>(table),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $PostResponsesTable,
+                    PostResponseRow
+                  >(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$PostResponsesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $PostResponsesTable,
+      PostResponseRow,
+      $$PostResponsesTableFilterComposer,
+      $$PostResponsesTableOrderingComposer,
+      $$PostResponsesTableAnnotationComposer,
+      $$PostResponsesTableCreateCompanionBuilder,
+      $$PostResponsesTableUpdateCompanionBuilder,
+      (
+        PostResponseRow,
+        BaseReferences<_$AppDatabase, $PostResponsesTable, PostResponseRow>,
+      ),
+      PostResponseRow,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -8302,4 +8946,6 @@ class $AppDatabaseManager {
       $$TrustedContactsTableTableManager(_db, _db.trustedContacts);
   $$NeighborBidsTableTableManager get neighborBids =>
       $$NeighborBidsTableTableManager(_db, _db.neighborBids);
+  $$PostResponsesTableTableManager get postResponses =>
+      $$PostResponsesTableTableManager(_db, _db.postResponses);
 }

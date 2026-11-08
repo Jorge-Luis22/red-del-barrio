@@ -202,6 +202,22 @@ class NeighborBids extends Table {
   Set<Column> get primaryKey => {id};
 }
 
+@DataClassName('PostResponseRow')
+class PostResponses extends Table {
+  @override
+  String get tableName => 'post_responses';
+
+  TextColumn get id => text()();
+  TextColumn get postId => text()();
+  TextColumn get kind => text()();
+  TextColumn get valuesJson => text()();
+  DateTimeColumn get createdAt => dateTime()();
+  TextColumn get syncStatus => text()();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
 @DriftDatabase(
   tables: [
     Needs,
@@ -217,6 +233,7 @@ class NeighborBids extends Table {
     PersonAddresses,
     TrustedContacts,
     NeighborBids,
+    PostResponses,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -228,7 +245,7 @@ class AppDatabase extends _$AppDatabase {
   /// Versión del esquema. Cada cambio exige subirla y escribir su migración + prueba (R28).
   /// 1: needs, outbox_ops · 2: + deals, interactions
   @override
-  int get schemaVersion => 8;
+  int get schemaVersion => 9;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -254,6 +271,9 @@ class AppDatabase extends _$AppDatabase {
         await m.createTable(emergencyPosts);
         await m.createTable(collectionPoints);
         await m.createTable(appSettingsKv);
+      }
+      if (from < 9) {
+        await m.createTable(postResponses);
       }
       if (from < 8) {
         // El perfil gana la foto. Si la tabla se acaba de crear ya la trae.
