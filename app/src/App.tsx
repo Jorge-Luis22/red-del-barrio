@@ -1,5 +1,6 @@
 import { AppProvider, useApp } from './state/app';
 import TabBar from './components/TabBar';
+import Onboarding from './components/Onboarding';
 import Tutorial from './components/Tutorial';
 import Inicio from './pages/Inicio';
 import Vecinos from './pages/Vecinos';
@@ -10,9 +11,10 @@ import NeedView from './pages/NeedView';
 import ChatView from './pages/ChatView';
 
 function Shell() {
-  const { ready, me, tab, screen } = useApp();
+  const { ready, me, tab, screen, needsOnboarding, notice, completeOnboarding } = useApp();
 
   if (!ready) return <div className="boot">Abriendo la base local…</div>;
+  if (needsOnboarding) return <Onboarding notice={notice} onDone={completeOnboarding} />;
   if (!me) return <div className="boot">No se pudo cargar ningún vecino.</div>;
 
   return (

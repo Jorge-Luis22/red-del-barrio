@@ -8,6 +8,7 @@ import {
   listProposals,
   type AcceptedDeal,
 } from '../db/repo';
+import ReportMenu from '../components/ReportMenu';
 import { useApp } from '../state/app';
 import { directionOf, isResource, isSolidary, resourceIcon } from '../lib/solidarity';
 import { NEED_LABEL } from '../types';
@@ -118,6 +119,8 @@ export default function NeedView({ needId }: { needId: string }) {
           </span>
         </div>
       </header>
+
+      {!isAuthor && <ReportMenu userId={need.authorId} userName={need.authorName} entity="need" entityId={need.id} />}
 
       {isAuthor && free && need.status !== 'cerrada' && need.status !== 'cancelada' && (
         <p>

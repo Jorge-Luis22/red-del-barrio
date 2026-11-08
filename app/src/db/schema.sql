@@ -150,6 +150,12 @@ CREATE TABLE IF NOT EXISTS emergency_responses (
 );
 CREATE INDEX IF NOT EXISTS idx_emergency_resp_alert ON emergency_responses (alert_id, status);
 
+-- Vecinos que bloqueé (solo en este teléfono): no veo sus publicaciones, propuestas, alertas ni chats.
+CREATE TABLE IF NOT EXISTS blocked_users (
+  user_id    TEXT PRIMARY KEY,
+  created_at TEXT NOT NULL
+);
+
 -- Cola de salida idempotente: si se reintenta, el txn_id evita duplicados.
 CREATE TABLE IF NOT EXISTS outbox (
   id          TEXT PRIMARY KEY,

@@ -4,6 +4,7 @@ import schemaSql from './schema.sql?raw';
 import seedSql from './seed.sql?raw';
 import seedOffersSql from './seed-offers.sql?raw';
 import seedSolidarioSql from './seed-solidario.sql?raw';
+import { PILOT } from '../lib/mode';
 
 const DB_KEY = 'redvecinal.sqlite.v1';
 
@@ -122,13 +123,16 @@ async function openInternal(): Promise<Database> {
   db.exec(schemaSql);
   migrate(db);
 
-  const result = db.exec('SELECT COUNT(*) FROM users');
-  const empty = !result.length || Number(result[0].values[0]?.[0] ?? 0) === 0;
-  if (empty) {
-    db.exec(seedSql);
+  // Piloto con vecinos reales: nada de usuarios ni publicaciones de ejemplo.
+  if (!PILOT) {
+    const result = db.exec('SELECT COUNT(*) FROM users');
+    const empty = !result.length || Number(result[0].values[0]?.[0] ?? 0) === 0;
+    if (empty) {
+      db.exec(seedSql);
+    }
+    db.exec(seedOffersSql);
+    db.exec(seedSolidarioSql);
   }
-  db.exec(seedOffersSql);
-  db.exec(seedSolidarioSql);
 
   await persist();
   return db;
@@ -182,6 +186,17 @@ export function sizeBytes(): number {
   } catch {
     return 0;
   }
+}
+
+/** Cierra y borra la base sin volver a abrirla (se usa justo antes de recargar la página). */
+export async function dropDb(): Promise<void> {
+  if (db) {
+    db.close();
+    db = null;
+  }
+  engine = null;
+  opening = null;
+  await del(DB_KEY);
 }
 
 /** Borra todo (Perfil → Borrar mis datos). */

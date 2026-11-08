@@ -1,3 +1,4 @@
+import ReportMenu from '../components/ReportMenu';
 import { useState, type FormEvent } from 'react';
 import {
   activeEmergency,
@@ -450,6 +451,7 @@ export default function Emergencia() {
                 zona aproximada.
               </p>
             )}
+            <ReportMenu userId={alert.authorId} userName={alert.authorName} entity="emergency" entityId={alert.id} />
           </article>
         ))}
       </section>

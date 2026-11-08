@@ -1,6 +1,8 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { dbBytes, getStats, levelOf, listUsers, resetAll, saveProfile } from '../db/repo';
 import MisServicios from '../components/MisServicios';
+import PilotAccount from '../components/PilotAccount';
+import { PILOT } from '../lib/mode';
 import { POINTS_PER_HELP, POINTS_PER_RECOMMENDATION } from '../lib/level';
 import { chat } from '../lib/matrix';
 import { loadA11y, openTutorial, setA11y } from '../lib/prefs';
@@ -160,6 +162,10 @@ export default function Perfil() {
         </p>
       </form>
 
+      {PILOT ? (
+        <PilotAccount />
+      ) : (
+        <>
       <section className="card">
         <h3>Cambiar de vecino (demo y pruebas)</h3>
         <p>
@@ -183,6 +189,8 @@ export default function Perfil() {
       <button type="button" className="btn ghost block" onClick={wipe}>
         Borrar mis datos
       </button>
+        </>
+      )}
     </div>
   );
 }

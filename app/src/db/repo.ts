@@ -40,6 +40,9 @@ const DEFAULT_POINT: Point = {
 
 const now = () => new Date().toISOString();
 
+/** Fragmento SQL: deja fuera a los vecinos que bloqueé en este teléfono. */
+const notBlocked = (col: string) => `${col} NOT IN (SELECT user_id FROM blocked_users)`;
+
 /* ------------------------------------------------------------------ */
 /* Filas (snake_case, tal como viven en SQLite)                        */
 /* ------------------------------------------------------------------ */
@@ -213,8 +216,65 @@ export async function saveProfile(userId: string, patch: { name?: string; zone?:
   if (patch.zone !== undefined) {
     run(`UPDATE users SET zone = ? WHERE id = ?`, [patch.zone.trim(), userId]);
   }
+  markDirty('user', userId);
   await persist();
 }
+
+/* ------------------------------------------------------------------ */
+/* Piloto: cuenta propia, ubicación aproximada y bloqueos               */
+/* ------------------------------------------------------------------ */
+
+const AVATAR_COLORS = ['#0a6b66', '#7a4bd6', '#2a5ea8', '#b35a00', '#a3275f', '#3d7a1f', '#8a3b12', '#1f6f8b'];
+
+/** Crea mi perfil local con el id de mi cuenta y lo deja listo para subir. */
+export async function createPilotUser(input: { id: string; name: string; zone: string }): Promise<User> {
+  let hash = 0;
+  for (const ch of input.id) hash = (hash * 31 + ch.charCodeAt(0)) >>> 0;
+  run(
+    `INSERT INTO users (id, display_name, zone, lat, lng, solid_level, avatar_color, created_at)
+     VALUES (?, ?, ?, NULL, NULL, 'Vecino', ?, ?)
+     ON CONFLICT(id) DO UPDATE SET display_name = excluded.display_name, zone = excluded.zone`,
+    [input.id, input.name.trim().slice(0, 60), input.zone.trim().slice(0, 60), AVATAR_COLORS[hash % AVATAR_COLORS.length], now()],
+  );
+  markDirty('user', input.id);
+  await persist();
+  const created = getUser(input.id);
+  if (!created) throw new Error('No se pudo crear tu perfil');
+  return created;
+}
+
+/**
+ * Guarda mi posición para que los vecinos me ubiquen "cerca", redondeada a ~1 km (2 decimales).
+ * Devuelve true si cambió lo suficiente como para volver a publicarla.
+ */
+export async function updateMyApproxPosition(userId: string, point: Point): Promise<boolean> {
+  const rounded = roundZone(point, 2);
+  const current = one<{ lat: number | null; lng: number | null }>(`SELECT lat, lng FROM users WHERE id = ?`, [userId]);
+  if (!current || (current.lat === rounded.lat && current.lng === rounded.lng)) return false;
+  run(`UPDATE users SET lat = ?, lng = ? WHERE id = ?`, [rounded.lat, rounded.lng, userId]);
+  markDirty('user', userId);
+  await persist();
+  return true;
+}
+
+export async function blockUser(userId: string): Promise<void> {
+  run(`INSERT OR IGNORE INTO blocked_users (user_id, created_at) VALUES (?, ?)`, [userId, now()]);
+  await persist();
+}
+
+export async function unblockUser(userId: string): Promise<void> {
+  run(`DELETE FROM blocked_users WHERE user_id = ?`, [userId]);
+  await persist();
+}
+
+export function listBlocked(): { id: string; name: string }[] {
+  return all<{ id: string; name: string | null }>(
+    `SELECT b.user_id AS id, u.display_name AS name FROM blocked_users b LEFT JOIN users u ON u.id = b.user_id ORDER BY b.created_at`,
+  ).map((row) => ({ id: row.id, name: row.name ?? 'Vecino' }));
+}
+
+export const isBlocked = (userId: string): boolean =>
+  count(`SELECT COUNT(*) AS n FROM blocked_users WHERE user_id = ?`, [userId]) > 0;
 
 /* ------------------------------------------------------------------ */
 /* Necesidades                                                         */
@@ -234,6 +294,7 @@ export function listNeeds(
   const rows = all<NeedRow>(
     `${NEED_SELECT}
      WHERE n.is_emergency = 0 AND n.status IN ('abierta','en_curso')
+       AND ${notBlocked('n.author_id')}
        ${opts.authorId ? 'AND n.author_id = ?' : ''}
      ORDER BY n.created_at DESC`,
     opts.authorId ? [opts.authorId] : [],
@@ -329,7 +390,7 @@ export function listProposals(needId: string): Proposal[] {
     `SELECT p.*, u.display_name AS provider_name
        FROM proposals p
        JOIN users u ON u.id = p.provider_id
-      WHERE p.need_id = ?
+      WHERE p.need_id = ? AND ${notBlocked('p.provider_id')}
       ORDER BY p.created_at DESC`,
     [needId],
   );
@@ -467,7 +528,7 @@ const CONVERSATION_SELECT = `
     FROM interactions i
     JOIN needs n ON n.id = i.need_id
     JOIN users ou ON ou.id = CASE WHEN i.requester_id = ? THEN i.provider_id ELSE i.requester_id END
-   WHERE i.requester_id = ? OR i.provider_id = ?
+   WHERE (i.requester_id = ? OR i.provider_id = ?) AND ${notBlocked('ou.id')}
 `;
 
 export function listConversations(userId: string): Conversation[] {
@@ -614,7 +675,7 @@ export function listProviders(viewerId: string, viewer: Point): Provider[] {
             (SELECT COUNT(*) FROM recommendations r WHERE r.provider_id = u.id) AS recs,
             EXISTS(SELECT 1 FROM recommendations r WHERE r.provider_id = u.id AND r.voter_id = ?) AS mine
        FROM users u
-      WHERE u.id <> ?
+      WHERE u.id <> ? AND ${notBlocked('u.id')}
       ORDER BY recs DESC`,
     [viewerId, viewerId],
   );
@@ -773,6 +834,7 @@ export function listEmergencyWall(viewerId: string, viewer: Point): EmergencyWal
     `SELECT e.*, u.display_name AS author_name, u.avatar_color AS author_color
        FROM emergency_alerts e JOIN users u ON u.id = e.author_id
       WHERE e.status = 'activa' AND e.author_id != ? AND e.kind != 'violencia' AND e.created_at >= ?
+        AND ${notBlocked('e.author_id')}
       ORDER BY e.created_at DESC`,
     [viewerId, since],
   );
@@ -781,7 +843,7 @@ export function listEmergencyWall(viewerId: string, viewer: Point): EmergencyWal
     const helpers = all<{ id: string; name: string; zone: string }>(
       `SELECT r.helper_id AS id, u.display_name AS name, u.zone AS zone
          FROM emergency_responses r JOIN users u ON u.id = r.helper_id
-        WHERE r.alert_id = ? AND r.status = 'ofrece' ORDER BY r.updated_at`,
+        WHERE r.alert_id = ? AND r.status = 'ofrece' AND ${notBlocked('r.helper_id')} ORDER BY r.updated_at`,
       [row.id],
     );
     const disputers = all<{ id: string }>(
@@ -816,7 +878,7 @@ export function helpersOf(alertId: string): { id: string; name: string; zone: st
   return all<{ id: string; name: string; zone: string }>(
     `SELECT r.helper_id AS id, u.display_name AS name, u.zone AS zone
        FROM emergency_responses r JOIN users u ON u.id = r.helper_id
-      WHERE r.alert_id = ? AND r.status = 'ofrece' ORDER BY r.updated_at`,
+      WHERE r.alert_id = ? AND r.status = 'ofrece' AND ${notBlocked('r.helper_id')} ORDER BY r.updated_at`,
     [alertId],
   );
 }
@@ -931,7 +993,7 @@ export function listUrgentServices(viewerId: string, viewer: Point, trade?: stri
     `SELECT o.*, u.display_name AS name, u.avatar_color AS color, u.solid_level AS level, u.lat, u.lng,
             (SELECT COUNT(*) FROM recommendations r WHERE r.provider_id = u.id) AS recs
        FROM service_offers o JOIN users u ON u.id = o.provider_id
-      WHERE o.urgent = 1 AND o.active = 1 AND o.provider_id <> ?`,
+      WHERE o.urgent = 1 AND o.active = 1 AND o.provider_id <> ? AND ${notBlocked('o.provider_id')}`,
     [viewerId],
   );
   const wanted = trade ? normTrade(trade) : null;
@@ -975,6 +1037,7 @@ export function listUrgentRequests(viewerId: string, viewer: Point): UrgentReque
   const rows = all<NeedRow>(
     `${NEED_SELECT}
       WHERE n.is_emergency = 1 AND n.status = 'abierta' AND n.author_id <> ? AND n.created_at >= ?
+        AND ${notBlocked('n.author_id')}
         AND n.category NOT LIKE '${RESOURCE_PREFIX}%'
       ORDER BY n.created_at DESC`,
     [viewerId, since],
@@ -1031,6 +1094,7 @@ export function listResourcePosts(
     `${NEED_SELECT}
       WHERE n.is_emergency = 1 AND n.category LIKE '${RESOURCE_PREFIX}%'
         AND ((n.status = 'abierta' AND n.created_at >= ?) OR (n.author_id = ? AND n.status = 'en_curso'))
+        AND ${notBlocked('n.author_id')}
       ORDER BY n.created_at DESC`,
     [since, viewerId],
   );

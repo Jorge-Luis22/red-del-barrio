@@ -8,13 +8,21 @@
  *   reglas que nunca retroceden un estado (un trato completado no vuelve a "acordado").
  * - Privacidad: nunca se sube lat_exact/lng_exact ni meet_code_hash, y las alertas de
  *   violencia no salen del teléfono. El servidor además lo rechaza con un CHECK.
+ * - Modo piloto (VITE_APP_MODE=pilot): lo mismo, pero con cuenta de cada vecino. Se sube con la función
+ *   `pilot_push` (el servidor decide de quién es cada fila y quién puede leerla: los chats solo los ven
+ *   los dos) y se baja de `pilot_records`, donde cada vecino solo recibe lo que le corresponde.
  */
 import { all, count, one, persist, run } from '../db/sqlite';
+import { authedRest, getSessionUserId, hasSession, rpc } from './auth';
+import { PILOT } from './mode';
 
 const URL = ((import.meta.env.VITE_SUPABASE_URL as string | undefined) ?? '').replace(/\/+$/, '');
 const KEY = (import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined) ?? '';
 
 export const syncConfigured = Boolean(URL && KEY);
+
+/** Cuenta local fijada: solo tiene sentido sincronizar si este teléfono ya tiene sesión. */
+const canSync = () => syncConfigured && (!PILOT || hasSession());
 
 export type SyncState = 'apagado' | 'sincronizando' | 'ok' | 'sin_conexion' | 'error';
 export interface SyncStatus {
@@ -25,6 +33,7 @@ export interface SyncStatus {
 }
 
 const TABLES: Record<string, string> = {
+  ...(PILOT ? { user: 'users' } : {}),
   need: 'needs',
   proposal: 'proposals',
   interaction: 'interactions',
@@ -37,6 +46,7 @@ const TABLES: Record<string, string> = {
 };
 /** Orden de dependencias: primero lo que otras filas referencian. */
 const ORDER = [
+  'user',
   'service_offer',
   'need',
   'proposal',
@@ -48,6 +58,8 @@ const ORDER = [
   'emergency_response',
 ];
 const STRIP = ['lat_exact', 'lng_exact', 'meet_code_hash', 'meet_code_expires_at'];
+/** De mi perfil solo sale esto (el nivel lo calcula cada teléfono). */
+const USER_PUBLIC = ['id', 'display_name', 'zone', 'lat', 'lng', 'avatar_color', 'created_at'];
 
 let status: SyncStatus = {
   state: syncConfigured ? 'ok' : 'apagado',
@@ -71,6 +83,15 @@ function setStatus(patch: Partial<SyncStatus>): void {
   listeners.forEach((fn) => fn());
 }
 
+/** Filas por subir. Si la base se cerró (cuenta borrada o perdida) devuelve 0 en vez de fallar. */
+function pendingCount(): number {
+  try {
+    return count(`SELECT COUNT(*) AS n FROM sync_queue`);
+  } catch {
+    return 0;
+  }
+}
+
 /** Marca una fila local para subirla al servidor. */
 export function markDirty(entity: string, entityId: string, payload?: Record<string, unknown>): void {
   if (!TABLES[entity]) return;
@@ -88,6 +109,7 @@ function headers(extra?: Record<string, string>): Record<string, string> {
 }
 
 async function http(path: string, init: RequestInit): Promise<Response> {
+  if (PILOT) return authedRest(path, init);
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), 12000);
   try {
@@ -116,6 +138,12 @@ function buildRecord(item: QueueRow): { entity: string; id: string; data: Record
   const row = one<Record<string, unknown>>(`SELECT * FROM ${table} WHERE id = ?`, [item.entity_id]);
   if (!row) return null;
   if (item.entity === 'emergency' && row.kind === 'violencia') return null; // privado: nunca sale
+  if (item.entity === 'user') {
+    if (item.entity_id !== getSessionUserId()) return null; // solo publico mi propio perfil
+    const data: Record<string, unknown> = {};
+    for (const field of USER_PUBLIC) data[field] = row[field];
+    return { entity: 'user', id: item.entity_id, data };
+  }
   const data = { ...row };
   for (const field of STRIP) delete data[field];
   return { entity: item.entity, id: item.entity_id, data };
@@ -135,15 +163,22 @@ async function push(): Promise<void> {
   }
   for (let i = 0; i < records.length; i += 100) {
     const chunk = records.slice(i, i + 100);
-    await http('records?on_conflict=entity,id', {
-      method: 'POST',
-      headers: headers({ Prefer: 'resolution=merge-duplicates,return=minimal' }),
-      body: JSON.stringify(chunk),
-    });
+    if (PILOT) {
+      const result = await rpc<{ ok: number; skipped: number }>('pilot_push', { p_records: chunk });
+      if (result?.skipped) console.warn('[sync] el servidor descartó', result.skipped, 'registro(s) no autorizados o mal formados');
+    } else {
+      await http('records?on_conflict=entity,id', {
+        method: 'POST',
+        headers: headers({ Prefer: 'resolution=merge-duplicates,return=minimal' }),
+        body: JSON.stringify(chunk),
+      });
+    }
     for (const r of chunk) run(`DELETE FROM sync_queue WHERE entity = ? AND entity_id = ?`, [r.entity, r.id]);
   }
   for (const item of skip) run(`DELETE FROM sync_queue WHERE entity = ? AND entity_id = ?`, [item.entity, item.entity_id]);
 }
+
+const AVATAR = /^#[0-9a-fA-F]{6}$/;
 
 const RANK_NEED = `CASE %s WHEN 'abierta' THEN 0 WHEN 'en_curso' THEN 1 ELSE 2 END`;
 const RANK_DEAL = `CASE %s WHEN 'acordado' THEN 0 WHEN 'en_curso' THEN 1 ELSE 2 END`;
@@ -157,6 +192,20 @@ const n = (v: unknown) => (v === null || v === undefined ? null : Number(v));
 /** Aplica una fila del servidor a la base local. Devuelve true si cambió algo importante. */
 function apply(entity: string, d: Json): boolean {
   switch (entity) {
+    case 'user': {
+      // Perfil de otro vecino. El mío manda lo local (no lo pisa una copia vieja del servidor).
+      if (!PILOT || s(d.id) === getSessionUserId()) return false;
+      run(
+        `INSERT INTO users (id, display_name, zone, lat, lng, solid_level, avatar_color, created_at)
+         VALUES (?, ?, ?, ?, ?, 'Vecino', ?, ?)
+         ON CONFLICT(id) DO UPDATE SET
+           display_name = excluded.display_name, zone = excluded.zone,
+           lat = excluded.lat, lng = excluded.lng, avatar_color = excluded.avatar_color`,
+        [s(d.id), (s(d.display_name) ?? 'Vecino').slice(0, 60), (s(d.zone) ?? '').slice(0, 60), n(d.lat), n(d.lng),
+         AVATAR.test(s(d.avatar_color) ?? '') ? s(d.avatar_color) : '#0a6b66', s(d.created_at) ?? new Date().toISOString()],
+      );
+      return true;
+    }
     case 'need': {
       run(
         `INSERT INTO needs (id, author_id, type, title, description, category, zone, lat_public, lng_public, status, is_emergency, created_at)
@@ -292,6 +341,7 @@ function fingerprint(): string {
       `SELECT (SELECT COUNT(*) FROM messages) || '|' || (SELECT COUNT(*) FROM needs) || '|' ||
               (SELECT COUNT(*) FROM proposals) || '|' || (SELECT COUNT(*) FROM ratings) || '|' ||
               (SELECT COUNT(*) FROM recommendations) || '|' || (SELECT COUNT(*) FROM emergency_alerts) || '|' ||
+              (SELECT COUNT(*) FROM users) || '|' ||
               COALESCE((SELECT GROUP_CONCAT(status || confirmed_by_requester || confirmed_by_provider) FROM interactions), '') || '|' ||
               COALESCE((SELECT GROUP_CONCAT(status) FROM needs), '') || '|' ||
               COALESCE((SELECT GROUP_CONCAT(status) FROM proposals), '') || '|' ||
@@ -316,7 +366,7 @@ async function pull(): Promise<number> {
   let from = cursor ? new Date(new Date(cursor).getTime() - 5000).toISOString() : null; // solape de 5 s
   for (let page = 0; page < 20; page += 1) {
     const filter = from ? `&updated_at=gte.${encodeURIComponent(from)}` : '';
-    const res = await http(`records?select=entity,id,data,updated_at&order=updated_at.asc&limit=500${filter}`, {
+    const res = await http(`${PILOT ? 'pilot_records' : 'records'}?select=entity,id,data,updated_at&order=updated_at.asc&limit=500${filter}`, {
       method: 'GET',
       headers: headers(),
     });
@@ -359,7 +409,7 @@ export function onSyncChanged(listener: () => void): () => void {
 
 /** Sube lo pendiente y baja lo nuevo. Devuelve true si llegaron cambios de otros teléfonos. */
 export async function syncNow(): Promise<boolean> {
-  if (!syncConfigured) return false;
+  if (!canSync()) return false;
   if (running) {
     again = true;
     return false;
@@ -368,7 +418,7 @@ export async function syncNow(): Promise<boolean> {
   let changed = false;
   try {
     if (typeof navigator !== 'undefined' && navigator.onLine === false) {
-      setStatus({ state: 'sin_conexion', detail: 'Sin conexión', pendingUp: count(`SELECT COUNT(*) AS n FROM sync_queue`) });
+      setStatus({ state: 'sin_conexion', detail: 'Sin conexión', pendingUp: pendingCount() });
       return false;
     }
     setStatus({ state: 'sincronizando', detail: 'Sincronizando…' });
@@ -381,7 +431,7 @@ export async function syncNow(): Promise<boolean> {
       state: 'ok',
       detail: 'Conectado',
       lastOkAt: new Date().toISOString(),
-      pendingUp: count(`SELECT COUNT(*) AS n FROM sync_queue`),
+      pendingUp: pendingCount(),
     });
     if (changed) changeListeners.forEach((listener) => listener());
     return changed;
@@ -391,7 +441,7 @@ export async function syncNow(): Promise<boolean> {
     setStatus({
       state: offline ? 'sin_conexion' : 'error',
       detail: offline ? 'Sin conexión con el servidor' : message,
-      pendingUp: count(`SELECT COUNT(*) AS n FROM sync_queue`),
+      pendingUp: pendingCount(),
     });
     return false;
   } finally {

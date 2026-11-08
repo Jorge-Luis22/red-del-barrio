@@ -8,6 +8,7 @@ import {
   retryPending,
   sendChatMessage,
 } from '../db/repo';
+import ReportMenu from '../components/ReportMenu';
 import { chat } from '../lib/matrix';
 import { useApp } from '../state/app';
 
@@ -103,6 +104,15 @@ export default function ChatView({ conversationId }: { conversationId: string })
           </button>
         )}
       </header>
+
+      <div style={{ padding: '0 12px' }}>
+        <ReportMenu
+          userId={conversation.otherId}
+          userName={conversation.otherName}
+          entity="interaction"
+          entityId={conversation.id}
+        />
+      </div>
 
       {deal && deal.status !== 'cancelado' && (
         <section className="card" aria-live="polite" style={{ margin: '8px 12px' }}>

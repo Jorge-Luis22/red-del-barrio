@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { defaultPoint, listDirectory, toggleRecommendation } from '../db/repo';
+import ReportMenu from '../components/ReportMenu';
 import { useApp } from '../state/app';
 import { startNeedDraft } from './Inicio';
 
@@ -144,6 +145,7 @@ export default function Vecinos() {
                 {p.recommendedByMe ? '✓ Recomendado (quitar)' : 'Recomendar'}
               </button>
             </p>
+            <ReportMenu userId={p.id} userName={p.name} entity="user" entityId={p.id} />
           </article>
         );
       })}

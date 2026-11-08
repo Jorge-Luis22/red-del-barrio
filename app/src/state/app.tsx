@@ -1,8 +1,11 @@
 import { createContext, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
-import { emergencySignal, getUser } from '../db/repo';
-import { requestPosition, type GpsStatus } from '../lib/geo';
+import { flushSync } from 'react-dom';
+import { createPilotUser, emergencySignal, getUser, updateMyApproxPosition } from '../db/repo';
+import { fetchMyMember, getSessionUserId, isMemberMarked, onSessionLost } from '../lib/auth';
+import { getCurrentPoint, requestPosition, type GpsStatus } from '../lib/geo';
+import { PILOT } from '../lib/mode';
 import { onSyncChanged, syncConfigured, syncNow } from '../lib/sync';
-import { openDb } from '../db/sqlite';
+import { openDb, wipeDb } from '../db/sqlite';
 import type { Tab, User } from '../types';
 
 export type Screen =
@@ -22,6 +25,10 @@ interface AppState {
   go(s: Screen): void;
   bump(): void;
   switchUser(id: string): void;
+  /** Piloto: todavía no entró al barrio (falta el código) y, si aplica, por qué se le vuelve a pedir. */
+  needsOnboarding: boolean;
+  notice: string | null;
+  completeOnboarding(user: User): void;
 }
 
 const Ctx = createContext<AppState | null>(null);
@@ -35,6 +42,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [screen, setScreen] = useState<Screen>({ name: 'none' });
   const [version, setVersion] = useState(0);
   const [gps, setGps] = useState<GpsStatus>('pendiente');
+  const [needsOnboarding, setNeedsOnboarding] = useState(false);
+  const [notice, setNotice] = useState<string | null>(null);
 
   const refreshGps = async () => {
     setGps('pendiente');
@@ -52,6 +61,24 @@ export function AppProvider({ children }: { children: ReactNode }) {
     (async () => {
       const db = await openDb();
       if (!alive) return;
+      if (PILOT) {
+        // Piloto: la cuenta es la de este teléfono; si falta el perfil local se reconstruye desde el servidor.
+        const id = getSessionUserId();
+        let user = id && isMemberMarked() ? getUser(id) : null;
+        if (id && isMemberMarked() && !user) {
+          try {
+            const member = await fetchMyMember();
+            if (member) user = await createPilotUser({ id, name: member.display_name, zone: member.zone });
+          } catch {
+            /* sin red: se vuelve a pedir el código */
+          }
+        }
+        if (!alive) return;
+        setMe(user);
+        setNeedsOnboarding(!user);
+        setReady(true);
+        return;
+      }
       const stored = localStorage.getItem(CURRENT_USER_KEY);
       const user = getUser(stored ?? '') ?? getUser(SEED_USER);
       if (user) localStorage.setItem(CURRENT_USER_KEY, user.id);
@@ -66,9 +93,34 @@ export function AppProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
+  // Piloto: si el servidor rechaza la sesión de este teléfono, la cuenta ya no existe aquí.
+  useEffect(() => {
+    if (!PILOT) return;
+    return onSessionLost(() => {
+      void (async () => {
+        // Primero se quitan las pantallas que leen la base (render síncrono) y recién después se borra.
+        flushSync(() => {
+          setMe(null);
+          setNotice('session_lost');
+          setNeedsOnboarding(true);
+          setTabState('inicio');
+          setScreen({ name: 'none' });
+        });
+        await wipeDb();
+      })();
+    });
+  }, []);
+
+  // Piloto: publico mi posición redondeada a ~1 km cuando el GPS responde.
+  useEffect(() => {
+    if (!PILOT || !ready || !me || gps !== 'ok') return;
+    const point = getCurrentPoint();
+    if (point) void updateMyApproxPosition(me.id, point).then((changed) => changed && setVersion((v) => v + 1));
+  }, [ready, me?.id, gps]);
+
   // Sincronización: al abrir, cada 4 s, al volver la red y poco después de cada cambio local.
   useEffect(() => {
-    if (!ready || !syncConfigured) return;
+    if (!ready || !syncConfigured || (PILOT && !me)) return;
     let alive = true;
     // Cualquier sincronización que traiga cambios (también las repetidas) refresca la pantalla.
     const unsubscribe = onSyncChanged(() => {
@@ -86,10 +138,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
       window.removeEventListener('online', tick);
       document.removeEventListener('visibilitychange', tick);
     };
-  }, [ready]);
+  }, [ready, me?.id]);
 
   useEffect(() => {
-    if (!ready || !syncConfigured) return;
+    if (!ready || !syncConfigured || (PILOT && !me)) return;
     const timer = window.setTimeout(() => void syncNow(), 400);
     return () => window.clearTimeout(timer);
   }, [ready, version]);
@@ -130,8 +182,18 @@ export function AppProvider({ children }: { children: ReactNode }) {
         setScreen({ name: 'none' });
         setVersion((v) => v + 1);
       },
+      needsOnboarding,
+      notice,
+      completeOnboarding: (user) => {
+        setMe(user);
+        setNeedsOnboarding(false);
+        setNotice(null);
+        setTabState('inicio');
+        setScreen({ name: 'none' });
+        setVersion((v) => v + 1);
+      },
     }),
-    [ready, me, tab, screen, version, gps],
+    [ready, me, tab, screen, version, gps, needsOnboarding, notice],
   );
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
