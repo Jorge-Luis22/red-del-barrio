@@ -12,6 +12,9 @@ El piloto es la misma app, publicada en **otra dirección**, con vecinos reales:
 
 Se compila con `VITE_APP_MODE=pilot` (y `VITE_CONTACT_EMAIL`). Sin esa variable sale la demo.
 
+**Dirección del piloto:** https://dynamic-bunny-001690.netlify.app (puesto en marcha el 8-nov-2026).
+El código del barrio NO se guarda en este repositorio: se fija en Supabase y se comparte solo con los vecinos.
+
 ## Puesta en marcha (una sola vez)
 
 1. Supabase → *Authentication → Sign In / Providers* → activar **Allow anonymous sign-ins**.
