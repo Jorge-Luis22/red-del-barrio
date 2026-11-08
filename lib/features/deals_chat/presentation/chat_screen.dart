@@ -19,6 +19,8 @@ import '../../assistant/domain/safety_guard.dart';
 import '../../assistant/presentation/assistant_widgets.dart';
 import '../../assistant/presentation/quechua_sheet.dart';
 import '../../assistant/presentation/tr.dart';
+import '../../meeting/domain/meeting_point.dart';
+import '../../meeting/presentation/meeting_map.dart';
 
 /// Chat de un trato. No hay otra persona conectada todavía: lo que escribes se guarda en tu
 /// teléfono y NO se inventan respuestas.
@@ -43,10 +45,10 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     super.dispose();
   }
 
-  Future<void> _send([String? phrase]) async {
+  Future<void> _send([String? phrase, bool trusted = false]) async {
     final body = (phrase ?? _text.text).trim();
     if (body.isEmpty || _sending) return;
-    final flags = const SafetyGuard().scan(body);
+    final flags = trusted ? <SafetyFlag>[] : const SafetyGuard().scan(body);
     if (flags.isNotEmpty) {
       final ok = await confirmSafety(context, flags);
       if (ok != true || !mounted) return;
@@ -77,6 +79,12 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           SnackBar(content: Text(failureText(context.l, failure))),
         );
     }
+  }
+
+  Future<void> _pickMeeting() async {
+    final point = await showMeetingPicker(context);
+    if (point == null || !mounted) return;
+    await _send(point.toMessage(), true);
   }
 
   Future<void> _pickQuechua() async {
@@ -205,6 +213,18 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                   IconButton(
                     tooltip: tr(
                       context,
+                      'Proponer lugar de encuentro',
+                      'Suggest a meeting place',
+                    ),
+                    onPressed: _pickMeeting,
+                    icon: const Icon(Icons.place_rounded),
+                    style: IconButton.styleFrom(
+                      minimumSize: const Size(48, 56),
+                    ),
+                  ),
+                  IconButton(
+                    tooltip: tr(
+                      context,
                       'Frases en quechua',
                       'Quechua phrases',
                     ),
@@ -257,6 +277,7 @@ class _Bubble extends StatelessWidget {
   Widget build(BuildContext context) {
     final badge = syncBadge(context.l, message.syncStatus);
     final sent = message.syncStatus.name == 'sent';
+    final point = MeetingPoint.tryParse(message.text);
     return Align(
       alignment: Alignment.centerRight,
       child: Container(
@@ -277,12 +298,46 @@ class _Bubble extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
-            Text(
-              message.text,
-              style: context.tt.bodyMedium?.copyWith(
-                color: context.cs.onPrimary,
+            if (point == null)
+              Text(
+                message.text,
+                style: context.tt.bodyMedium?.copyWith(
+                  color: context.cs.onPrimary,
+                ),
+              )
+            else ...[
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.place_rounded,
+                    size: 20,
+                    color: context.cs.onPrimary,
+                  ),
+                  const SizedBox(width: 6),
+                  Flexible(
+                    child: Text(
+                      tr(
+                        context,
+                        'Punto de encuentro: ${point.label}',
+                        'Meeting point: ${point.label}',
+                      ),
+                      style: context.tt.bodyMedium?.copyWith(
+                        color: context.cs.onPrimary,
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            ),
+              TextButton.icon(
+                onPressed: () => showMeetingViewer(context, point),
+                icon: Icon(Icons.map_rounded, color: context.cs.onPrimary),
+                label: Text(
+                  tr(context, 'Ver en el mapa', 'View on map'),
+                  style: TextStyle(color: context.cs.onPrimary),
+                ),
+              ),
+            ],
             const SizedBox(height: 4),
             Row(
               mainAxisSize: MainAxisSize.min,
