@@ -7,6 +7,8 @@
  * Un room por trato: el `room_id` queda guardado en `interactions`.
  */
 
+import { syncConfigured } from './sync';
+
 const HOMESERVER = (import.meta.env.VITE_MATRIX_HOMESERVER ?? '').replace(/\/+$/, '');
 const TOKEN = import.meta.env.VITE_MATRIX_TOKEN ?? '';
 
@@ -82,7 +84,7 @@ class MatrixTransport implements ChatTransport {
 
 class LocalTransport implements ChatTransport {
   kind = 'local' as const;
-  label = 'Chat local (demo)';
+  label = syncConfigured ? 'Chat en vivo' : 'Chat local (demo)';
 
   async ensureRoom(input: RoomInput): Promise<string> {
     return `!local:${input.interactionId}`;

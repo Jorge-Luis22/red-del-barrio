@@ -1,17 +1,14 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import App from './App';
-import { StoreProvider } from './state/store';
-import './styles.css';
+import './index.css';
 
 const root = document.getElementById('root');
 if (!root) throw new Error('Falta <div id="root"> en index.html');
 
 createRoot(root).render(
   <StrictMode>
-    <StoreProvider>
-      <App />
-    </StoreProvider>
+    <App />
   </StrictMode>,
 );
 
