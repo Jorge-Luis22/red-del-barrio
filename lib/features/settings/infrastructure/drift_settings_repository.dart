@@ -28,6 +28,8 @@ class DriftSettingsRepository implements SettingsRepository {
       'capabilities': next.capabilities.join('|'),
       'language': next.languageCode ?? '',
       'welcomeDone': next.welcomeDone.toString(),
+      'packedItems': next.packedItems.join('|'),
+      'meetingPoint': next.meetingPoint,
       'useLocation': next.useLocation.toString(),
       'lastZoneLat': next.lastZoneLat?.toString() ?? '',
       'lastZoneLng': next.lastZoneLng?.toString() ?? '',
@@ -66,6 +68,11 @@ class DriftSettingsRepository implements SettingsRepository {
       volunteer: m['volunteer'] == 'true',
       languageCode: (m['language'] ?? '').isEmpty ? null : m['language'],
       welcomeDone: m['welcomeDone'] == 'true',
+      packedItems: (m['packedItems'] ?? '')
+          .split('|')
+          .where((e) => e.isNotEmpty)
+          .toSet(),
+      meetingPoint: m['meetingPoint'] ?? '',
       useLocation: m['useLocation'] == 'true',
       lastZoneLat: double.tryParse(m['lastZoneLat'] ?? ''),
       lastZoneLng: double.tryParse(m['lastZoneLng'] ?? ''),

@@ -2755,6 +2755,270 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'No se pudo actualizar la dirección.'**
   String get failUpdateAddress;
+
+  /// No description provided for @planTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Mi plan de emergencia'**
+  String get planTitle;
+
+  /// No description provided for @planSubtitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Prepárate antes de que pase algo. Todo funciona sin internet.'**
+  String get planSubtitle;
+
+  /// No description provided for @contactsTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Contactos de confianza'**
+  String get contactsTitle;
+
+  /// No description provided for @contactsHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Les avisamos por SMS cuando pidas ayuda. Funciona sin internet.'**
+  String get contactsHint;
+
+  /// No description provided for @contactsEmpty.
+  ///
+  /// In es, this message translates to:
+  /// **'Aún no tienes contactos'**
+  String get contactsEmpty;
+
+  /// No description provided for @contactAdd.
+  ///
+  /// In es, this message translates to:
+  /// **'Agregar contacto'**
+  String get contactAdd;
+
+  /// No description provided for @contactName.
+  ///
+  /// In es, this message translates to:
+  /// **'Nombre'**
+  String get contactName;
+
+  /// No description provided for @contactPhone.
+  ///
+  /// In es, this message translates to:
+  /// **'Teléfono'**
+  String get contactPhone;
+
+  /// No description provided for @contactPhoneHelp.
+  ///
+  /// In es, this message translates to:
+  /// **'Solo números; con código de país si es de otro país'**
+  String get contactPhoneHelp;
+
+  /// No description provided for @contactSave.
+  ///
+  /// In es, this message translates to:
+  /// **'Guardar contacto'**
+  String get contactSave;
+
+  /// No description provided for @contactDeleted.
+  ///
+  /// In es, this message translates to:
+  /// **'Contacto eliminado'**
+  String get contactDeleted;
+
+  /// No description provided for @contactDeleteTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Eliminar a {name}?'**
+  String contactDeleteTitle(String name);
+
+  /// No description provided for @meetingTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Punto de encuentro'**
+  String get meetingTitle;
+
+  /// No description provided for @meetingHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Un lugar seguro donde tu familia se junta si no puede volver a casa.'**
+  String get meetingHint;
+
+  /// No description provided for @meetingEmpty.
+  ///
+  /// In es, this message translates to:
+  /// **'Toca para elegir el lugar'**
+  String get meetingEmpty;
+
+  /// No description provided for @meetingLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Lugar (por ejemplo: el parque de la esquina)'**
+  String get meetingLabel;
+
+  /// No description provided for @meetingSave.
+  ///
+  /// In es, this message translates to:
+  /// **'Guardar lugar'**
+  String get meetingSave;
+
+  /// No description provided for @backpackTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Mochila de emergencia'**
+  String get backpackTitle;
+
+  /// No description provided for @backpackHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Marca lo que ya tienes guardado.'**
+  String get backpackHint;
+
+  /// No description provided for @backpackProgress.
+  ///
+  /// In es, this message translates to:
+  /// **'{done} de {total} listos'**
+  String backpackProgress(int done, int total);
+
+  /// No description provided for @bpWater.
+  ///
+  /// In es, this message translates to:
+  /// **'Agua para 3 días'**
+  String get bpWater;
+
+  /// No description provided for @bpFood.
+  ///
+  /// In es, this message translates to:
+  /// **'Comida no perecible'**
+  String get bpFood;
+
+  /// No description provided for @bpFlashlight.
+  ///
+  /// In es, this message translates to:
+  /// **'Linterna y pilas'**
+  String get bpFlashlight;
+
+  /// No description provided for @bpRadio.
+  ///
+  /// In es, this message translates to:
+  /// **'Radio a pilas'**
+  String get bpRadio;
+
+  /// No description provided for @bpFirstAid.
+  ///
+  /// In es, this message translates to:
+  /// **'Botiquín'**
+  String get bpFirstAid;
+
+  /// No description provided for @bpMeds.
+  ///
+  /// In es, this message translates to:
+  /// **'Medicinas de la familia'**
+  String get bpMeds;
+
+  /// No description provided for @bpDocs.
+  ///
+  /// In es, this message translates to:
+  /// **'Copias de documentos'**
+  String get bpDocs;
+
+  /// No description provided for @bpCash.
+  ///
+  /// In es, this message translates to:
+  /// **'Dinero en efectivo'**
+  String get bpCash;
+
+  /// No description provided for @bpCharger.
+  ///
+  /// In es, this message translates to:
+  /// **'Cargador portátil'**
+  String get bpCharger;
+
+  /// No description provided for @bpWhistle.
+  ///
+  /// In es, this message translates to:
+  /// **'Silbato'**
+  String get bpWhistle;
+
+  /// No description provided for @bpClothes.
+  ///
+  /// In es, this message translates to:
+  /// **'Ropa y abrigo'**
+  String get bpClothes;
+
+  /// No description provided for @sosNotifyTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Avisar también a mis contactos'**
+  String get sosNotifyTitle;
+
+  /// No description provided for @sosNotifySub.
+  ///
+  /// In es, this message translates to:
+  /// **'Se abre tu app de mensajes con el aviso ya escrito; tú tocas Enviar. Funciona sin internet.'**
+  String get sosNotifySub;
+
+  /// No description provided for @sosNoContacts.
+  ///
+  /// In es, this message translates to:
+  /// **'Agrega contactos de confianza en tu plan de emergencia para avisarles por SMS.'**
+  String get sosNoContacts;
+
+  /// No description provided for @sosSmsFailed.
+  ///
+  /// In es, this message translates to:
+  /// **'No pudimos abrir tus mensajes. Avísales por llamada.'**
+  String get sosSmsFailed;
+
+  /// No description provided for @smsAlert.
+  ///
+  /// In es, this message translates to:
+  /// **'ALERTA ({situation}): {text}'**
+  String smsAlert(String situation, String text);
+
+  /// No description provided for @smsZone.
+  ///
+  /// In es, this message translates to:
+  /// **'Mi zona aprox.: {lat}, {lng} (~1 km) {link}'**
+  String smsZone(String lat, String lng, String link);
+
+  /// No description provided for @smsRef.
+  ///
+  /// In es, this message translates to:
+  /// **'Referencia: {ref}'**
+  String smsRef(String ref);
+
+  /// No description provided for @smsFooter.
+  ///
+  /// In es, this message translates to:
+  /// **'Enviado desde Red del barrio. Si es grave, llama a emergencias.'**
+  String get smsFooter;
+
+  /// No description provided for @failContactName.
+  ///
+  /// In es, this message translates to:
+  /// **'Escribe el nombre del contacto.'**
+  String get failContactName;
+
+  /// No description provided for @failContactPhone.
+  ///
+  /// In es, this message translates to:
+  /// **'Escribe un teléfono válido (solo números).'**
+  String get failContactPhone;
+
+  /// No description provided for @failContactDup.
+  ///
+  /// In es, this message translates to:
+  /// **'Ya tienes ese contacto.'**
+  String get failContactDup;
+
+  /// No description provided for @failContactMax.
+  ///
+  /// In es, this message translates to:
+  /// **'Puedes tener hasta 5 contactos.'**
+  String get failContactMax;
+
+  /// No description provided for @failSaveContact.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudo guardar el contacto.'**
+  String get failSaveContact;
 }
 
 class _AppLocalizationsDelegate

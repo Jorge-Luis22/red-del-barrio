@@ -16,6 +16,8 @@ class AppSettings {
     this.lastZoneLat,
     this.lastZoneLng,
     this.welcomeDone = false,
+    this.packedItems = const {},
+    this.meetingPoint = '',
   });
 
   /// 1.0 normal · 1.15 grande · 1.3 muy grande.
@@ -47,6 +49,12 @@ class AppSettings {
   /// La bienvenida (perfil y ubicación) ya se mostró o se saltó: no se vuelve a insistir.
   final bool welcomeDone;
 
+  /// Cosas de la mochila de emergencia que la persona ya tiene guardadas (identificadores).
+  final Set<String> packedItems;
+
+  /// Lugar seguro donde su familia se junta si no puede volver a casa.
+  final String meetingPoint;
+
   AppSettings copyWith({
     double? textScale,
     bool? highContrast,
@@ -62,6 +70,8 @@ class AppSettings {
     double? lastZoneLng,
     bool clearLastZone = false,
     bool? welcomeDone,
+    Set<String>? packedItems,
+    String? meetingPoint,
   }) => AppSettings(
     textScale: textScale ?? this.textScale,
     highContrast: highContrast ?? this.highContrast,
@@ -77,6 +87,8 @@ class AppSettings {
     lastZoneLat: clearLastZone ? null : (lastZoneLat ?? this.lastZoneLat),
     lastZoneLng: clearLastZone ? null : (lastZoneLng ?? this.lastZoneLng),
     welcomeDone: welcomeDone ?? this.welcomeDone,
+    packedItems: packedItems ?? this.packedItems,
+    meetingPoint: meetingPoint ?? this.meetingPoint,
   );
 }
 

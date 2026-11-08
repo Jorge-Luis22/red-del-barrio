@@ -89,3 +89,51 @@ class ProposeCollectionPoint {
     return Ok(point);
   }
 }
+
+/// Agrega un contacto de confianza. Valida el nombre y el teléfono, evita repetidos
+/// y limita la cantidad ([maxTrustedContacts]).
+class AddContact {
+  AddContact({required this.emergency, required this.clock, required this.ids});
+
+  final EmergencyRepository emergency;
+  final Clock clock;
+  final IdGenerator ids;
+
+  static const noName = 'Escribe el nombre del contacto.';
+  static const badPhone = 'Escribe un teléfono válido (solo números).';
+  static const duplicate = 'Ya tienes ese contacto.';
+  static const tooMany = 'Puedes tener hasta 5 contactos.';
+
+  /// Quita espacios, guiones y paréntesis. Devuelve `null` si no parece un teléfono
+  /// (de 7 a 15 dígitos, con `+` opcional al inicio).
+  static String? normalizePhone(String raw) {
+    final cleaned = raw.replaceAll(RegExp(r'[\s\-().]'), '');
+    return RegExp(r'^\+?\d{7,15}$').hasMatch(cleaned) ? cleaned : null;
+  }
+
+  Future<Result<TrustedContact>> call({
+    required String name,
+    required String phone,
+  }) async {
+    final cleanName = name.trim();
+    if (cleanName.length < 2) return const Err(ValidationFailure(noName));
+    final normalized = normalizePhone(phone);
+    if (normalized == null) return const Err(ValidationFailure(badPhone));
+    final current = await emergency.contacts();
+    if (current.length >= maxTrustedContacts) {
+      return const Err(ValidationFailure(tooMany));
+    }
+    if (current.any((c) => c.phone == normalized)) {
+      return const Err(ValidationFailure(duplicate));
+    }
+    final contact = TrustedContact(
+      id: ids.newUuid(),
+      name: cleanName,
+      phone: normalized,
+      createdAt: clock.now(),
+    );
+    final saved = await emergency.saveContact(contact);
+    if (saved case Err(:final failure)) return Err(failure);
+    return Ok(contact);
+  }
+}

@@ -24,6 +24,42 @@ class EmergencyPost {
   final SyncStatus syncStatus;
 }
 
+/// Persona de confianza a la que se avisa por SMS cuando se pide ayuda.
+/// Vive solo en el teléfono: no se sube a ningún servidor.
+class TrustedContact {
+  const TrustedContact({
+    required this.id,
+    required this.name,
+    required this.phone,
+    required this.createdAt,
+  });
+
+  final String id;
+  final String name;
+
+  /// Solo dígitos, con un `+` al inicio si trae código de país.
+  final String phone;
+  final DateTime createdAt;
+}
+
+/// Cuántos contactos de confianza se pueden guardar.
+const maxTrustedContacts = 5;
+
+/// Qué lleva la mochila de emergencia (identificadores; la interfaz pone el texto).
+const backpackItems = [
+  'water',
+  'food',
+  'flashlight',
+  'radio',
+  'firstAid',
+  'meds',
+  'docs',
+  'cash',
+  'charger',
+  'whistle',
+  'clothes',
+];
+
 /// Punto de acopio propuesto por la persona. Siempre "sin verificar".
 class CollectionPoint {
   const CollectionPoint({

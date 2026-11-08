@@ -45,5 +45,10 @@ String messageText(AppLocalizations l, String message) => switch (message) {
   'No se pudo guardar tu perfil.' => l.failSaveProfile,
   'No se pudo guardar la dirección.' => l.failSaveAddress,
   'No se pudo actualizar la dirección.' => l.failUpdateAddress,
+  'Escribe el nombre del contacto.' => l.failContactName,
+  'Escribe un teléfono válido (solo números).' => l.failContactPhone,
+  'Ya tienes ese contacto.' => l.failContactDup,
+  'Puedes tener hasta 5 contactos.' => l.failContactMax,
+  'No se pudo guardar el contacto.' => l.failSaveContact,
   _ => message,
 };

@@ -12,4 +12,12 @@ abstract interface class EmergencyRepository {
   Future<Result<void>> saveCollectionPoint(CollectionPoint point);
 
   Stream<List<CollectionPoint>> watchCollectionPoints();
+
+  Future<Result<void>> saveContact(TrustedContact contact);
+
+  Future<Result<void>> deleteContact(String id);
+
+  Stream<List<TrustedContact>> watchContacts();
+
+  Future<List<TrustedContact>> contacts();
 }

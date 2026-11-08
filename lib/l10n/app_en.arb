@@ -782,5 +782,96 @@
   "failAddressNoLocation": "Mark your location first.",
   "failSaveProfile": "Your profile could not be saved.",
   "failSaveAddress": "The address could not be saved.",
-  "failUpdateAddress": "The address could not be updated."
+  "failUpdateAddress": "The address could not be updated.",
+  "planTitle": "My emergency plan",
+  "planSubtitle": "Get ready before something happens. Everything works without internet.",
+  "contactsTitle": "Trusted contacts",
+  "contactsHint": "We alert them by SMS when you ask for help. Works without internet.",
+  "contactsEmpty": "You have no contacts yet",
+  "contactAdd": "Add contact",
+  "contactName": "Name",
+  "contactPhone": "Phone",
+  "contactPhoneHelp": "Numbers only; with the country code if abroad",
+  "contactSave": "Save contact",
+  "contactDeleted": "Contact deleted",
+  "contactDeleteTitle": "Delete {name}?",
+  "@contactDeleteTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "meetingTitle": "Meeting point",
+  "meetingHint": "A safe place where your family meets if they cannot get home.",
+  "meetingEmpty": "Tap to choose the place",
+  "meetingLabel": "Place (for example: the park on the corner)",
+  "meetingSave": "Save place",
+  "backpackTitle": "Emergency backpack",
+  "backpackHint": "Mark what you already have packed.",
+  "backpackProgress": "{done} of {total} ready",
+  "@backpackProgress": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "bpWater": "Water for 3 days",
+  "bpFood": "Non-perishable food",
+  "bpFlashlight": "Flashlight and batteries",
+  "bpRadio": "Battery radio",
+  "bpFirstAid": "First-aid kit",
+  "bpMeds": "Family medicines",
+  "bpDocs": "Copies of documents",
+  "bpCash": "Cash",
+  "bpCharger": "Portable charger",
+  "bpWhistle": "Whistle",
+  "bpClothes": "Clothes and a blanket",
+  "sosNotifyTitle": "Also alert my contacts",
+  "sosNotifySub": "Your messages app opens with the alert already written; you tap Send. Works without internet.",
+  "sosNoContacts": "Add trusted contacts in your emergency plan to alert them by SMS.",
+  "sosSmsFailed": "We couldn’t open your messages. Call them instead.",
+  "smsAlert": "ALERT ({situation}): {text}",
+  "@smsAlert": {
+    "placeholders": {
+      "situation": {
+        "type": "String"
+      },
+      "text": {
+        "type": "String"
+      }
+    }
+  },
+  "smsZone": "My approx. area: {lat}, {lng} (~1 km) {link}",
+  "@smsZone": {
+    "placeholders": {
+      "lat": {
+        "type": "String"
+      },
+      "lng": {
+        "type": "String"
+      },
+      "link": {
+        "type": "String"
+      }
+    }
+  },
+  "smsRef": "Landmark: {ref}",
+  "@smsRef": {
+    "placeholders": {
+      "ref": {
+        "type": "String"
+      }
+    }
+  },
+  "smsFooter": "Sent from Neighborhood Network. If it is serious, call emergency services.",
+  "failContactName": "Write the contact’s name.",
+  "failContactPhone": "Enter a valid phone number (numbers only).",
+  "failContactDup": "You already have that contact.",
+  "failContactMax": "You can have up to 5 contacts.",
+  "failSaveContact": "The contact could not be saved."
 }

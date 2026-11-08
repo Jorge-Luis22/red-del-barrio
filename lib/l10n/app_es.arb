@@ -782,5 +782,96 @@
   "failAddressNoLocation": "Primero marca tu ubicación.",
   "failSaveProfile": "No se pudo guardar tu perfil.",
   "failSaveAddress": "No se pudo guardar la dirección.",
-  "failUpdateAddress": "No se pudo actualizar la dirección."
+  "failUpdateAddress": "No se pudo actualizar la dirección.",
+  "planTitle": "Mi plan de emergencia",
+  "planSubtitle": "Prepárate antes de que pase algo. Todo funciona sin internet.",
+  "contactsTitle": "Contactos de confianza",
+  "contactsHint": "Les avisamos por SMS cuando pidas ayuda. Funciona sin internet.",
+  "contactsEmpty": "Aún no tienes contactos",
+  "contactAdd": "Agregar contacto",
+  "contactName": "Nombre",
+  "contactPhone": "Teléfono",
+  "contactPhoneHelp": "Solo números; con código de país si es de otro país",
+  "contactSave": "Guardar contacto",
+  "contactDeleted": "Contacto eliminado",
+  "contactDeleteTitle": "¿Eliminar a {name}?",
+  "@contactDeleteTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "meetingTitle": "Punto de encuentro",
+  "meetingHint": "Un lugar seguro donde tu familia se junta si no puede volver a casa.",
+  "meetingEmpty": "Toca para elegir el lugar",
+  "meetingLabel": "Lugar (por ejemplo: el parque de la esquina)",
+  "meetingSave": "Guardar lugar",
+  "backpackTitle": "Mochila de emergencia",
+  "backpackHint": "Marca lo que ya tienes guardado.",
+  "backpackProgress": "{done} de {total} listos",
+  "@backpackProgress": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "bpWater": "Agua para 3 días",
+  "bpFood": "Comida no perecible",
+  "bpFlashlight": "Linterna y pilas",
+  "bpRadio": "Radio a pilas",
+  "bpFirstAid": "Botiquín",
+  "bpMeds": "Medicinas de la familia",
+  "bpDocs": "Copias de documentos",
+  "bpCash": "Dinero en efectivo",
+  "bpCharger": "Cargador portátil",
+  "bpWhistle": "Silbato",
+  "bpClothes": "Ropa y abrigo",
+  "sosNotifyTitle": "Avisar también a mis contactos",
+  "sosNotifySub": "Se abre tu app de mensajes con el aviso ya escrito; tú tocas Enviar. Funciona sin internet.",
+  "sosNoContacts": "Agrega contactos de confianza en tu plan de emergencia para avisarles por SMS.",
+  "sosSmsFailed": "No pudimos abrir tus mensajes. Avísales por llamada.",
+  "smsAlert": "ALERTA ({situation}): {text}",
+  "@smsAlert": {
+    "placeholders": {
+      "situation": {
+        "type": "String"
+      },
+      "text": {
+        "type": "String"
+      }
+    }
+  },
+  "smsZone": "Mi zona aprox.: {lat}, {lng} (~1 km) {link}",
+  "@smsZone": {
+    "placeholders": {
+      "lat": {
+        "type": "String"
+      },
+      "lng": {
+        "type": "String"
+      },
+      "link": {
+        "type": "String"
+      }
+    }
+  },
+  "smsRef": "Referencia: {ref}",
+  "@smsRef": {
+    "placeholders": {
+      "ref": {
+        "type": "String"
+      }
+    }
+  },
+  "smsFooter": "Enviado desde Red del barrio. Si es grave, llama a emergencias.",
+  "failContactName": "Escribe el nombre del contacto.",
+  "failContactPhone": "Escribe un teléfono válido (solo números).",
+  "failContactDup": "Ya tienes ese contacto.",
+  "failContactMax": "Puedes tener hasta 5 contactos.",
+  "failSaveContact": "No se pudo guardar el contacto."
 }

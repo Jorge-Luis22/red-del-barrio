@@ -5,6 +5,7 @@ import '../../../app/theme/brand.dart';
 import '../../../app/ui/components.dart';
 import '../../../app/ui/section_header.dart';
 import 'collection_points_section.dart';
+import 'emergency_plan_section.dart';
 import 'my_alerts_section.dart';
 import 'official_contacts_section.dart';
 import 'preparedness_section.dart';
@@ -53,6 +54,8 @@ class EmergenciaScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 16),
                 const MyAlertsSection(),
+                const SizedBox(height: 28),
+                const EmergencyPlanSection(),
                 const SizedBox(height: 28),
                 const PreparednessSection(),
                 const SizedBox(height: 16),

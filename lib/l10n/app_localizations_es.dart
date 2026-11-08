@@ -1525,4 +1525,154 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get failUpdateAddress => 'No se pudo actualizar la dirección.';
+
+  @override
+  String get planTitle => 'Mi plan de emergencia';
+
+  @override
+  String get planSubtitle =>
+      'Prepárate antes de que pase algo. Todo funciona sin internet.';
+
+  @override
+  String get contactsTitle => 'Contactos de confianza';
+
+  @override
+  String get contactsHint =>
+      'Les avisamos por SMS cuando pidas ayuda. Funciona sin internet.';
+
+  @override
+  String get contactsEmpty => 'Aún no tienes contactos';
+
+  @override
+  String get contactAdd => 'Agregar contacto';
+
+  @override
+  String get contactName => 'Nombre';
+
+  @override
+  String get contactPhone => 'Teléfono';
+
+  @override
+  String get contactPhoneHelp =>
+      'Solo números; con código de país si es de otro país';
+
+  @override
+  String get contactSave => 'Guardar contacto';
+
+  @override
+  String get contactDeleted => 'Contacto eliminado';
+
+  @override
+  String contactDeleteTitle(String name) {
+    return '¿Eliminar a $name?';
+  }
+
+  @override
+  String get meetingTitle => 'Punto de encuentro';
+
+  @override
+  String get meetingHint =>
+      'Un lugar seguro donde tu familia se junta si no puede volver a casa.';
+
+  @override
+  String get meetingEmpty => 'Toca para elegir el lugar';
+
+  @override
+  String get meetingLabel => 'Lugar (por ejemplo: el parque de la esquina)';
+
+  @override
+  String get meetingSave => 'Guardar lugar';
+
+  @override
+  String get backpackTitle => 'Mochila de emergencia';
+
+  @override
+  String get backpackHint => 'Marca lo que ya tienes guardado.';
+
+  @override
+  String backpackProgress(int done, int total) {
+    return '$done de $total listos';
+  }
+
+  @override
+  String get bpWater => 'Agua para 3 días';
+
+  @override
+  String get bpFood => 'Comida no perecible';
+
+  @override
+  String get bpFlashlight => 'Linterna y pilas';
+
+  @override
+  String get bpRadio => 'Radio a pilas';
+
+  @override
+  String get bpFirstAid => 'Botiquín';
+
+  @override
+  String get bpMeds => 'Medicinas de la familia';
+
+  @override
+  String get bpDocs => 'Copias de documentos';
+
+  @override
+  String get bpCash => 'Dinero en efectivo';
+
+  @override
+  String get bpCharger => 'Cargador portátil';
+
+  @override
+  String get bpWhistle => 'Silbato';
+
+  @override
+  String get bpClothes => 'Ropa y abrigo';
+
+  @override
+  String get sosNotifyTitle => 'Avisar también a mis contactos';
+
+  @override
+  String get sosNotifySub =>
+      'Se abre tu app de mensajes con el aviso ya escrito; tú tocas Enviar. Funciona sin internet.';
+
+  @override
+  String get sosNoContacts =>
+      'Agrega contactos de confianza en tu plan de emergencia para avisarles por SMS.';
+
+  @override
+  String get sosSmsFailed =>
+      'No pudimos abrir tus mensajes. Avísales por llamada.';
+
+  @override
+  String smsAlert(String situation, String text) {
+    return 'ALERTA ($situation): $text';
+  }
+
+  @override
+  String smsZone(String lat, String lng, String link) {
+    return 'Mi zona aprox.: $lat, $lng (~1 km) $link';
+  }
+
+  @override
+  String smsRef(String ref) {
+    return 'Referencia: $ref';
+  }
+
+  @override
+  String get smsFooter =>
+      'Enviado desde Red del barrio. Si es grave, llama a emergencias.';
+
+  @override
+  String get failContactName => 'Escribe el nombre del contacto.';
+
+  @override
+  String get failContactPhone => 'Escribe un teléfono válido (solo números).';
+
+  @override
+  String get failContactDup => 'Ya tienes ese contacto.';
+
+  @override
+  String get failContactMax => 'Puedes tener hasta 5 contactos.';
+
+  @override
+  String get failSaveContact => 'No se pudo guardar el contacto.';
 }

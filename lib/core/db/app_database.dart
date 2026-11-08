@@ -168,6 +168,20 @@ class PersonAddresses extends Table {
   Set<Column> get primaryKey => {id};
 }
 
+@DataClassName('TrustedContactRow')
+class TrustedContacts extends Table {
+  @override
+  String get tableName => 'trusted_contacts';
+
+  TextColumn get id => text()();
+  TextColumn get name => text()();
+  TextColumn get phone => text()();
+  DateTimeColumn get createdAt => dateTime()();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
 @DriftDatabase(
   tables: [
     Needs,
@@ -181,6 +195,7 @@ class PersonAddresses extends Table {
     AppSettingsKv,
     PersonProfile,
     PersonAddresses,
+    TrustedContacts,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -192,7 +207,7 @@ class AppDatabase extends _$AppDatabase {
   /// Versión del esquema. Cada cambio exige subirla y escribir su migración + prueba (R28).
   /// 1: needs, outbox_ops · 2: + deals, interactions
   @override
-  int get schemaVersion => 5;
+  int get schemaVersion => 6;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -201,6 +216,9 @@ class AppDatabase extends _$AppDatabase {
       if (from < 2) {
         await m.createTable(deals);
         await m.createTable(interactions);
+      }
+      if (from < 6) {
+        await m.createTable(trustedContacts);
       }
       if (from < 5) {
         await m.createTable(personProfile);

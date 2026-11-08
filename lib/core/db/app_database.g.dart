@@ -4362,6 +4362,313 @@ class PersonAddressesCompanion extends UpdateCompanion<AddressRow> {
   }
 }
 
+class $TrustedContactsTable extends TrustedContacts
+    with TableInfo<$TrustedContactsTable, TrustedContactRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $TrustedContactsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _phoneMeta = const VerificationMeta('phone');
+  @override
+  late final GeneratedColumn<String> phone = GeneratedColumn<String>(
+    'phone',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [id, name, phone, createdAt];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'trusted_contacts';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<TrustedContactRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('phone')) {
+      context.handle(
+        _phoneMeta,
+        phone.isAcceptableOrUnknown(data['phone']!, _phoneMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_phoneMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  TrustedContactRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return TrustedContactRow(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      phone: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}phone'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+    );
+  }
+
+  @override
+  $TrustedContactsTable createAlias(String alias) {
+    return $TrustedContactsTable(attachedDatabase, alias);
+  }
+}
+
+class TrustedContactRow extends DataClass
+    implements Insertable<TrustedContactRow> {
+  final String id;
+  final String name;
+  final String phone;
+  final DateTime createdAt;
+  const TrustedContactRow({
+    required this.id,
+    required this.name,
+    required this.phone,
+    required this.createdAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['name'] = Variable<String>(name);
+    map['phone'] = Variable<String>(phone);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    return map;
+  }
+
+  TrustedContactsCompanion toCompanion(bool nullToAbsent) {
+    return TrustedContactsCompanion(
+      id: Value(id),
+      name: Value(name),
+      phone: Value(phone),
+      createdAt: Value(createdAt),
+    );
+  }
+
+  factory TrustedContactRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return TrustedContactRow(
+      id: serializer.fromJson<String>(json['id']),
+      name: serializer.fromJson<String>(json['name']),
+      phone: serializer.fromJson<String>(json['phone']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'name': serializer.toJson<String>(name),
+      'phone': serializer.toJson<String>(phone),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+    };
+  }
+
+  TrustedContactRow copyWith({
+    String? id,
+    String? name,
+    String? phone,
+    DateTime? createdAt,
+  }) => TrustedContactRow(
+    id: id ?? this.id,
+    name: name ?? this.name,
+    phone: phone ?? this.phone,
+    createdAt: createdAt ?? this.createdAt,
+  );
+  TrustedContactRow copyWithCompanion(TrustedContactsCompanion data) {
+    return TrustedContactRow(
+      id: data.id.present ? data.id.value : this.id,
+      name: data.name.present ? data.name.value : this.name,
+      phone: data.phone.present ? data.phone.value : this.phone,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('TrustedContactRow(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('phone: $phone, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, name, phone, createdAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is TrustedContactRow &&
+          other.id == this.id &&
+          other.name == this.name &&
+          other.phone == this.phone &&
+          other.createdAt == this.createdAt);
+}
+
+class TrustedContactsCompanion extends UpdateCompanion<TrustedContactRow> {
+  final Value<String> id;
+  final Value<String> name;
+  final Value<String> phone;
+  final Value<DateTime> createdAt;
+  final Value<int> rowid;
+  const TrustedContactsCompanion({
+    this.id = const Value.absent(),
+    this.name = const Value.absent(),
+    this.phone = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  TrustedContactsCompanion.insert({
+    required String id,
+    required String name,
+    required String phone,
+    required DateTime createdAt,
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       name = Value(name),
+       phone = Value(phone),
+       createdAt = Value(createdAt);
+  static Insertable<TrustedContactRow> custom({
+    Expression<String>? id,
+    Expression<String>? name,
+    Expression<String>? phone,
+    Expression<DateTime>? createdAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (name != null) 'name': name,
+      if (phone != null) 'phone': phone,
+      if (createdAt != null) 'created_at': createdAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  TrustedContactsCompanion copyWith({
+    Value<String>? id,
+    Value<String>? name,
+    Value<String>? phone,
+    Value<DateTime>? createdAt,
+    Value<int>? rowid,
+  }) {
+    return TrustedContactsCompanion(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      phone: phone ?? this.phone,
+      createdAt: createdAt ?? this.createdAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (phone.present) {
+      map['phone'] = Variable<String>(phone.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('TrustedContactsCompanion(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('phone: $phone, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -4380,6 +4687,9 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $PersonAddressesTable personAddresses = $PersonAddressesTable(
     this,
   );
+  late final $TrustedContactsTable trustedContacts = $TrustedContactsTable(
+    this,
+  );
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -4396,6 +4706,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     appSettingsKv,
     personProfile,
     personAddresses,
+    trustedContacts,
   ];
 }
 
@@ -6858,6 +7169,202 @@ typedef $$PersonAddressesTableProcessedTableManager =
       AddressRow,
       PrefetchHooks Function()
     >;
+typedef $$TrustedContactsTableCreateCompanionBuilder =
+    TrustedContactsCompanion Function({
+      required String id,
+      required String name,
+      required String phone,
+      required DateTime createdAt,
+      Value<int> rowid,
+    });
+typedef $$TrustedContactsTableUpdateCompanionBuilder =
+    TrustedContactsCompanion Function({
+      Value<String> id,
+      Value<String> name,
+      Value<String> phone,
+      Value<DateTime> createdAt,
+      Value<int> rowid,
+    });
+
+class $$TrustedContactsTableFilterComposer
+    extends Composer<_$AppDatabase, $TrustedContactsTable> {
+  $$TrustedContactsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get phone => $composableBuilder(
+    column: $table.phone,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$TrustedContactsTableOrderingComposer
+    extends Composer<_$AppDatabase, $TrustedContactsTable> {
+  $$TrustedContactsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get phone => $composableBuilder(
+    column: $table.phone,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$TrustedContactsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $TrustedContactsTable> {
+  $$TrustedContactsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<String> get phone =>
+      $composableBuilder(column: $table.phone, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+}
+
+class $$TrustedContactsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $TrustedContactsTable,
+          TrustedContactRow,
+          $$TrustedContactsTableFilterComposer,
+          $$TrustedContactsTableOrderingComposer,
+          $$TrustedContactsTableAnnotationComposer,
+          $$TrustedContactsTableCreateCompanionBuilder,
+          $$TrustedContactsTableUpdateCompanionBuilder,
+          (
+            TrustedContactRow,
+            BaseReferences<
+              _$AppDatabase,
+              $TrustedContactsTable,
+              TrustedContactRow
+            >,
+          ),
+          TrustedContactRow,
+          PrefetchHooks Function()
+        > {
+  $$TrustedContactsTableTableManager(
+    _$AppDatabase db,
+    $TrustedContactsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$TrustedContactsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$TrustedContactsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$TrustedContactsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> name = const Value.absent(),
+                Value<String> phone = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => TrustedContactsCompanion(
+                id: id,
+                name: name,
+                phone: phone,
+                createdAt: createdAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String name,
+                required String phone,
+                required DateTime createdAt,
+                Value<int> rowid = const Value.absent(),
+              }) => TrustedContactsCompanion.insert(
+                id: id,
+                name: name,
+                phone: phone,
+                createdAt: createdAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$TrustedContactsTable, TrustedContactRow>(table),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $TrustedContactsTable,
+                    TrustedContactRow
+                  >(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$TrustedContactsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $TrustedContactsTable,
+      TrustedContactRow,
+      $$TrustedContactsTableFilterComposer,
+      $$TrustedContactsTableOrderingComposer,
+      $$TrustedContactsTableAnnotationComposer,
+      $$TrustedContactsTableCreateCompanionBuilder,
+      $$TrustedContactsTableUpdateCompanionBuilder,
+      (
+        TrustedContactRow,
+        BaseReferences<_$AppDatabase, $TrustedContactsTable, TrustedContactRow>,
+      ),
+      TrustedContactRow,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -6884,4 +7391,6 @@ class $AppDatabaseManager {
       $$PersonProfileTableTableManager(_db, _db.personProfile);
   $$PersonAddressesTableTableManager get personAddresses =>
       $$PersonAddressesTableTableManager(_db, _db.personAddresses);
+  $$TrustedContactsTableTableManager get trustedContacts =>
+      $$TrustedContactsTableTableManager(_db, _db.trustedContacts);
 }

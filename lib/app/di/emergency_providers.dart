@@ -28,6 +28,18 @@ final proposeCollectionPointProvider = Provider<ProposeCollectionPoint>(
   ),
 );
 
+final addContactProvider = Provider<AddContact>(
+  (ref) => AddContact(
+    emergency: ref.watch(emergencyRepositoryProvider),
+    clock: ref.watch(clockProvider),
+    ids: ref.watch(idGeneratorProvider),
+  ),
+);
+
+final contactsStreamProvider = StreamProvider<List<TrustedContact>>(
+  (ref) => ref.watch(emergencyRepositoryProvider).watchContacts(),
+);
+
 final emergencyPostsStreamProvider = StreamProvider<List<EmergencyPost>>(
   (ref) => ref.watch(emergencyRepositoryProvider).watchPosts(),
 );

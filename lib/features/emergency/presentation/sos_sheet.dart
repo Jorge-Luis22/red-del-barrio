@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../app/di/providers.dart';
 import '../../../app/theme/brand.dart';
@@ -9,6 +10,9 @@ import '../../../core/result.dart';
 import '../../sync/presentation/sync_controller.dart';
 import '../domain/emergency.dart';
 import '../../../app/l10n.dart';
+import '../../location/presentation/location_controller.dart';
+import '../../location/domain/zone.dart';
+import 'alert_sms.dart';
 import 'sos_labels.dart';
 import '../../../app/ui/failure_text.dart';
 
@@ -36,6 +40,7 @@ class _SosSheetState extends ConsumerState<_SosSheet> {
   final TextEditingController _text = TextEditingController();
   bool _textReady = false;
   bool _busy = false;
+  bool _notifyContacts = true;
   String? _error;
 
   @override
@@ -66,6 +71,30 @@ class _SosSheetState extends ConsumerState<_SosSheet> {
     });
   }
 
+  /// SMS con el aviso para todos los contactos de confianza (`null` si no hay ninguno).
+  /// Solo lleva la zona de ~1 km: la dirección activa, el GPS o la última zona guardada.
+  Future<Uri?> _smsToContacts(AppLocalizations l) async {
+    final contacts = await ref.read(emergencyRepositoryProvider).contacts();
+    if (contacts.isEmpty) return null;
+    final active = ref.read(activeAddressProvider);
+    final settings = ref.read(appSettingsProvider);
+    final saved = (settings.lastZoneLat == null || settings.lastZoneLng == null)
+        ? null
+        : Zone(settings.lastZoneLat!, settings.lastZoneLng!);
+    final zone =
+        active?.zone ??
+        ref.read(locationControllerProvider).location?.zone ??
+        saved;
+    final body = buildAlertSms(
+      l,
+      situation: _situation,
+      text: _text.text,
+      zone: zone,
+      reference: active?.reference,
+    );
+    return buildSmsUri([for (final c in contacts) c.phone], body);
+  }
+
   Future<void> _send() async {
     setState(() {
       _busy = true;
@@ -80,8 +109,13 @@ class _SosSheetState extends ConsumerState<_SosSheet> {
     switch (r) {
       case Ok():
         final messenger = ScaffoldMessenger.of(context);
+        final sms = _notifyContacts ? await _smsToContacts(l) : null;
+        if (!mounted) return;
         Navigator.of(context).pop();
         confirmHaptic(enabled: ref.read(appSettingsProvider).vibration);
+        if (sms != null && !await launchUrl(sms)) {
+          messenger.showSnackBar(SnackBar(content: Text(l.sosSmsFailed)));
+        }
         await ref.read(syncControllerProvider.notifier).flushNow();
         messenger.showSnackBar(
           SnackBar(
@@ -122,6 +156,11 @@ class _SosSheetState extends ConsumerState<_SosSheet> {
         tone: BvTone.emergency,
         title: context.l.primeroLosServiciosOficiales,
         message: context.l.siHayPeligroAhora,
+      ),
+      const SizedBox(height: 16),
+      _NotifyContactsRow(
+        value: _notifyContacts,
+        onChanged: (v) => setState(() => _notifyContacts = v),
       ),
       const SizedBox(height: 20),
       Text(context.l.quePasa, style: context.tt.titleSmall),
@@ -202,4 +241,42 @@ class _SosSheetState extends ConsumerState<_SosSheet> {
       ),
     ],
   );
+}
+
+/// Interruptor "Avisar también a mis contactos". Sin contactos explica cómo agregarlos.
+class _NotifyContactsRow extends ConsumerWidget {
+  const _NotifyContactsRow({required this.value, required this.onChanged});
+
+  final bool value;
+  final ValueChanged<bool> onChanged;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = context.l;
+    final contacts = ref.watch(contactsStreamProvider).value ?? const [];
+    if (contacts.isEmpty) {
+      return Padding(
+        padding: const EdgeInsets.only(bottom: 16),
+        child: BvBanner(
+          icon: Icons.sms_outlined,
+          tone: BvTone.violet,
+          message: l.sosNoContacts,
+        ),
+      );
+    }
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: BvPanel(
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        child: SwitchListTile(
+          contentPadding: EdgeInsets.zero,
+          secondary: const BvIconBadge(Icons.sms_rounded, tone: BvTone.coral),
+          title: Text(l.sosNotifyTitle, style: context.tt.titleSmall),
+          subtitle: Text(l.sosNotifySub),
+          value: value,
+          onChanged: onChanged,
+        ),
+      ),
+    );
+  }
 }

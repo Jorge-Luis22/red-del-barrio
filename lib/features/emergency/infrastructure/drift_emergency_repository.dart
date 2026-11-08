@@ -72,6 +72,50 @@ class DriftEmergencyRepository implements EmergencyRepository {
   }
 
   @override
+  Future<Result<void>> saveContact(TrustedContact c) =>
+      guardStorage('No se pudo guardar el contacto.', () async {
+        await _db
+            .into(_db.trustedContacts)
+            .insertOnConflictUpdate(
+              TrustedContactsCompanion.insert(
+                id: c.id,
+                name: c.name,
+                phone: c.phone,
+                createdAt: c.createdAt,
+              ),
+            );
+      });
+
+  @override
+  Future<Result<void>> deleteContact(String id) =>
+      guardStorage('No se pudo guardar el contacto.', () async {
+        await (_db.delete(
+          _db.trustedContacts,
+        )..where((t) => t.id.equals(id))).go();
+      });
+
+  @override
+  Stream<List<TrustedContact>> watchContacts() {
+    final q = _db.select(_db.trustedContacts)
+      ..orderBy([(t) => OrderingTerm.asc(t.createdAt)]);
+    return q.watch().map((rows) => rows.map(_contact).toList());
+  }
+
+  @override
+  Future<List<TrustedContact>> contacts() async {
+    final q = _db.select(_db.trustedContacts)
+      ..orderBy([(t) => OrderingTerm.asc(t.createdAt)]);
+    return (await q.get()).map(_contact).toList();
+  }
+
+  TrustedContact _contact(TrustedContactRow r) => TrustedContact(
+    id: r.id,
+    name: r.name,
+    phone: r.phone,
+    createdAt: r.createdAt,
+  );
+
+  @override
   Stream<List<CollectionPoint>> watchCollectionPoints() {
     final query = _db.select(_db.collectionPoints)
       ..orderBy([(t) => OrderingTerm.desc(t.createdAt)]);
