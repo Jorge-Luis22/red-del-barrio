@@ -14,7 +14,12 @@ typedef _Shortcut = ({NeedKind kind, String text, String label, IconData icon});
 List<_Shortcut> _shortcuts(BuildContext context) {
   final base = [
     for (final q in NeedLabels.quick(context.l))
-      (kind: q.kind, text: q.text, label: q.label, icon: NeedLabels.icon(q.kind)),
+      (
+        kind: q.kind,
+        text: q.text,
+        label: q.label,
+        icon: NeedLabels.icon(q.kind),
+      ),
   ];
   final extra = <_Shortcut>[
     (
@@ -31,7 +36,11 @@ List<_Shortcut> _shortcuts(BuildContext context) {
     ),
     (
       kind: NeedKind.service,
-      text: tr(context, 'Necesito arreglar un dobladillo', 'I need a hem fixed'),
+      text: tr(
+        context,
+        'Necesito arreglar un dobladillo',
+        'I need a hem fixed',
+      ),
       label: tr(context, 'Costurera', 'Seamstress'),
       icon: Icons.content_cut_rounded,
     ),
@@ -57,7 +66,11 @@ List<_Shortcut> _shortcuts(BuildContext context) {
     ),
     (
       kind: NeedKind.loan,
-      text: tr(context, '¿Alguien me presta un taladro?', 'Can someone lend me a drill?'),
+      text: tr(
+        context,
+        '¿Alguien me presta un taladro?',
+        'Can someone lend me a drill?',
+      ),
       label: tr(context, 'Pedir prestado', 'Borrow'),
       icon: Icons.build_rounded,
     ),
