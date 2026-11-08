@@ -935,6 +935,28 @@ class $DealsTable extends Deals with TableInfo<$DealsTable, DealRow> {
     type: DriftSqlType.dateTime,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _cancelReasonMeta = const VerificationMeta(
+    'cancelReason',
+  );
+  @override
+  late final GeneratedColumn<String> cancelReason = GeneratedColumn<String>(
+    'cancel_reason',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _cancelledAtMeta = const VerificationMeta(
+    'cancelledAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> cancelledAt = GeneratedColumn<DateTime>(
+    'cancelled_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -948,6 +970,8 @@ class $DealsTable extends Deals with TableInfo<$DealsTable, DealRow> {
     acceptedAt,
     startedAt,
     completedAt,
+    cancelReason,
+    cancelledAt,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -1048,6 +1072,24 @@ class $DealsTable extends Deals with TableInfo<$DealsTable, DealRow> {
         ),
       );
     }
+    if (data.containsKey('cancel_reason')) {
+      context.handle(
+        _cancelReasonMeta,
+        cancelReason.isAcceptableOrUnknown(
+          data['cancel_reason']!,
+          _cancelReasonMeta,
+        ),
+      );
+    }
+    if (data.containsKey('cancelled_at')) {
+      context.handle(
+        _cancelledAtMeta,
+        cancelledAt.isAcceptableOrUnknown(
+          data['cancelled_at']!,
+          _cancelledAtMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -1101,6 +1143,14 @@ class $DealsTable extends Deals with TableInfo<$DealsTable, DealRow> {
         DriftSqlType.dateTime,
         data['${effectivePrefix}completed_at'],
       ),
+      cancelReason: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}cancel_reason'],
+      ),
+      cancelledAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}cancelled_at'],
+      ),
     );
   }
 
@@ -1122,6 +1172,8 @@ class DealRow extends DataClass implements Insertable<DealRow> {
   final DateTime acceptedAt;
   final DateTime? startedAt;
   final DateTime? completedAt;
+  final String? cancelReason;
+  final DateTime? cancelledAt;
   const DealRow({
     required this.id,
     required this.needId,
@@ -1134,6 +1186,8 @@ class DealRow extends DataClass implements Insertable<DealRow> {
     required this.acceptedAt,
     this.startedAt,
     this.completedAt,
+    this.cancelReason,
+    this.cancelledAt,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -1152,6 +1206,12 @@ class DealRow extends DataClass implements Insertable<DealRow> {
     }
     if (!nullToAbsent || completedAt != null) {
       map['completed_at'] = Variable<DateTime>(completedAt);
+    }
+    if (!nullToAbsent || cancelReason != null) {
+      map['cancel_reason'] = Variable<String>(cancelReason);
+    }
+    if (!nullToAbsent || cancelledAt != null) {
+      map['cancelled_at'] = Variable<DateTime>(cancelledAt);
     }
     return map;
   }
@@ -1173,6 +1233,12 @@ class DealRow extends DataClass implements Insertable<DealRow> {
       completedAt: completedAt == null && nullToAbsent
           ? const Value.absent()
           : Value(completedAt),
+      cancelReason: cancelReason == null && nullToAbsent
+          ? const Value.absent()
+          : Value(cancelReason),
+      cancelledAt: cancelledAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(cancelledAt),
     );
   }
 
@@ -1193,6 +1259,8 @@ class DealRow extends DataClass implements Insertable<DealRow> {
       acceptedAt: serializer.fromJson<DateTime>(json['acceptedAt']),
       startedAt: serializer.fromJson<DateTime?>(json['startedAt']),
       completedAt: serializer.fromJson<DateTime?>(json['completedAt']),
+      cancelReason: serializer.fromJson<String?>(json['cancelReason']),
+      cancelledAt: serializer.fromJson<DateTime?>(json['cancelledAt']),
     );
   }
   @override
@@ -1210,6 +1278,8 @@ class DealRow extends DataClass implements Insertable<DealRow> {
       'acceptedAt': serializer.toJson<DateTime>(acceptedAt),
       'startedAt': serializer.toJson<DateTime?>(startedAt),
       'completedAt': serializer.toJson<DateTime?>(completedAt),
+      'cancelReason': serializer.toJson<String?>(cancelReason),
+      'cancelledAt': serializer.toJson<DateTime?>(cancelledAt),
     };
   }
 
@@ -1225,6 +1295,8 @@ class DealRow extends DataClass implements Insertable<DealRow> {
     DateTime? acceptedAt,
     Value<DateTime?> startedAt = const Value.absent(),
     Value<DateTime?> completedAt = const Value.absent(),
+    Value<String?> cancelReason = const Value.absent(),
+    Value<DateTime?> cancelledAt = const Value.absent(),
   }) => DealRow(
     id: id ?? this.id,
     needId: needId ?? this.needId,
@@ -1237,6 +1309,8 @@ class DealRow extends DataClass implements Insertable<DealRow> {
     acceptedAt: acceptedAt ?? this.acceptedAt,
     startedAt: startedAt.present ? startedAt.value : this.startedAt,
     completedAt: completedAt.present ? completedAt.value : this.completedAt,
+    cancelReason: cancelReason.present ? cancelReason.value : this.cancelReason,
+    cancelledAt: cancelledAt.present ? cancelledAt.value : this.cancelledAt,
   );
   DealRow copyWithCompanion(DealsCompanion data) {
     return DealRow(
@@ -1263,6 +1337,12 @@ class DealRow extends DataClass implements Insertable<DealRow> {
       completedAt: data.completedAt.present
           ? data.completedAt.value
           : this.completedAt,
+      cancelReason: data.cancelReason.present
+          ? data.cancelReason.value
+          : this.cancelReason,
+      cancelledAt: data.cancelledAt.present
+          ? data.cancelledAt.value
+          : this.cancelledAt,
     );
   }
 
@@ -1279,7 +1359,9 @@ class DealRow extends DataClass implements Insertable<DealRow> {
           ..write('status: $status, ')
           ..write('acceptedAt: $acceptedAt, ')
           ..write('startedAt: $startedAt, ')
-          ..write('completedAt: $completedAt')
+          ..write('completedAt: $completedAt, ')
+          ..write('cancelReason: $cancelReason, ')
+          ..write('cancelledAt: $cancelledAt')
           ..write(')'))
         .toString();
   }
@@ -1297,6 +1379,8 @@ class DealRow extends DataClass implements Insertable<DealRow> {
     acceptedAt,
     startedAt,
     completedAt,
+    cancelReason,
+    cancelledAt,
   );
   @override
   bool operator ==(Object other) =>
@@ -1312,7 +1396,9 @@ class DealRow extends DataClass implements Insertable<DealRow> {
           other.status == this.status &&
           other.acceptedAt == this.acceptedAt &&
           other.startedAt == this.startedAt &&
-          other.completedAt == this.completedAt);
+          other.completedAt == this.completedAt &&
+          other.cancelReason == this.cancelReason &&
+          other.cancelledAt == this.cancelledAt);
 }
 
 class DealsCompanion extends UpdateCompanion<DealRow> {
@@ -1327,6 +1413,8 @@ class DealsCompanion extends UpdateCompanion<DealRow> {
   final Value<DateTime> acceptedAt;
   final Value<DateTime?> startedAt;
   final Value<DateTime?> completedAt;
+  final Value<String?> cancelReason;
+  final Value<DateTime?> cancelledAt;
   final Value<int> rowid;
   const DealsCompanion({
     this.id = const Value.absent(),
@@ -1340,6 +1428,8 @@ class DealsCompanion extends UpdateCompanion<DealRow> {
     this.acceptedAt = const Value.absent(),
     this.startedAt = const Value.absent(),
     this.completedAt = const Value.absent(),
+    this.cancelReason = const Value.absent(),
+    this.cancelledAt = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   DealsCompanion.insert({
@@ -1354,6 +1444,8 @@ class DealsCompanion extends UpdateCompanion<DealRow> {
     required DateTime acceptedAt,
     this.startedAt = const Value.absent(),
     this.completedAt = const Value.absent(),
+    this.cancelReason = const Value.absent(),
+    this.cancelledAt = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        needId = Value(needId),
@@ -1376,6 +1468,8 @@ class DealsCompanion extends UpdateCompanion<DealRow> {
     Expression<DateTime>? acceptedAt,
     Expression<DateTime>? startedAt,
     Expression<DateTime>? completedAt,
+    Expression<String>? cancelReason,
+    Expression<DateTime>? cancelledAt,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -1390,6 +1484,8 @@ class DealsCompanion extends UpdateCompanion<DealRow> {
       if (acceptedAt != null) 'accepted_at': acceptedAt,
       if (startedAt != null) 'started_at': startedAt,
       if (completedAt != null) 'completed_at': completedAt,
+      if (cancelReason != null) 'cancel_reason': cancelReason,
+      if (cancelledAt != null) 'cancelled_at': cancelledAt,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -1406,6 +1502,8 @@ class DealsCompanion extends UpdateCompanion<DealRow> {
     Value<DateTime>? acceptedAt,
     Value<DateTime?>? startedAt,
     Value<DateTime?>? completedAt,
+    Value<String?>? cancelReason,
+    Value<DateTime?>? cancelledAt,
     Value<int>? rowid,
   }) {
     return DealsCompanion(
@@ -1420,6 +1518,8 @@ class DealsCompanion extends UpdateCompanion<DealRow> {
       acceptedAt: acceptedAt ?? this.acceptedAt,
       startedAt: startedAt ?? this.startedAt,
       completedAt: completedAt ?? this.completedAt,
+      cancelReason: cancelReason ?? this.cancelReason,
+      cancelledAt: cancelledAt ?? this.cancelledAt,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -1460,6 +1560,12 @@ class DealsCompanion extends UpdateCompanion<DealRow> {
     if (completedAt.present) {
       map['completed_at'] = Variable<DateTime>(completedAt.value);
     }
+    if (cancelReason.present) {
+      map['cancel_reason'] = Variable<String>(cancelReason.value);
+    }
+    if (cancelledAt.present) {
+      map['cancelled_at'] = Variable<DateTime>(cancelledAt.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -1480,6 +1586,8 @@ class DealsCompanion extends UpdateCompanion<DealRow> {
           ..write('acceptedAt: $acceptedAt, ')
           ..write('startedAt: $startedAt, ')
           ..write('completedAt: $completedAt, ')
+          ..write('cancelReason: $cancelReason, ')
+          ..write('cancelledAt: $cancelledAt, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -5684,6 +5792,564 @@ class PostResponsesCompanion extends UpdateCompanion<PostResponseRow> {
   }
 }
 
+class $PriceChangesTable extends PriceChanges
+    with TableInfo<$PriceChangesTable, PriceChangeRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $PriceChangesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _dealIdMeta = const VerificationMeta('dealId');
+  @override
+  late final GeneratedColumn<String> dealId = GeneratedColumn<String>(
+    'deal_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _previousPriceMeta = const VerificationMeta(
+    'previousPrice',
+  );
+  @override
+  late final GeneratedColumn<int> previousPrice = GeneratedColumn<int>(
+    'previous_price',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _newPriceMeta = const VerificationMeta(
+    'newPrice',
+  );
+  @override
+  late final GeneratedColumn<int> newPrice = GeneratedColumn<int>(
+    'new_price',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _reasonMeta = const VerificationMeta('reason');
+  @override
+  late final GeneratedColumn<String> reason = GeneratedColumn<String>(
+    'reason',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _statusMeta = const VerificationMeta('status');
+  @override
+  late final GeneratedColumn<String> status = GeneratedColumn<String>(
+    'status',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _authorMeta = const VerificationMeta('author');
+  @override
+  late final GeneratedColumn<String> author = GeneratedColumn<String>(
+    'author',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('provider'),
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _resolvedAtMeta = const VerificationMeta(
+    'resolvedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> resolvedAt = GeneratedColumn<DateTime>(
+    'resolved_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    dealId,
+    previousPrice,
+    newPrice,
+    reason,
+    status,
+    author,
+    createdAt,
+    resolvedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'price_changes';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<PriceChangeRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('deal_id')) {
+      context.handle(
+        _dealIdMeta,
+        dealId.isAcceptableOrUnknown(data['deal_id']!, _dealIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_dealIdMeta);
+    }
+    if (data.containsKey('previous_price')) {
+      context.handle(
+        _previousPriceMeta,
+        previousPrice.isAcceptableOrUnknown(
+          data['previous_price']!,
+          _previousPriceMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_previousPriceMeta);
+    }
+    if (data.containsKey('new_price')) {
+      context.handle(
+        _newPriceMeta,
+        newPrice.isAcceptableOrUnknown(data['new_price']!, _newPriceMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_newPriceMeta);
+    }
+    if (data.containsKey('reason')) {
+      context.handle(
+        _reasonMeta,
+        reason.isAcceptableOrUnknown(data['reason']!, _reasonMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_reasonMeta);
+    }
+    if (data.containsKey('status')) {
+      context.handle(
+        _statusMeta,
+        status.isAcceptableOrUnknown(data['status']!, _statusMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_statusMeta);
+    }
+    if (data.containsKey('author')) {
+      context.handle(
+        _authorMeta,
+        author.isAcceptableOrUnknown(data['author']!, _authorMeta),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('resolved_at')) {
+      context.handle(
+        _resolvedAtMeta,
+        resolvedAt.isAcceptableOrUnknown(data['resolved_at']!, _resolvedAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  PriceChangeRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return PriceChangeRow(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      dealId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}deal_id'],
+      )!,
+      previousPrice: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}previous_price'],
+      )!,
+      newPrice: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}new_price'],
+      )!,
+      reason: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}reason'],
+      )!,
+      status: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}status'],
+      )!,
+      author: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}author'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      resolvedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}resolved_at'],
+      ),
+    );
+  }
+
+  @override
+  $PriceChangesTable createAlias(String alias) {
+    return $PriceChangesTable(attachedDatabase, alias);
+  }
+}
+
+class PriceChangeRow extends DataClass implements Insertable<PriceChangeRow> {
+  final String id;
+  final String dealId;
+  final int previousPrice;
+  final int newPrice;
+  final String reason;
+  final String status;
+  final String author;
+  final DateTime createdAt;
+  final DateTime? resolvedAt;
+  const PriceChangeRow({
+    required this.id,
+    required this.dealId,
+    required this.previousPrice,
+    required this.newPrice,
+    required this.reason,
+    required this.status,
+    required this.author,
+    required this.createdAt,
+    this.resolvedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['deal_id'] = Variable<String>(dealId);
+    map['previous_price'] = Variable<int>(previousPrice);
+    map['new_price'] = Variable<int>(newPrice);
+    map['reason'] = Variable<String>(reason);
+    map['status'] = Variable<String>(status);
+    map['author'] = Variable<String>(author);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    if (!nullToAbsent || resolvedAt != null) {
+      map['resolved_at'] = Variable<DateTime>(resolvedAt);
+    }
+    return map;
+  }
+
+  PriceChangesCompanion toCompanion(bool nullToAbsent) {
+    return PriceChangesCompanion(
+      id: Value(id),
+      dealId: Value(dealId),
+      previousPrice: Value(previousPrice),
+      newPrice: Value(newPrice),
+      reason: Value(reason),
+      status: Value(status),
+      author: Value(author),
+      createdAt: Value(createdAt),
+      resolvedAt: resolvedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(resolvedAt),
+    );
+  }
+
+  factory PriceChangeRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return PriceChangeRow(
+      id: serializer.fromJson<String>(json['id']),
+      dealId: serializer.fromJson<String>(json['dealId']),
+      previousPrice: serializer.fromJson<int>(json['previousPrice']),
+      newPrice: serializer.fromJson<int>(json['newPrice']),
+      reason: serializer.fromJson<String>(json['reason']),
+      status: serializer.fromJson<String>(json['status']),
+      author: serializer.fromJson<String>(json['author']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      resolvedAt: serializer.fromJson<DateTime?>(json['resolvedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'dealId': serializer.toJson<String>(dealId),
+      'previousPrice': serializer.toJson<int>(previousPrice),
+      'newPrice': serializer.toJson<int>(newPrice),
+      'reason': serializer.toJson<String>(reason),
+      'status': serializer.toJson<String>(status),
+      'author': serializer.toJson<String>(author),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'resolvedAt': serializer.toJson<DateTime?>(resolvedAt),
+    };
+  }
+
+  PriceChangeRow copyWith({
+    String? id,
+    String? dealId,
+    int? previousPrice,
+    int? newPrice,
+    String? reason,
+    String? status,
+    String? author,
+    DateTime? createdAt,
+    Value<DateTime?> resolvedAt = const Value.absent(),
+  }) => PriceChangeRow(
+    id: id ?? this.id,
+    dealId: dealId ?? this.dealId,
+    previousPrice: previousPrice ?? this.previousPrice,
+    newPrice: newPrice ?? this.newPrice,
+    reason: reason ?? this.reason,
+    status: status ?? this.status,
+    author: author ?? this.author,
+    createdAt: createdAt ?? this.createdAt,
+    resolvedAt: resolvedAt.present ? resolvedAt.value : this.resolvedAt,
+  );
+  PriceChangeRow copyWithCompanion(PriceChangesCompanion data) {
+    return PriceChangeRow(
+      id: data.id.present ? data.id.value : this.id,
+      dealId: data.dealId.present ? data.dealId.value : this.dealId,
+      previousPrice: data.previousPrice.present
+          ? data.previousPrice.value
+          : this.previousPrice,
+      newPrice: data.newPrice.present ? data.newPrice.value : this.newPrice,
+      reason: data.reason.present ? data.reason.value : this.reason,
+      status: data.status.present ? data.status.value : this.status,
+      author: data.author.present ? data.author.value : this.author,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      resolvedAt: data.resolvedAt.present
+          ? data.resolvedAt.value
+          : this.resolvedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PriceChangeRow(')
+          ..write('id: $id, ')
+          ..write('dealId: $dealId, ')
+          ..write('previousPrice: $previousPrice, ')
+          ..write('newPrice: $newPrice, ')
+          ..write('reason: $reason, ')
+          ..write('status: $status, ')
+          ..write('author: $author, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('resolvedAt: $resolvedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    dealId,
+    previousPrice,
+    newPrice,
+    reason,
+    status,
+    author,
+    createdAt,
+    resolvedAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is PriceChangeRow &&
+          other.id == this.id &&
+          other.dealId == this.dealId &&
+          other.previousPrice == this.previousPrice &&
+          other.newPrice == this.newPrice &&
+          other.reason == this.reason &&
+          other.status == this.status &&
+          other.author == this.author &&
+          other.createdAt == this.createdAt &&
+          other.resolvedAt == this.resolvedAt);
+}
+
+class PriceChangesCompanion extends UpdateCompanion<PriceChangeRow> {
+  final Value<String> id;
+  final Value<String> dealId;
+  final Value<int> previousPrice;
+  final Value<int> newPrice;
+  final Value<String> reason;
+  final Value<String> status;
+  final Value<String> author;
+  final Value<DateTime> createdAt;
+  final Value<DateTime?> resolvedAt;
+  final Value<int> rowid;
+  const PriceChangesCompanion({
+    this.id = const Value.absent(),
+    this.dealId = const Value.absent(),
+    this.previousPrice = const Value.absent(),
+    this.newPrice = const Value.absent(),
+    this.reason = const Value.absent(),
+    this.status = const Value.absent(),
+    this.author = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.resolvedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  PriceChangesCompanion.insert({
+    required String id,
+    required String dealId,
+    required int previousPrice,
+    required int newPrice,
+    required String reason,
+    required String status,
+    this.author = const Value.absent(),
+    required DateTime createdAt,
+    this.resolvedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       dealId = Value(dealId),
+       previousPrice = Value(previousPrice),
+       newPrice = Value(newPrice),
+       reason = Value(reason),
+       status = Value(status),
+       createdAt = Value(createdAt);
+  static Insertable<PriceChangeRow> custom({
+    Expression<String>? id,
+    Expression<String>? dealId,
+    Expression<int>? previousPrice,
+    Expression<int>? newPrice,
+    Expression<String>? reason,
+    Expression<String>? status,
+    Expression<String>? author,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? resolvedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (dealId != null) 'deal_id': dealId,
+      if (previousPrice != null) 'previous_price': previousPrice,
+      if (newPrice != null) 'new_price': newPrice,
+      if (reason != null) 'reason': reason,
+      if (status != null) 'status': status,
+      if (author != null) 'author': author,
+      if (createdAt != null) 'created_at': createdAt,
+      if (resolvedAt != null) 'resolved_at': resolvedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  PriceChangesCompanion copyWith({
+    Value<String>? id,
+    Value<String>? dealId,
+    Value<int>? previousPrice,
+    Value<int>? newPrice,
+    Value<String>? reason,
+    Value<String>? status,
+    Value<String>? author,
+    Value<DateTime>? createdAt,
+    Value<DateTime?>? resolvedAt,
+    Value<int>? rowid,
+  }) {
+    return PriceChangesCompanion(
+      id: id ?? this.id,
+      dealId: dealId ?? this.dealId,
+      previousPrice: previousPrice ?? this.previousPrice,
+      newPrice: newPrice ?? this.newPrice,
+      reason: reason ?? this.reason,
+      status: status ?? this.status,
+      author: author ?? this.author,
+      createdAt: createdAt ?? this.createdAt,
+      resolvedAt: resolvedAt ?? this.resolvedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (dealId.present) {
+      map['deal_id'] = Variable<String>(dealId.value);
+    }
+    if (previousPrice.present) {
+      map['previous_price'] = Variable<int>(previousPrice.value);
+    }
+    if (newPrice.present) {
+      map['new_price'] = Variable<int>(newPrice.value);
+    }
+    if (reason.present) {
+      map['reason'] = Variable<String>(reason.value);
+    }
+    if (status.present) {
+      map['status'] = Variable<String>(status.value);
+    }
+    if (author.present) {
+      map['author'] = Variable<String>(author.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (resolvedAt.present) {
+      map['resolved_at'] = Variable<DateTime>(resolvedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PriceChangesCompanion(')
+          ..write('id: $id, ')
+          ..write('dealId: $dealId, ')
+          ..write('previousPrice: $previousPrice, ')
+          ..write('newPrice: $newPrice, ')
+          ..write('reason: $reason, ')
+          ..write('status: $status, ')
+          ..write('author: $author, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('resolvedAt: $resolvedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -5707,6 +6373,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   );
   late final $NeighborBidsTable neighborBids = $NeighborBidsTable(this);
   late final $PostResponsesTable postResponses = $PostResponsesTable(this);
+  late final $PriceChangesTable priceChanges = $PriceChangesTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -5726,6 +6393,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     trustedContacts,
     neighborBids,
     postResponses,
+    priceChanges,
   ];
 }
 
@@ -6185,6 +6853,8 @@ typedef $$DealsTableCreateCompanionBuilder = DealsCompanion Function({
   required DateTime acceptedAt,
   Value<DateTime?> startedAt,
   Value<DateTime?> completedAt,
+  Value<String?> cancelReason,
+  Value<DateTime?> cancelledAt,
   Value<int> rowid,
 });
 typedef $$DealsTableUpdateCompanionBuilder = DealsCompanion Function({
@@ -6199,6 +6869,8 @@ typedef $$DealsTableUpdateCompanionBuilder = DealsCompanion Function({
   Value<DateTime> acceptedAt,
   Value<DateTime?> startedAt,
   Value<DateTime?> completedAt,
+  Value<String?> cancelReason,
+  Value<DateTime?> cancelledAt,
   Value<int> rowid,
 });
 
@@ -6262,6 +6934,16 @@ class $$DealsTableFilterComposer extends Composer<_$AppDatabase, $DealsTable> {
 
   ColumnFilters<DateTime> get completedAt => $composableBuilder(
     column: $table.completedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get cancelReason => $composableBuilder(
+    column: $table.cancelReason,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get cancelledAt => $composableBuilder(
+    column: $table.cancelledAt,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -6329,6 +7011,16 @@ class $$DealsTableOrderingComposer
     column: $table.completedAt,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get cancelReason => $composableBuilder(
+    column: $table.cancelReason,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get cancelledAt => $composableBuilder(
+    column: $table.cancelledAt,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$DealsTableAnnotationComposer
@@ -6384,6 +7076,16 @@ class $$DealsTableAnnotationComposer
     column: $table.completedAt,
     builder: (column) => column,
   );
+
+  GeneratedColumn<String> get cancelReason => $composableBuilder(
+    column: $table.cancelReason,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get cancelledAt => $composableBuilder(
+    column: $table.cancelledAt,
+    builder: (column) => column,
+  );
 }
 
 class $$DealsTableTableManager
@@ -6425,6 +7127,8 @@ class $$DealsTableTableManager
                 Value<DateTime> acceptedAt = const Value.absent(),
                 Value<DateTime?> startedAt = const Value.absent(),
                 Value<DateTime?> completedAt = const Value.absent(),
+                Value<String?> cancelReason = const Value.absent(),
+                Value<DateTime?> cancelledAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => DealsCompanion(
                 id: id,
@@ -6438,6 +7142,8 @@ class $$DealsTableTableManager
                 acceptedAt: acceptedAt,
                 startedAt: startedAt,
                 completedAt: completedAt,
+                cancelReason: cancelReason,
+                cancelledAt: cancelledAt,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -6453,6 +7159,8 @@ class $$DealsTableTableManager
                 required DateTime acceptedAt,
                 Value<DateTime?> startedAt = const Value.absent(),
                 Value<DateTime?> completedAt = const Value.absent(),
+                Value<String?> cancelReason = const Value.absent(),
+                Value<DateTime?> cancelledAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => DealsCompanion.insert(
                 id: id,
@@ -6466,6 +7174,8 @@ class $$DealsTableTableManager
                 acceptedAt: acceptedAt,
                 startedAt: startedAt,
                 completedAt: completedAt,
+                cancelReason: cancelReason,
+                cancelledAt: cancelledAt,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
@@ -8916,6 +9626,295 @@ typedef $$PostResponsesTableProcessedTableManager =
       PostResponseRow,
       PrefetchHooks Function()
     >;
+typedef $$PriceChangesTableCreateCompanionBuilder =
+    PriceChangesCompanion Function({
+      required String id,
+      required String dealId,
+      required int previousPrice,
+      required int newPrice,
+      required String reason,
+      required String status,
+      Value<String> author,
+      required DateTime createdAt,
+      Value<DateTime?> resolvedAt,
+      Value<int> rowid,
+    });
+typedef $$PriceChangesTableUpdateCompanionBuilder =
+    PriceChangesCompanion Function({
+      Value<String> id,
+      Value<String> dealId,
+      Value<int> previousPrice,
+      Value<int> newPrice,
+      Value<String> reason,
+      Value<String> status,
+      Value<String> author,
+      Value<DateTime> createdAt,
+      Value<DateTime?> resolvedAt,
+      Value<int> rowid,
+    });
+
+class $$PriceChangesTableFilterComposer
+    extends Composer<_$AppDatabase, $PriceChangesTable> {
+  $$PriceChangesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get dealId => $composableBuilder(
+    column: $table.dealId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get previousPrice => $composableBuilder(
+    column: $table.previousPrice,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get newPrice => $composableBuilder(
+    column: $table.newPrice,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get reason => $composableBuilder(
+    column: $table.reason,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get author => $composableBuilder(
+    column: $table.author,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get resolvedAt => $composableBuilder(
+    column: $table.resolvedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$PriceChangesTableOrderingComposer
+    extends Composer<_$AppDatabase, $PriceChangesTable> {
+  $$PriceChangesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get dealId => $composableBuilder(
+    column: $table.dealId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get previousPrice => $composableBuilder(
+    column: $table.previousPrice,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get newPrice => $composableBuilder(
+    column: $table.newPrice,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get reason => $composableBuilder(
+    column: $table.reason,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get author => $composableBuilder(
+    column: $table.author,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get resolvedAt => $composableBuilder(
+    column: $table.resolvedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$PriceChangesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $PriceChangesTable> {
+  $$PriceChangesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get dealId =>
+      $composableBuilder(column: $table.dealId, builder: (column) => column);
+
+  GeneratedColumn<int> get previousPrice => $composableBuilder(
+    column: $table.previousPrice,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get newPrice =>
+      $composableBuilder(column: $table.newPrice, builder: (column) => column);
+
+  GeneratedColumn<String> get reason =>
+      $composableBuilder(column: $table.reason, builder: (column) => column);
+
+  GeneratedColumn<String> get status =>
+      $composableBuilder(column: $table.status, builder: (column) => column);
+
+  GeneratedColumn<String> get author =>
+      $composableBuilder(column: $table.author, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get resolvedAt => $composableBuilder(
+    column: $table.resolvedAt,
+    builder: (column) => column,
+  );
+}
+
+class $$PriceChangesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $PriceChangesTable,
+          PriceChangeRow,
+          $$PriceChangesTableFilterComposer,
+          $$PriceChangesTableOrderingComposer,
+          $$PriceChangesTableAnnotationComposer,
+          $$PriceChangesTableCreateCompanionBuilder,
+          $$PriceChangesTableUpdateCompanionBuilder,
+          (
+            PriceChangeRow,
+            BaseReferences<_$AppDatabase, $PriceChangesTable, PriceChangeRow>,
+          ),
+          PriceChangeRow,
+          PrefetchHooks Function()
+        > {
+  $$PriceChangesTableTableManager(_$AppDatabase db, $PriceChangesTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$PriceChangesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$PriceChangesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$PriceChangesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> dealId = const Value.absent(),
+                Value<int> previousPrice = const Value.absent(),
+                Value<int> newPrice = const Value.absent(),
+                Value<String> reason = const Value.absent(),
+                Value<String> status = const Value.absent(),
+                Value<String> author = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime?> resolvedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => PriceChangesCompanion(
+                id: id,
+                dealId: dealId,
+                previousPrice: previousPrice,
+                newPrice: newPrice,
+                reason: reason,
+                status: status,
+                author: author,
+                createdAt: createdAt,
+                resolvedAt: resolvedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String dealId,
+                required int previousPrice,
+                required int newPrice,
+                required String reason,
+                required String status,
+                Value<String> author = const Value.absent(),
+                required DateTime createdAt,
+                Value<DateTime?> resolvedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => PriceChangesCompanion.insert(
+                id: id,
+                dealId: dealId,
+                previousPrice: previousPrice,
+                newPrice: newPrice,
+                reason: reason,
+                status: status,
+                author: author,
+                createdAt: createdAt,
+                resolvedAt: resolvedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$PriceChangesTable, PriceChangeRow>(table),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $PriceChangesTable,
+                    PriceChangeRow
+                  >(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$PriceChangesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $PriceChangesTable,
+      PriceChangeRow,
+      $$PriceChangesTableFilterComposer,
+      $$PriceChangesTableOrderingComposer,
+      $$PriceChangesTableAnnotationComposer,
+      $$PriceChangesTableCreateCompanionBuilder,
+      $$PriceChangesTableUpdateCompanionBuilder,
+      (
+        PriceChangeRow,
+        BaseReferences<_$AppDatabase, $PriceChangesTable, PriceChangeRow>,
+      ),
+      PriceChangeRow,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -8948,4 +9947,6 @@ class $AppDatabaseManager {
       $$NeighborBidsTableTableManager(_db, _db.neighborBids);
   $$PostResponsesTableTableManager get postResponses =>
       $$PostResponsesTableTableManager(_db, _db.postResponses);
+  $$PriceChangesTableTableManager get priceChanges =>
+      $$PriceChangesTableTableManager(_db, _db.priceChanges);
 }

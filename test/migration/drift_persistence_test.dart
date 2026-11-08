@@ -157,4 +157,24 @@ void main() {
       expect(await db.select(db.postResponses).get(), isEmpty);
     },
   );
+
+  test('migración 9 → 10: los tratos ganan el motivo de cancelación', () async {
+    final executor = NativeDatabase.memory(
+      setup: (raw) {
+        raw.execute(
+          'CREATE TABLE deals (id TEXT NOT NULL PRIMARY KEY, need_id TEXT NOT NULL, provider_id TEXT NOT NULL, provider_name TEXT NOT NULL, price_soles INTEGER NOT NULL, price_label TEXT NOT NULL, code TEXT NOT NULL, status TEXT NOT NULL, accepted_at INTEGER NOT NULL, started_at INTEGER, completed_at INTEGER)',
+        );
+        raw.execute(
+          "INSERT INTO deals VALUES ('d','n','p','Carlos',40,'S/ 40','1234','accepted',1700000000,NULL,NULL)",
+        );
+        raw.execute('PRAGMA user_version = 9');
+      },
+    );
+    final db = AppDatabase(executor);
+    addTearDown(db.close);
+    final d = await db.select(db.deals).getSingle();
+    expect(d.id, 'd');
+    expect(d.cancelReason, isNull);
+    expect(await db.select(db.priceChanges).get(), isEmpty);
+  });
 }

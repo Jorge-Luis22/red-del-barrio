@@ -10,6 +10,9 @@ enum DealStatus {
 
   /// Calificado: cuenta para la reputación.
   closed,
+
+  /// Cancelado con un motivo. No hay multas ni baja de reputación.
+  cancelled,
 }
 
 /// Trato: una propuesta aceptada con su código de encuentro, etapas y cierre.
@@ -26,6 +29,8 @@ class Deal {
     required this.acceptedAt,
     this.startedAt,
     this.completedAt,
+    this.cancelReason,
+    this.cancelledAt,
   });
 
   final String id;
@@ -41,6 +46,8 @@ class Deal {
   final DateTime acceptedAt;
   final DateTime? startedAt;
   final DateTime? completedAt;
+  final String? cancelReason;
+  final DateTime? cancelledAt;
 
   /// Duración del servicio, si ya terminó.
   Duration? get duration => (startedAt != null && completedAt != null)
@@ -51,17 +58,23 @@ class Deal {
     DealStatus? status,
     DateTime? startedAt,
     DateTime? completedAt,
+    int? priceSoles,
+    String? priceLabel,
+    String? cancelReason,
+    DateTime? cancelledAt,
   }) => Deal(
     id: id,
     needId: needId,
     providerId: providerId,
     providerName: providerName,
-    priceSoles: priceSoles,
-    priceLabel: priceLabel,
+    priceSoles: priceSoles ?? this.priceSoles,
+    priceLabel: priceLabel ?? this.priceLabel,
     code: code,
     status: status ?? this.status,
     acceptedAt: acceptedAt,
     startedAt: startedAt ?? this.startedAt,
     completedAt: completedAt ?? this.completedAt,
+    cancelReason: cancelReason ?? this.cancelReason,
+    cancelledAt: cancelledAt ?? this.cancelledAt,
   );
 }

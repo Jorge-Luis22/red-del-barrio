@@ -31,6 +31,8 @@ class DriftDealRepository implements DealRepository {
                 acceptedAt: d.acceptedAt,
                 startedAt: Value(d.startedAt),
                 completedAt: Value(d.completedAt),
+                cancelReason: Value(d.cancelReason),
+                cancelledAt: Value(d.cancelledAt),
               ),
             );
       },
@@ -69,5 +71,7 @@ class DriftDealRepository implements DealRepository {
     acceptedAt: r.acceptedAt,
     startedAt: r.startedAt,
     completedAt: r.completedAt,
+    cancelReason: r.cancelReason,
+    cancelledAt: r.cancelledAt,
   );
 }

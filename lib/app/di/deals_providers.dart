@@ -2,11 +2,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../features/proposals/domain/deal.dart';
 import '../../features/proposals/domain/deal_repository.dart';
+import '../../features/proposals/domain/price_change.dart';
 import '../../features/proposals/domain/proposal_repository.dart';
 import '../../features/proposals/domain/usecases/deal_usecases.dart';
 import '../../features/proposals/domain/usecases/list_proposals.dart';
 import '../../features/proposals/infrastructure/demo_proposal_repository.dart';
 import '../../features/proposals/infrastructure/drift_deal_repository.dart';
+import '../../features/proposals/infrastructure/drift_price_change_repository.dart';
 import '../../features/reputation/domain/interaction.dart';
 import '../../features/reputation/domain/reputation_repository.dart';
 import '../../features/reputation/infrastructure/drift_reputation_repository.dart';
@@ -66,4 +68,29 @@ final dealsStreamProvider = StreamProvider<List<Deal>>(
 );
 final interactionsStreamProvider = StreamProvider<List<Interaction>>(
   (ref) => ref.watch(reputationRepositoryProvider).watchAll(),
+);
+
+final priceChangeRepositoryProvider = Provider<PriceChangeRepository>(
+  (ref) => DriftPriceChangeRepository(ref.watch(appDatabaseProvider)),
+);
+
+/// Todas las contraofertas de los tratos de la persona.
+final priceChangesStreamProvider = StreamProvider<List<PriceChange>>(
+  (ref) => ref.watch(priceChangeRepositoryProvider).watchAll(),
+);
+
+final counterOfferProvider = Provider<CounterOfferService>(
+  (ref) => CounterOfferService(
+    deals: ref.watch(dealRepositoryProvider),
+    changes: ref.watch(priceChangeRepositoryProvider),
+    clock: ref.watch(clockProvider),
+    ids: ref.watch(idGeneratorProvider),
+  ),
+);
+
+final cancelDealProvider = Provider<CancelDeal>(
+  (ref) => CancelDeal(
+    deals: ref.watch(dealRepositoryProvider),
+    clock: ref.watch(clockProvider),
+  ),
 );

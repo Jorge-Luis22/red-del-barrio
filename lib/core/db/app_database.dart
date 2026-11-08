@@ -45,6 +45,8 @@ class Deals extends Table {
   DateTimeColumn get acceptedAt => dateTime()();
   DateTimeColumn get startedAt => dateTime().nullable()();
   DateTimeColumn get completedAt => dateTime().nullable()();
+  TextColumn get cancelReason => text().nullable()();
+  DateTimeColumn get cancelledAt => dateTime().nullable()();
 
   @override
   Set<Column> get primaryKey => {id};
@@ -218,6 +220,26 @@ class PostResponses extends Table {
   Set<Column> get primaryKey => {id};
 }
 
+/// Contraofertas presenciales del prestador (máximo 2 por trato). Desde el esquema 10.
+@DataClassName('PriceChangeRow')
+class PriceChanges extends Table {
+  @override
+  String get tableName => 'price_changes';
+
+  TextColumn get id => text()();
+  TextColumn get dealId => text()();
+  IntColumn get previousPrice => integer()();
+  IntColumn get newPrice => integer()();
+  TextColumn get reason => text()();
+  TextColumn get status => text()();
+  TextColumn get author => text().withDefault(const Constant('provider'))();
+  DateTimeColumn get createdAt => dateTime()();
+  DateTimeColumn get resolvedAt => dateTime().nullable()();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
 @DriftDatabase(
   tables: [
     Needs,
@@ -234,6 +256,7 @@ class PostResponses extends Table {
     TrustedContacts,
     NeighborBids,
     PostResponses,
+    PriceChanges,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -245,7 +268,7 @@ class AppDatabase extends _$AppDatabase {
   /// Versión del esquema. Cada cambio exige subirla y escribir su migración + prueba (R28).
   /// 1: needs, outbox_ops · 2: + deals, interactions
   @override
-  int get schemaVersion => 9;
+  int get schemaVersion => 10;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -271,6 +294,16 @@ class AppDatabase extends _$AppDatabase {
         await m.createTable(emergencyPosts);
         await m.createTable(collectionPoints);
         await m.createTable(appSettingsKv);
+      }
+      if (from < 10) {
+        await m.createTable(priceChanges);
+        // Los tratos ganan el motivo de cancelación (si la tabla ya existía sin ellas).
+        final cols = await customSelect("PRAGMA table_info('deals')").get();
+        final names = cols.map((c) => c.read<String>('name')).toSet();
+        if (names.isNotEmpty && !names.contains('cancel_reason')) {
+          await m.addColumn(deals, deals.cancelReason);
+          await m.addColumn(deals, deals.cancelledAt);
+        }
       }
       if (from < 9) {
         await m.createTable(postResponses);
