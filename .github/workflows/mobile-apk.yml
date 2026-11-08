@@ -44,12 +44,31 @@ jobs:
       - name: Dependencias
         run: flutter pub get
 
+      # Si algo falla, los errores quedan como anotaciones del flujo (se leen sin iniciar sesión).
       - name: Revisar el código (no detiene la compilación)
         continue-on-error: true
-        run: flutter analyze lib
+        run: |
+          set +e
+          flutter analyze lib > ../analyze.txt 2>&1
+          code=$?
+          cat ../analyze.txt
+          if [ $code -ne 0 ]; then
+            msg=$(grep -E ' error ' ../analyze.txt | head -40 | cut -c1-300 | awk 'BEGIN{ORS="%0A"} {print}')
+            echo "::error title=flutter analyze::${msg}"
+          fi
+          exit $code
 
       - name: Compilar APK
-        run: flutter build apk --release
+        run: |
+          set +e
+          flutter build apk --release > ../build.txt 2>&1
+          code=$?
+          tail -n 80 ../build.txt
+          if [ $code -ne 0 ]; then
+            msg=$(grep -E 'Error|error:|FAILURE|What went wrong|lib/' ../build.txt | head -40 | cut -c1-300 | awk 'BEGIN{ORS="%0A"} {print}')
+            echo "::error title=build::${msg}"
+          fi
+          exit $code
 
       - uses: actions/upload-artifact@v4
         with:
