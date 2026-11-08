@@ -16,25 +16,31 @@ class ExploreFilters {
   final String trade;
   final ExploreSort sort;
 
-  ExploreFilters copyWith({ListingKind? kind, String? trade, ExploreSort? sort}) =>
-      ExploreFilters(
-        kind: kind ?? this.kind,
-        trade: trade ?? this.trade,
-        sort: sort ?? this.sort,
-      );
+  ExploreFilters copyWith({
+    ListingKind? kind,
+    String? trade,
+    ExploreSort? sort,
+  }) => ExploreFilters(
+    kind: kind ?? this.kind,
+    trade: trade ?? this.trade,
+    sort: sort ?? this.sort,
+  );
 }
 
 class ExploreFiltersController extends Notifier<ExploreFilters> {
   @override
   ExploreFilters build() => const ExploreFilters();
 
-  void setKind(ListingKind k) => state = ExploreFilters(kind: k, sort: state.sort);
+  void setKind(ListingKind k) =>
+      state = ExploreFilters(kind: k, sort: state.sort);
   void setTrade(String t) => state = state.copyWith(trade: t);
   void setSort(ExploreSort s) => state = state.copyWith(sort: s);
 }
 
 final exploreFiltersProvider =
-    NotifierProvider<ExploreFiltersController, ExploreFilters>(ExploreFiltersController.new);
+    NotifierProvider<ExploreFiltersController, ExploreFilters>(
+      ExploreFiltersController.new,
+    );
 
 /// Se recalcula al cambiar filtros, ubicación o interacciones (Visto Bueno).
 final exploreItemsProvider = FutureProvider<List<ExploreItem>>((ref) async {

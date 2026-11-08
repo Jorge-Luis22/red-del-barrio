@@ -22,10 +22,16 @@ class AcceptProposal {
 
   Future<Result<Deal>> call(Need need, Proposal proposal) async {
     if (need.syncStatus != SyncStatus.sent) {
-      return const Err(ValidationFailure('Tu pedido todavía no se envió. Espera a tener internet.'));
+      return const Err(
+        ValidationFailure(
+          'Tu pedido todavía no se envió. Espera a tener internet.',
+        ),
+      );
     }
     if (await deals.byNeed(need.id) != null) {
-      return const Err(ValidationFailure('Este pedido ya tiene una propuesta aceptada.'));
+      return const Err(
+        ValidationFailure('Este pedido ya tiene una propuesta aceptada.'),
+      );
     }
     final deal = Deal(
       id: ids.newUuid(),
@@ -54,14 +60,24 @@ class ValidateMeetingCode {
 
   Future<Result<Deal>> call(String dealId, String entered) async {
     final deal = await deals.byId(dealId);
-    if (deal == null) return const Err(ValidationFailure('No encontramos este trato.'));
+    if (deal == null)
+      return const Err(ValidationFailure('No encontramos este trato.'));
     if (deal.status != DealStatus.accepted) {
-      return const Err(ValidationFailure('El código de este trato ya fue validado.'));
+      return const Err(
+        ValidationFailure('El código de este trato ya fue validado.'),
+      );
     }
     if (entered.trim() != deal.code) {
-      return const Err(ValidationFailure('El código no coincide. Revísalo con la otra persona.'));
+      return const Err(
+        ValidationFailure(
+          'El código no coincide. Revísalo con la otra persona.',
+        ),
+      );
     }
-    final updated = deal.copyWith(status: DealStatus.inProgress, startedAt: clock.now());
+    final updated = deal.copyWith(
+      status: DealStatus.inProgress,
+      startedAt: clock.now(),
+    );
     final saved = await deals.save(updated);
     if (saved case Err(:final failure)) return Err(failure);
     return Ok(updated);
@@ -77,11 +93,17 @@ class CompleteDeal {
 
   Future<Result<Deal>> call(String dealId) async {
     final deal = await deals.byId(dealId);
-    if (deal == null) return const Err(ValidationFailure('No encontramos este trato.'));
+    if (deal == null)
+      return const Err(ValidationFailure('No encontramos este trato.'));
     if (deal.status != DealStatus.inProgress) {
-      return const Err(ValidationFailure('Primero hay que validar el código de encuentro.'));
+      return const Err(
+        ValidationFailure('Primero hay que validar el código de encuentro.'),
+      );
     }
-    final updated = deal.copyWith(status: DealStatus.awaitingRating, completedAt: clock.now());
+    final updated = deal.copyWith(
+      status: DealStatus.awaitingRating,
+      completedAt: clock.now(),
+    );
     final saved = await deals.save(updated);
     if (saved case Err(:final failure)) return Err(failure);
     return Ok(updated);
@@ -131,12 +153,16 @@ class CloseAndRate {
       return const Err(ValidationFailure('Elige de 1 a 5 estrellas.'));
     }
     final deal = await deals.byId(dealId);
-    if (deal == null) return const Err(ValidationFailure('No encontramos este trato.'));
+    if (deal == null)
+      return const Err(ValidationFailure('No encontramos este trato.'));
     if (deal.status != DealStatus.awaitingRating) {
-      return const Err(ValidationFailure('Primero marca el servicio como hecho.'));
+      return const Err(
+        ValidationFailure('Primero marca el servicio como hecho.'),
+      );
     }
     final provider = await directory.provider(deal.providerId);
-    if (provider == null) return const Err(ValidationFailure('No encontramos a esta persona.'));
+    if (provider == null)
+      return const Err(ValidationFailure('No encontramos a esta persona.'));
 
     final before = await reputation.forProvider(deal.providerId);
     final interaction = Interaction(
@@ -156,14 +182,16 @@ class CloseAndRate {
     if (saved case Err(:final failure)) return Err(failure);
 
     final after = [...before, interaction];
-    return Ok(CloseOutcome(
-      deal: closed,
-      before: calculateReputation(provider, before),
-      after: calculateReputation(provider, after),
-      vistoBueno: calculateVistoBueno(
-        exampleCount: provider.exampleVistoBueno,
-        interactions: after,
+    return Ok(
+      CloseOutcome(
+        deal: closed,
+        before: calculateReputation(provider, before),
+        after: calculateReputation(provider, after),
+        vistoBueno: calculateVistoBueno(
+          exampleCount: provider.exampleVistoBueno,
+          interactions: after,
+        ),
       ),
-    ));
+    );
   }
 }

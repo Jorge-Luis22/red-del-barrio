@@ -12,7 +12,10 @@ void main() {
     const loc = ExactLocation(-12.04637, -77.04281);
     expect(loc.zone.lat, -12.05);
     expect(loc.zone.lng, -77.04);
-    expect(haversineMeters(loc.lat, loc.lng, loc.zone.lat, loc.zone.lng), lessThan(1000));
+    expect(
+      haversineMeters(loc.lat, loc.lng, loc.zone.lat, loc.zone.lng),
+      lessThan(1000),
+    );
   });
 
   test('formatDistance en español', () {

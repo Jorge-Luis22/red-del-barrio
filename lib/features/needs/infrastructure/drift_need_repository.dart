@@ -14,14 +14,18 @@ class DriftNeedRepository implements NeedRepository {
   @override
   Future<Result<void>> save(Need need) async {
     try {
-      await _db.into(_db.needs).insertOnConflictUpdate(NeedsCompanion.insert(
-            id: need.id,
-            kind: need.kind.name,
-            body: need.text,
-            urgency: need.urgency.name,
-            createdAt: need.createdAt,
-            syncStatus: need.syncStatus.name,
-          ));
+      await _db
+          .into(_db.needs)
+          .insertOnConflictUpdate(
+            NeedsCompanion.insert(
+              id: need.id,
+              kind: need.kind.name,
+              body: need.text,
+              urgency: need.urgency.name,
+              createdAt: need.createdAt,
+              syncStatus: need.syncStatus.name,
+            ),
+          );
       return const Ok(null);
     } catch (_) {
       return const Err(StorageFailure('No se pudo guardar en tu teléfono.'));
@@ -31,8 +35,9 @@ class DriftNeedRepository implements NeedRepository {
   @override
   Future<Result<void>> updateStatus(String id, SyncStatus status) async {
     try {
-      await (_db.update(_db.needs)..where((t) => t.id.equals(id)))
-          .write(NeedsCompanion(syncStatus: Value(status.name)));
+      await (_db.update(_db.needs)..where((t) => t.id.equals(id))).write(
+        NeedsCompanion(syncStatus: Value(status.name)),
+      );
       return const Ok(null);
     } catch (_) {
       return const Err(StorageFailure('No se pudo actualizar el estado.'));
@@ -47,11 +52,11 @@ class DriftNeedRepository implements NeedRepository {
   }
 
   Need _toDomain(NeedRow r) => Need(
-        id: r.id,
-        kind: NeedKind.values.byName(r.kind),
-        text: r.body,
-        urgency: Urgency.values.byName(r.urgency),
-        createdAt: r.createdAt,
-        syncStatus: SyncStatus.values.byName(r.syncStatus),
-      );
+    id: r.id,
+    kind: NeedKind.values.byName(r.kind),
+    text: r.body,
+    urgency: Urgency.values.byName(r.urgency),
+    createdAt: r.createdAt,
+    syncStatus: SyncStatus.values.byName(r.syncStatus),
+  );
 }

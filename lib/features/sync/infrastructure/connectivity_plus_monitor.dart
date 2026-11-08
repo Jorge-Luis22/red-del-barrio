@@ -6,7 +6,7 @@ import '../domain/connectivity_monitor.dart';
 /// en etapa 2 se complementa con una comprobación contra el servidor.
 class ConnectivityPlusMonitor implements ConnectivityMonitor {
   ConnectivityPlusMonitor([Connectivity? connectivity])
-      : _connectivity = connectivity ?? Connectivity();
+    : _connectivity = connectivity ?? Connectivity();
 
   final Connectivity _connectivity;
 
@@ -14,7 +14,8 @@ class ConnectivityPlusMonitor implements ConnectivityMonitor {
       r.any((e) => e != ConnectivityResult.none);
 
   @override
-  Future<bool> get isOnline async => _hasNetwork(await _connectivity.checkConnectivity());
+  Future<bool> get isOnline async =>
+      _hasNetwork(await _connectivity.checkConnectivity());
 
   @override
   Stream<bool> get onlineChanges =>

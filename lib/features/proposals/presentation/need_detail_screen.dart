@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../app/di/providers.dart';
+import '../../../app/theme/brand.dart';
+import '../../../app/ui/components.dart';
 import '../../../core/geo/geo_math.dart';
 import '../../../core/result.dart';
 import '../../needs/domain/need.dart';
@@ -32,13 +34,13 @@ class _NeedDetailScreenState extends ConsumerState<NeedDetailScreen> {
     final r = await ref.read(acceptProposalProvider)(need, v.proposal);
     if (!mounted) return;
     if (r case Err(:final failure)) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(failure.message)));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(failure.message)));
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final need = ref.watch(needByIdProvider(widget.needId));
     final deal = ref.watch(dealByNeedProvider(widget.needId));
     final isDemo = ref.watch(syncGatewayProvider).isDemo;
@@ -46,7 +48,10 @@ class _NeedDetailScreenState extends ConsumerState<NeedDetailScreen> {
     if (need == null) {
       return Scaffold(
         appBar: AppBar(leading: BackButton(onPressed: () => context.go('/'))),
-        body: const Center(child: Text('No encontramos este pedido.')),
+        body: const BvEmptyState(
+          title: 'No encontramos este pedido',
+          message: 'Puede que ya no esté en tu teléfono. Vuelve a Inicio para ver tus pedidos.',
+        ),
       );
     }
 
@@ -55,60 +60,121 @@ class _NeedDetailScreenState extends ConsumerState<NeedDetailScreen> {
         leading: BackButton(onPressed: () => context.go('/')),
         title: Text(NeedLabels.kind(need.kind)),
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          Text(need.text, style: theme.textTheme.headlineSmall),
-          const SizedBox(height: 4),
-          Text('Para: ${NeedLabels.urgency(need.urgency)}'),
-          const SizedBox(height: 12),
-          _SyncCard(need: need, isDemo: isDemo),
-          const SizedBox(height: 16),
-          if (deal != null)
-            DealPanel(deal: deal)
-          else if (need.syncStatus == SyncStatus.sent)
-            ..._proposals(context),
-        ],
+      body: SafeArea(
+        top: false,
+        child: ListView(
+          padding: const EdgeInsets.fromLTRB(16, 4, 16, 32),
+          children: [
+            _NeedHeader(need: need),
+            const SizedBox(height: 16),
+            _SyncBanner(need: need, isDemo: isDemo),
+            const SizedBox(height: 24),
+            if (deal != null)
+              DealPanel(deal: deal)
+            else if (need.syncStatus == SyncStatus.sent)
+              ..._proposals(context),
+          ],
+        ),
       ),
     );
   }
 
   List<Widget> _proposals(BuildContext context) {
-    final theme = Theme.of(context);
     final views = ref.watch(proposalViewsProvider(widget.needId));
     return [
-      Text('Propuestas de tu barrio', style: theme.textTheme.titleLarge),
-      const SizedBox(height: 4),
-      const Text('Aquí el precio lo pone cada persona al ver tu pedido. Tú eliges. Las propuestas son de ejemplo.'),
-      const SizedBox(height: 8),
-      Wrap(spacing: 8, crossAxisAlignment: WrapCrossAlignment.center, children: [
-        const Text('Ordenar por'),
-        for (final s in _Sort.values)
-          ChoiceChip(
-            label: Text(switch (s) { _Sort.reputation => 'Reputación', _Sort.distance => 'Cercanía', _Sort.price => 'Precio' }),
-            selected: _sort == s,
-            onSelected: (_) => setState(() => _sort = s),
+      const BvSectionTitle(
+        'Propuestas de tu barrio',
+        subtitle: 'Aquí el precio lo pone cada persona al ver tu pedido. Tú eliges. Las propuestas son de ejemplo.',
+      ),
+      const SizedBox(height: 14),
+      BvSegmented<_Sort>(
+        options: const [
+          (
+            value: _Sort.reputation,
+            label: 'Reputación',
+            icon: Icons.star_rounded,
           ),
-      ]),
-      const SizedBox(height: 8),
+          (
+            value: _Sort.distance,
+            label: 'Cercanía',
+            icon: Icons.near_me_rounded,
+          ),
+          (value: _Sort.price, label: 'Precio', icon: Icons.sell_rounded),
+        ],
+        selected: _sort,
+        onChanged: (s) => setState(() => _sort = s),
+      ),
+      const SizedBox(height: 14),
       views.when(
-        loading: () => const Center(child: Padding(padding: EdgeInsets.all(24), child: CircularProgressIndicator())),
-        error: (_, _) => const Text('No pudimos cargar las propuestas. Inténtalo otra vez.'),
+        loading: () => const BvSkeletonRows(),
+        error: (_, _) => BvErrorState(
+          message: 'No pudimos cargar las propuestas.',
+          onRetry: () => ref.invalidate(proposalViewsProvider(widget.needId)),
+        ),
         data: (list) {
-          final sorted = [...list]..sort((a, b) => switch (_sort) {
-              _Sort.reputation => b.reputation.average.compareTo(a.reputation.average),
-              _Sort.distance => a.proposal.distanceMeters.compareTo(b.proposal.distanceMeters),
-              _Sort.price => a.proposal.priceSoles.compareTo(b.proposal.priceSoles),
-            });
-          return Column(children: [for (final v in sorted) _ProposalCard(view: v, onAccept: () => _accept(v))]);
+          final sorted = [...list]
+            ..sort(
+              (a, b) => switch (_sort) {
+                _Sort.reputation => b.reputation.average.compareTo(
+                  a.reputation.average,
+                ),
+                _Sort.distance => a.proposal.distanceMeters.compareTo(
+                  b.proposal.distanceMeters,
+                ),
+                _Sort.price => a.proposal.priceSoles.compareTo(
+                  b.proposal.priceSoles,
+                ),
+              },
+            );
+          return Column(
+            children: [
+              for (final v in sorted) ...[
+                _ProposalCard(view: v, onAccept: () => _accept(v)),
+                const SizedBox(height: 12),
+              ],
+            ],
+          );
         },
       ),
     ];
   }
 }
 
-class _SyncCard extends ConsumerWidget {
-  const _SyncCard({required this.need, required this.isDemo});
+class _NeedHeader extends StatelessWidget {
+  const _NeedHeader({required this.need});
+
+  final Need need;
+
+  @override
+  Widget build(BuildContext context) => Row(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      BvIconBadge(
+        NeedLabels.icon(need.kind),
+        tone: NeedLabels.tone(need.kind),
+        size: 56,
+      ),
+      const SizedBox(width: 14),
+      Expanded(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(need.text, style: context.tt.headlineSmall),
+            const SizedBox(height: 8),
+            BvPill(
+              'Para: ${NeedLabels.urgency(need.urgency)}',
+              icon: Icons.schedule_rounded,
+              tone: BvTone.violet,
+            ),
+          ],
+        ),
+      ),
+    ],
+  );
+}
+
+class _SyncBanner extends ConsumerWidget {
+  const _SyncBanner({required this.need, required this.isDemo});
 
   final Need need;
   final bool isDemo;
@@ -116,35 +182,31 @@ class _SyncCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final busy = ref.watch(syncControllerProvider);
-    final (icon, color) = switch (need.syncStatus) {
-      SyncStatus.pending => (Icons.schedule, Theme.of(context).colorScheme.tertiaryContainer),
-      SyncStatus.sent => (Icons.check_circle_outline, Theme.of(context).colorScheme.primaryContainer),
-      SyncStatus.error => (Icons.error_outline, Theme.of(context).colorScheme.errorContainer),
-    };
-    return Card(
-      color: color,
-      child: Padding(
-        padding: const EdgeInsets.all(14),
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Row(children: [
-            Icon(icon),
-            const SizedBox(width: 8),
-            Expanded(child: Text(syncLabel(need.syncStatus, isDemo: isDemo))),
-          ]),
-          if (need.syncStatus != SyncStatus.sent) ...[
-            const SizedBox(height: 8),
-            OutlinedButton(
-              onPressed: busy ? null : () => ref.read(syncControllerProvider.notifier).flushNow(),
-              child: Text(busy ? 'Enviando…' : 'Reintentar ahora'),
-            ),
-          ],
-          if (need.syncStatus == SyncStatus.sent && isDemo)
-            const Padding(
-              padding: EdgeInsets.only(top: 6),
-              child: Text('Todavía no hay servidor: las propuestas que ves son de ejemplo.'),
-            ),
-        ]),
-      ),
+    final badge = syncBadge(need.syncStatus);
+    final notSent = need.syncStatus != SyncStatus.sent;
+    return BvBanner(
+      icon: badge.icon,
+      tone: badge.tone,
+      message: [
+        syncLabel(need.syncStatus, isDemo: isDemo),
+        if (need.syncStatus == SyncStatus.sent && isDemo)
+          'Todavía no hay servidor: las propuestas que ves son de ejemplo.',
+      ].join('\n'),
+      action: notSent
+          ? OutlinedButton.icon(
+              onPressed: busy
+                  ? null
+                  : () => ref.read(syncControllerProvider.notifier).flushNow(),
+              icon: busy
+                  ? const SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(strokeWidth: 2.5),
+                    )
+                  : const Icon(Icons.sync_rounded),
+              label: Text(busy ? 'Enviando…' : 'Reintentar ahora'),
+            )
+          : null,
     );
   }
 }
@@ -157,35 +219,91 @@ class _ProposalCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final p = view.proposal;
     final rep = view.reputation;
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      child: Padding(
-        padding: const EdgeInsets.all(14),
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Row(children: [
-            Expanded(
-              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Text(p.providerName, style: theme.textTheme.titleMedium),
-                Text('${p.role} · ${view.vistoBueno.total} recomiendan', style: theme.textTheme.bodySmall),
-              ]),
+    return BvPanel(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              BvAvatar(p.providerName),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(p.providerName, style: context.tt.titleMedium),
+                    Text(
+                      '${p.role} · ${view.vistoBueno.total} recomiendan',
+                      style: context.tt.bodySmall?.copyWith(
+                        color: context.tones.muted,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    p.priceLabel,
+                    style: context.tt.headlineSmall?.copyWith(
+                      color: context.cs.primary,
+                    ),
+                  ),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.star_rounded,
+                        size: 18,
+                        color: context.tones.sun,
+                      ),
+                      const SizedBox(width: 2),
+                      Text(
+                        rep.average.toStringAsFixed(1),
+                        style: context.tt.labelMedium,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              BvPill(
+                '${formatDistance(p.distanceMeters)} (aprox.)',
+                icon: Icons.near_me_rounded,
+              ),
+              BvPill(p.availability, icon: Icons.schedule_rounded),
+              if (p.isExample) const BvPill('Ejemplo'),
+            ],
+          ),
+          if (p.diagnosticVisitSoles != null) ...[
+            const SizedBox(height: 10),
+            Text(
+              'Ofrece visita de diagnóstico: S/ ${p.diagnosticVisitSoles} (se descuenta)',
+              style: context.tt.bodySmall?.copyWith(color: context.tones.muted),
             ),
-            Text('★ ${rep.average.toStringAsFixed(1)}', style: theme.textTheme.titleMedium),
-          ]),
-          const SizedBox(height: 8),
-          Wrap(spacing: 16, runSpacing: 4, children: [
-            Text('Distancia: ${formatDistance(p.distanceMeters)} (aprox.)'),
-            Text('Precio: ${p.priceLabel}'),
-            Text(p.availability),
-          ]),
-          if (p.diagnosticVisitSoles != null)
-            Text('Ofrece visita de diagnóstico: S/ ${p.diagnosticVisitSoles} (se descuenta)', style: theme.textTheme.bodySmall),
-          if (p.isExample) const Padding(padding: EdgeInsets.only(top: 4), child: Chip(label: Text('Ejemplo'))),
-          const SizedBox(height: 8),
-          SizedBox(width: double.infinity, child: FilledButton(onPressed: onAccept, child: const Text('Aceptar propuesta'))),
-        ]),
+          ],
+          const SizedBox(height: 14),
+          SizedBox(
+            width: double.infinity,
+            child: FilledButton.icon(
+              onPressed: onAccept,
+              icon: const Icon(Icons.handshake_rounded),
+              label: const Text('Aceptar propuesta'),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -193,8 +311,8 @@ class _ProposalCard extends StatelessWidget {
 
 /// Texto del estado del trato (también lo usa la lista de Inicio en el futuro).
 String dealStatusLabel(DealStatus s) => switch (s) {
-      DealStatus.accepted => 'Aceptada',
-      DealStatus.inProgress => 'En curso',
-      DealStatus.awaitingRating => 'Falta calificar',
-      DealStatus.closed => 'Resuelta',
-    };
+  DealStatus.accepted => 'Aceptada',
+  DealStatus.inProgress => 'En curso',
+  DealStatus.awaitingRating => 'Falta calificar',
+  DealStatus.closed => 'Resuelta',
+};

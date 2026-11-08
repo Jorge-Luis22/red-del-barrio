@@ -7,7 +7,8 @@ const _earthRadius = 6371000.0;
 double haversineMeters(double lat1, double lng1, double lat2, double lng2) {
   final dLat = (lat2 - lat1) * _toRad;
   final dLng = (lng2 - lng1) * _toRad;
-  final a = math.sin(dLat / 2) * math.sin(dLat / 2) +
+  final a =
+      math.sin(dLat / 2) * math.sin(dLat / 2) +
       math.cos(lat1 * _toRad) *
           math.cos(lat2 * _toRad) *
           math.sin(dLng / 2) *
@@ -27,8 +28,11 @@ double haversineMeters(double lat1, double lng1, double lat2, double lng2) {
   final b = bearingDegrees * _toRad;
   final lat1 = lat * _toRad;
   final lng1 = lng * _toRad;
-  final lat2 = math.asin(math.sin(lat1) * math.cos(d) + math.cos(lat1) * math.sin(d) * math.cos(b));
-  final lng2 = lng1 +
+  final lat2 = math.asin(
+    math.sin(lat1) * math.cos(d) + math.cos(lat1) * math.sin(d) * math.cos(b),
+  );
+  final lng2 =
+      lng1 +
       math.atan2(
         math.sin(b) * math.sin(d) * math.cos(lat1),
         math.cos(d) - math.sin(lat1) * math.sin(lat2),

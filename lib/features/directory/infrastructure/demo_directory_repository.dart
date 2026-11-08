@@ -14,10 +14,7 @@ class DemoDirectoryRepository implements DirectoryRepository {
   Future<List<Listing>> listings({ExactLocation? near}) async {
     return [
       for (final d in demoListings)
-        if (near == null)
-          d.listing
-        else
-          _placed(d, near),
+        if (near == null) d.listing else _placed(d, near),
     ];
   }
 
@@ -40,5 +37,6 @@ class DemoDirectoryRepository implements DirectoryRepository {
   }
 
   @override
-  Future<ProviderProfile?> provider(String providerId) async => demoProviders[providerId];
+  Future<ProviderProfile?> provider(String providerId) async =>
+      demoProviders[providerId];
 }

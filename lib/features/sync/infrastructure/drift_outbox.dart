@@ -14,7 +14,9 @@ class DriftOutbox implements OutboxQueue {
   Future<Result<void>> enqueue(OutboxOp op) async {
     try {
       // insertOrIgnore: el mismo UUID no se encola dos veces.
-      await _db.into(_db.outboxOps).insert(
+      await _db
+          .into(_db.outboxOps)
+          .insert(
             OutboxOpsCompanion.insert(
               id: op.id,
               opType: op.type,
@@ -25,24 +27,28 @@ class DriftOutbox implements OutboxQueue {
           );
       return const Ok(null);
     } catch (_) {
-      return const Err(StorageFailure('No se pudo guardar el envío pendiente.'));
+      return const Err(
+        StorageFailure('No se pudo guardar el envío pendiente.'),
+      );
     }
   }
 
   @override
   Future<List<OutboxOp>> pending() async {
-    final rows = await (_db.select(_db.outboxOps)
-          ..orderBy([(t) => OrderingTerm.asc(t.createdAt)]))
-        .get();
+    final rows = await (_db.select(
+      _db.outboxOps,
+    )..orderBy([(t) => OrderingTerm.asc(t.createdAt)])).get();
     return rows
-        .map((r) => OutboxOp(
-              id: r.id,
-              type: r.opType,
-              payload: r.payload,
-              createdAt: r.createdAt,
-              attempts: r.attempts,
-              lastError: r.lastError,
-            ))
+        .map(
+          (r) => OutboxOp(
+            id: r.id,
+            type: r.opType,
+            payload: r.payload,
+            createdAt: r.createdAt,
+            attempts: r.attempts,
+            lastError: r.lastError,
+          ),
+        )
         .toList();
   }
 

@@ -66,7 +66,90 @@ class Interactions extends Table {
   Set<Column> get primaryKey => {id};
 }
 
-@DriftDatabase(tables: [Needs, OutboxOps, Deals, Interactions])
+@DataClassName('OfferRow')
+class Offers extends Table {
+  @override
+  String get tableName => 'neighbor_offers';
+
+  TextColumn get id => text()();
+  TextColumn get modality => text()();
+  TextColumn get body => text()();
+  DateTimeColumn get createdAt => dateTime()();
+  TextColumn get syncStatus => text()();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
+@DataClassName('ChatMessageRow')
+class ChatMessages extends Table {
+  @override
+  String get tableName => 'deal_messages';
+
+  TextColumn get id => text()();
+  TextColumn get dealId => text()();
+  TextColumn get body => text()();
+  DateTimeColumn get createdAt => dateTime()();
+  TextColumn get syncStatus => text()();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
+@DataClassName('EmergencyPostRow')
+class EmergencyPosts extends Table {
+  @override
+  String get tableName => 'sos_posts';
+
+  TextColumn get id => text()();
+  TextColumn get situation => text()();
+  TextColumn get body => text()();
+  DateTimeColumn get createdAt => dateTime()();
+  TextColumn get syncStatus => text()();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
+@DataClassName('CollectionPointRow')
+class CollectionPoints extends Table {
+  @override
+  String get tableName => 'acopio_points';
+
+  TextColumn get id => text()();
+  TextColumn get name => text()();
+  TextColumn get reference => text()();
+  DateTimeColumn get createdAt => dateTime()();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
+@DataClassName('SettingRow')
+class AppSettingsKv extends Table {
+  @override
+  String get tableName => 'person_settings';
+
+  TextColumn get key => text()();
+  TextColumn get value => text()();
+
+  @override
+  Set<Column> get primaryKey => {key};
+}
+
+@DriftDatabase(
+  tables: [
+    Needs,
+    OutboxOps,
+    Deals,
+    Interactions,
+    Offers,
+    ChatMessages,
+    EmergencyPosts,
+    CollectionPoints,
+    AppSettingsKv,
+  ],
+)
 class AppDatabase extends _$AppDatabase {
   AppDatabase(super.e);
 
@@ -76,16 +159,23 @@ class AppDatabase extends _$AppDatabase {
   /// Versión del esquema. Cada cambio exige subirla y escribir su migración + prueba (R28).
   /// 1: needs, outbox_ops · 2: + deals, interactions
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 4;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
-        onCreate: (m) => m.createAll(),
-        onUpgrade: (m, from, to) async {
-          if (from < 2) {
-            await m.createTable(deals);
-            await m.createTable(interactions);
-          }
-        },
-      );
+    onCreate: (m) => m.createAll(),
+    onUpgrade: (m, from, to) async {
+      if (from < 2) {
+        await m.createTable(deals);
+        await m.createTable(interactions);
+      }
+      if (from < 4) {
+        await m.createTable(offers);
+        await m.createTable(chatMessages);
+        await m.createTable(emergencyPosts);
+        await m.createTable(collectionPoints);
+        await m.createTable(appSettingsKv);
+      }
+    },
+  );
 }

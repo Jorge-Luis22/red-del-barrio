@@ -28,4 +28,6 @@ class SyncController extends Notifier<bool> {
   }
 }
 
-final syncControllerProvider = NotifierProvider<SyncController, bool>(SyncController.new);
+final syncControllerProvider = NotifierProvider<SyncController, bool>(
+  SyncController.new,
+);

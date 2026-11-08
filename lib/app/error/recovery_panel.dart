@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 
 import '../router.dart';
+import '../theme/app_theme.dart';
+import '../theme/brand.dart';
 
-/// Pantalla de recuperación (paridad con el panel de error del PWA, pero también
-/// para errores dentro de acciones, no solo de dibujado).
+/// Pantalla de recuperación: sustituye a cualquier pantalla que falle al dibujarse.
+/// Se usa dentro de `ErrorWidget.builder`, donde puede no haber tema, así que solo usa
+/// colores de la paleta y no depende de `Theme`.
 class RecoveryPanel extends StatelessWidget {
   const RecoveryPanel({super.key, this.detail});
 
@@ -11,39 +14,87 @@ class RecoveryPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    TextStyle style(
+      double size,
+      FontWeight w, [
+      Color color = BarrioPalette.ink,
+    ]) => TextStyle(
+      fontFamily: AppTheme.fontFamily,
+      fontSize: size,
+      fontWeight: w,
+      height: 1.4,
+      color: color,
+      decoration: TextDecoration.none,
+      fontVariations: [FontVariation.weight(w.value.toDouble())],
+    );
     return Directionality(
       textDirection: TextDirection.ltr,
       child: Material(
-        color: const Color(0xFFFFF0C2),
+        color: BarrioPalette.cream,
         child: SafeArea(
-          child: Padding(
+          child: SingleChildScrollView(
             padding: const EdgeInsets.all(24),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Container(
+                  width: 72,
+                  height: 72,
+                  decoration: BoxDecoration(
+                    color: BarrioPalette.tint(
+                      BarrioPalette.sun,
+                      0.45,
+                      base: BarrioPalette.cream,
+                    ),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.healing_rounded,
+                    size: 36,
+                    color: BarrioPalette.ink,
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Text(
                   'Esta pantalla no se pudo mostrar',
-                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: Color(0xFF5A3B00)),
+                  style: style(24, FontWeight.w800),
                 ),
                 const SizedBox(height: 8),
-                const Text(
+                Text(
                   'Tus datos siguen guardados en tu teléfono. Vuelve a Inicio; si sigue igual, cierra y abre la app.',
-                  style: TextStyle(fontSize: 16, color: Color(0xFF5A3B00)),
+                  style: style(17, FontWeight.w400),
                 ),
                 if (detail != null) ...[
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 16),
                   Text(
                     'Detalle técnico: $detail',
                     maxLines: 4,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(fontSize: 14, color: Color(0xFF5A3B00)),
+                    style: style(
+                      14,
+                      FontWeight.w400,
+                      BarrioPalette.ink.withValues(alpha: 0.72),
+                    ),
                   ),
                 ],
-                const SizedBox(height: 24),
-                FilledButton(
-                  onPressed: () => appRouter.go('/'),
-                  child: const Text('Ir a Inicio'),
+                const SizedBox(height: 28),
+                SizedBox(
+                  width: double.infinity,
+                  child: FilledButton.icon(
+                    onPressed: () => appRouter.go('/'),
+                    style: FilledButton.styleFrom(
+                      backgroundColor: BarrioPalette.violet,
+                      foregroundColor: BarrioPalette.white,
+                      minimumSize: const Size(64, 56),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      textStyle: style(16, FontWeight.w700),
+                    ),
+                    icon: const Icon(Icons.home_rounded),
+                    label: const Text('Ir a Inicio'),
+                  ),
                 ),
               ],
             ),

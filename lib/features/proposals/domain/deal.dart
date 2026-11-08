@@ -43,20 +43,25 @@ class Deal {
   final DateTime? completedAt;
 
   /// Duración del servicio, si ya terminó.
-  Duration? get duration =>
-      (startedAt != null && completedAt != null) ? completedAt!.difference(startedAt!) : null;
+  Duration? get duration => (startedAt != null && completedAt != null)
+      ? completedAt!.difference(startedAt!)
+      : null;
 
-  Deal copyWith({DealStatus? status, DateTime? startedAt, DateTime? completedAt}) => Deal(
-        id: id,
-        needId: needId,
-        providerId: providerId,
-        providerName: providerName,
-        priceSoles: priceSoles,
-        priceLabel: priceLabel,
-        code: code,
-        status: status ?? this.status,
-        acceptedAt: acceptedAt,
-        startedAt: startedAt ?? this.startedAt,
-        completedAt: completedAt ?? this.completedAt,
-      );
+  Deal copyWith({
+    DealStatus? status,
+    DateTime? startedAt,
+    DateTime? completedAt,
+  }) => Deal(
+    id: id,
+    needId: needId,
+    providerId: providerId,
+    providerName: providerName,
+    priceSoles: priceSoles,
+    priceLabel: priceLabel,
+    code: code,
+    status: status ?? this.status,
+    acceptedAt: acceptedAt,
+    startedAt: startedAt ?? this.startedAt,
+    completedAt: completedAt ?? this.completedAt,
+  );
 }

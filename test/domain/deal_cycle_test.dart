@@ -20,13 +20,13 @@ void main() {
   const directory = DemoDirectoryRepository();
 
   Need need({SyncStatus status = SyncStatus.sent}) => Need(
-        id: 'need-1',
-        kind: NeedKind.service,
-        text: 'Necesito un gasfitero',
-        urgency: Urgency.today,
-        createdAt: DateTime(2026, 11, 8),
-        syncStatus: status,
-      );
+    id: 'need-1',
+    kind: NeedKind.service,
+    text: 'Necesito un gasfitero',
+    urgency: Urgency.today,
+    createdAt: DateTime(2026, 11, 8),
+    syncStatus: status,
+  );
 
   setUp(() {
     deals = FakeDeals();
@@ -35,16 +35,18 @@ void main() {
     ids = FakeIds();
   });
 
-  AcceptProposal accept() => AcceptProposal(deals: deals, clock: clock, ids: ids);
-  ValidateMeetingCode validate() => ValidateMeetingCode(deals: deals, clock: clock);
+  AcceptProposal accept() =>
+      AcceptProposal(deals: deals, clock: clock, ids: ids);
+  ValidateMeetingCode validate() =>
+      ValidateMeetingCode(deals: deals, clock: clock);
   CompleteDeal complete() => CompleteDeal(deals: deals, clock: clock);
   CloseAndRate close() => CloseAndRate(
-        deals: deals,
-        reputation: reputation,
-        directory: directory,
-        clock: clock,
-        ids: ids,
-      );
+    deals: deals,
+    reputation: reputation,
+    directory: directory,
+    clock: clock,
+    ids: ids,
+  );
 
   Future<Deal> acceptedDeal() async {
     final props = await ListProposals(const DemoProposalRepository())(need());
@@ -54,7 +56,9 @@ void main() {
 
   group('propuestas', () {
     test('una necesidad Pendiente NO recibe propuestas', () async {
-      final r = await ListProposals(const DemoProposalRepository())(need(status: SyncStatus.pending));
+      final r = await ListProposals(const DemoProposalRepository())(
+        need(status: SyncStatus.pending),
+      );
       expect(r, isEmpty);
     });
 
@@ -72,13 +76,18 @@ void main() {
   });
 
   group('ciclo del trato', () {
-    test('aceptar genera código de 4 dígitos y no permite aceptar dos veces', () async {
-      final d = await acceptedDeal();
-      expect(d.code, '1234');
-      expect(d.status, DealStatus.accepted);
-      final props = await ListProposals(const DemoProposalRepository())(need());
-      expect(await accept()(need(), props.last), isA<Err<Deal>>());
-    });
+    test(
+      'aceptar genera código de 4 dígitos y no permite aceptar dos veces',
+      () async {
+        final d = await acceptedDeal();
+        expect(d.code, '1234');
+        expect(d.status, DealStatus.accepted);
+        final props = await ListProposals(const DemoProposalRepository())(
+          need(),
+        );
+        expect(await accept()(need(), props.last), isA<Err<Deal>>());
+      },
+    );
 
     test('código incorrecto no inicia el servicio; el correcto sí', () async {
       final d = await acceptedDeal();
@@ -89,25 +98,36 @@ void main() {
       expect(ok.value.startedAt, clock.current);
     });
 
-    test('no se puede terminar sin validar el código ni calificar sin terminar', () async {
-      final d = await acceptedDeal();
-      expect(await complete()(d.id), isA<Err<Deal>>());
-      expect(await close()(d.id, stars: 5), isA<Err<CloseOutcome>>());
-    });
+    test(
+      'no se puede terminar sin validar el código ni calificar sin terminar',
+      () async {
+        final d = await acceptedDeal();
+        expect(await complete()(d.id), isA<Err<Deal>>());
+        expect(await close()(d.id, stars: 5), isA<Err<CloseOutcome>>());
+      },
+    );
 
-    test('ciclo completo: reputación antes → después y Visto Bueno real', () async {
-      final d = await acceptedDeal();
-      await validate()(d.id, '1234');
-      clock.current = clock.current.add(const Duration(minutes: 20));
-      final done = await complete()(d.id) as Ok<Deal>;
-      expect(done.value.duration, const Duration(minutes: 20));
-      final out = await close()(d.id, stars: 5, comment: 'Muy bien', recommend: true) as Ok<CloseOutcome>;
-      expect(out.value.deal.status, DealStatus.closed);
-      expect(out.value.after.average, greaterThan(out.value.before.average));
-      expect(out.value.after.realCount, 1);
-      expect(out.value.vistoBueno.confirmed, 1);
-      expect(out.value.vistoBueno.example, 14);
-    });
+    test(
+      'ciclo completo: reputación antes → después y Visto Bueno real',
+      () async {
+        final d = await acceptedDeal();
+        await validate()(d.id, '1234');
+        clock.current = clock.current.add(const Duration(minutes: 20));
+        final done = await complete()(d.id) as Ok<Deal>;
+        expect(done.value.duration, const Duration(minutes: 20));
+        final out = await close()(
+          d.id,
+          stars: 5,
+          comment: 'Muy bien',
+          recommend: true,
+        ) as Ok<CloseOutcome>;
+        expect(out.value.deal.status, DealStatus.closed);
+        expect(out.value.after.average, greaterThan(out.value.before.average));
+        expect(out.value.after.realCount, 1);
+        expect(out.value.vistoBueno.confirmed, 1);
+        expect(out.value.vistoBueno.example, 14);
+      },
+    );
 
     test('estrellas fuera de 1 a 5 se rechazan', () async {
       final d = await acceptedDeal();
@@ -123,13 +143,16 @@ void main() {
       final d = await acceptedDeal();
       await validate()(d.id, '1234');
       await complete()(d.id);
-      final out = await close()(d.id, stars: 4, recommend: false) as Ok<CloseOutcome>;
+      final out =
+          await close()(d.id, stars: 4, recommend: false) as Ok<CloseOutcome>;
       expect(out.value.vistoBueno.confirmed, 0);
     });
 
     test('la misma persona no suma dos veces al mismo proveedor', () async {
       for (var n = 0; n < 2; n++) {
-        final props = await ListProposals(const DemoProposalRepository())(need());
+        final props = await ListProposals(const DemoProposalRepository())(
+          need(),
+        );
         final needN = Need(
           id: 'need-$n',
           kind: NeedKind.service,
@@ -143,7 +166,10 @@ void main() {
         await complete()(dl.id);
         await close()(dl.id, stars: 5, recommend: true);
       }
-      final explored = await ExploreNearby(directory: directory, reputation: reputation)(kind: ListingKind.service);
+      final explored = await ExploreNearby(
+        directory: directory,
+        reputation: reputation,
+      )(kind: ListingKind.service);
       final carlos = explored.firstWhere((e) => e.provider.id == 'carlos');
       expect(carlos.vistoBueno.confirmed, 1);
       expect(carlos.recommendedByMe, isTrue);
@@ -153,7 +179,10 @@ void main() {
   group('explorar cerca', () {
     test('sin ubicación usa distancias de ejemplo; con ubicación calcula distancias reales', () async {
       final uc = ExploreNearby(directory: directory, reputation: reputation);
-      final sin = await uc(kind: ListingKind.service, sort: ExploreSort.nearest);
+      final sin = await uc(
+        kind: ListingKind.service,
+        sort: ExploreSort.nearest,
+      );
       expect(sin.first.distanceIsReal, isFalse);
       final con = await uc(
         kind: ListingKind.service,
@@ -162,7 +191,10 @@ void main() {
       );
       expect(con.every((e) => e.distanceIsReal), isTrue);
       final carlos = con.firstWhere((e) => e.provider.id == 'carlos');
-      expect(carlos.distanceMeters, closeTo(500, 5)); // el seed ubica a Carlos a 500 m
+      expect(
+        carlos.distanceMeters,
+        closeTo(500, 5),
+      ); // el seed ubica a Carlos a 500 m
       expect(con.first.distanceMeters! <= con.last.distanceMeters!, isTrue);
     });
 

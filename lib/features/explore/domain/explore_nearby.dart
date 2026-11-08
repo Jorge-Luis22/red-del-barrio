@@ -51,21 +51,24 @@ class ExploreNearby {
       final provider = await directory.provider(l.providerId);
       if (provider == null) continue;
       final interactions = await reputation.forProvider(l.providerId);
-      final hasPosition = near != null && l.latitude != null && l.longitude != null;
+      final hasPosition =
+          near != null && l.latitude != null && l.longitude != null;
       final double? distance = hasPosition
           ? haversineMeters(near.lat, near.lng, l.latitude!, l.longitude!)
           : l.nominalMeters;
-      out.add(ExploreItem(
-        listing: l,
-        provider: provider,
-        distanceMeters: distance,
-        distanceIsReal: hasPosition,
-        vistoBueno: calculateVistoBueno(
-          exampleCount: provider.exampleVistoBueno,
-          interactions: interactions,
+      out.add(
+        ExploreItem(
+          listing: l,
+          provider: provider,
+          distanceMeters: distance,
+          distanceIsReal: hasPosition,
+          vistoBueno: calculateVistoBueno(
+            exampleCount: provider.exampleVistoBueno,
+            interactions: interactions,
+          ),
+          recommendedByMe: _recommended(interactions, raterId),
         ),
-        recommendedByMe: _recommended(interactions, raterId),
-      ));
+      );
     }
     out.sort((a, b) {
       final da = a.distanceMeters ?? 99999;

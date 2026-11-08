@@ -25,11 +25,11 @@ class Need {
   final SyncStatus syncStatus;
 
   Need copyWith({SyncStatus? syncStatus}) => Need(
-        id: id,
-        kind: kind,
-        text: text,
-        urgency: urgency,
-        createdAt: createdAt,
-        syncStatus: syncStatus ?? this.syncStatus,
-      );
+    id: id,
+    kind: kind,
+    text: text,
+    urgency: urgency,
+    createdAt: createdAt,
+    syncStatus: syncStatus ?? this.syncStatus,
+  );
 }

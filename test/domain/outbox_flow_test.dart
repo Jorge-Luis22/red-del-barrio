@@ -25,7 +25,12 @@ void main() {
       clock: FakeClock(DateTime(2026, 11, 8)),
       ids: FakeIds(),
     );
-    flush = FlushOutbox(outbox: outbox, gateway: gateway, connectivity: net, needs: needs);
+    flush = FlushOutbox(
+      outbox: outbox,
+      gateway: gateway,
+      connectivity: net,
+      needs: needs,
+    );
   });
 
   test('rechaza textos de menos de 3 letras y no guarda nada', () async {
@@ -36,7 +41,10 @@ void main() {
   });
 
   test('publicar guarda la necesidad como Pendiente y la encola', () async {
-    final r = await publish(kind: NeedKind.service, text: 'Necesito un gasfitero');
+    final r = await publish(
+      kind: NeedKind.service,
+      text: 'Necesito un gasfitero',
+    );
     expect(r.isOk, isTrue);
     expect(needs.store.values.single.syncStatus, SyncStatus.pending);
     expect(outbox.ops.length, 1);

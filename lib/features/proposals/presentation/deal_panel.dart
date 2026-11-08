@@ -2,8 +2,11 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../app/di/providers.dart';
+import '../../../app/theme/brand.dart';
+import '../../../app/ui/components.dart';
 import '../../../core/result.dart';
 import '../domain/deal.dart';
 import 'deal_providers.dart';
@@ -30,10 +33,14 @@ class _DealPanelState extends ConsumerState<DealPanel> {
     super.dispose();
   }
 
-  void _toast(String msg) =>
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(duration: const Duration(seconds: 6), content: Text(msg)));
+  void _toast(String msg) => ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(duration: const Duration(seconds: 6), content: Text(msg)),
+  );
 
-  Future<void> _run(Future<Result<Object?>> Function() action, {String? ok}) async {
+  Future<void> _run(
+    Future<Result<Object?>> Function() action, {
+    String? ok,
+  }) async {
     setState(() => _busy = true);
     final r = await action();
     if (!mounted) return;
@@ -48,184 +55,414 @@ class _DealPanelState extends ConsumerState<DealPanel> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final d = widget.deal;
-    const steps = ['Aceptada', 'En curso', 'Falta calificar', 'Resuelta'];
-    final current = d.status.index;
-
-    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Card(
-        child: ListTile(
-          leading: const CircleAvatar(child: Icon(Icons.person_outline)),
-          title: Text(d.providerName),
-          subtitle: Text('Trato: ${d.priceLabel}'),
-        ),
-      ),
-      const SizedBox(height: 8),
-      Row(children: [
-        for (var i = 0; i < steps.length; i++)
-          Expanded(
-            child: Container(
-              margin: const EdgeInsets.symmetric(horizontal: 2),
-              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 2),
-              decoration: BoxDecoration(
-                color: i <= current ? theme.colorScheme.primaryContainer : theme.colorScheme.surfaceContainerHighest,
-                borderRadius: BorderRadius.circular(10),
-                border: i == current ? Border.all(color: theme.colorScheme.primary, width: 2) : null,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        BvPanel(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              BvAvatar(d.providerName, size: 52),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(d.providerName, style: context.tt.titleMedium),
+                    Text(
+                      'Trato: ${d.priceLabel}',
+                      style: context.tt.bodyMedium?.copyWith(
+                        color: context.tones.muted,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-              child: Text(steps[i], textAlign: TextAlign.center, style: theme.textTheme.labelMedium),
-            ),
+              IconButton.filledTonal(
+                tooltip: 'Abrir el chat de este trato',
+                onPressed: () => context.push('/mensajes/${d.id}'),
+                icon: const Icon(Icons.chat_bubble_rounded),
+                style: IconButton.styleFrom(minimumSize: const Size(52, 52)),
+              ),
+            ],
           ),
-      ]),
-      const SizedBox(height: 16),
-      switch (d.status) {
-        DealStatus.accepted => _accepted(theme, d),
-        DealStatus.inProgress => _inProgress(theme, d),
-        DealStatus.awaitingRating => _rating(theme, d),
-        DealStatus.closed => _closed(theme, d),
-      },
-    ]);
+        ),
+        const SizedBox(height: 20),
+        _Timeline(current: d.status.index),
+        const SizedBox(height: 20),
+        switch (d.status) {
+          DealStatus.accepted => _accepted(context, d),
+          DealStatus.inProgress => _inProgress(context, d),
+          DealStatus.awaitingRating => _rating(context, d),
+          DealStatus.closed => _closed(context, d),
+        },
+      ],
+    );
   }
 
-  Widget _accepted(ThemeData theme, Deal d) => Card(
-        child: Padding(
-          padding: const EdgeInsets.all(14),
-          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text('Tu código de encuentro', style: theme.textTheme.titleMedium),
-            const SizedBox(height: 8),
-            Semantics(
-              label: 'Código ${d.code.split('').join(' ')}',
-              child: ExcludeSemantics(
-                child: Text(d.code, style: theme.textTheme.displayMedium?.copyWith(letterSpacing: 8, fontWeight: FontWeight.w700)),
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text('Díselo a ${d.providerName.split(' ').first} cuando llegue. Así confirmamos que se encontraron de verdad '
-                'y el trato cuenta para la reputación.'),
-            const SizedBox(height: 12),
-            OutlinedButton(
-              onPressed: _busy
-                  ? null
-                  : () => _run(
-                        () => ref.read(validateMeetingCodeProvider)(d.id, d.code),
-                        ok: 'Código validado. Encuentro confirmado.',
+  Widget _accepted(BuildContext context, Deal d) => BvPanel(
+    padding: const EdgeInsets.all(20),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(Icons.pin_rounded, color: context.cs.primary),
+            const SizedBox(width: 8),
+            Text('Tu código de encuentro', style: context.tt.titleMedium),
+          ],
+        ),
+        const SizedBox(height: 16),
+        Semantics(
+          label: 'Código ${d.code.split('').join(' ')}',
+          child: ExcludeSemantics(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                for (final digit in d.code.split(''))
+                  Container(
+                    width: 60,
+                    height: 76,
+                    margin: const EdgeInsets.symmetric(horizontal: 5),
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: context.tones.violetSoft,
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Text(
+                      digit,
+                      style: context.tt.displayMedium?.copyWith(
+                        color: context.cs.primary,
+                        letterSpacing: 0,
                       ),
-              child: const Text('Demo: la otra persona ingresa el código'),
+                    ),
+                  ),
+              ],
             ),
-            const SizedBox(height: 4),
-            Text('Todavía no hay cuentas: este botón hace de la otra persona solo para la demostración.', style: theme.textTheme.bodySmall),
-          ]),
+          ),
         ),
-      );
-
-  Widget _inProgress(ThemeData theme, Deal d) => Card(
-        child: Padding(
-          padding: const EdgeInsets.all(14),
-          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            const Text('Encuentro confirmado con código ✓'),
-            const SizedBox(height: 8),
-            Text('En curso', style: theme.textTheme.titleMedium),
-            _Elapsed(since: d.startedAt!),
-            const Text('Tiempo desde que se validó el código. Es informativo, no es un cobro.'),
-            const SizedBox(height: 12),
-            SizedBox(
-              width: double.infinity,
-              child: FilledButton(
-                onPressed: _busy ? null : () => _run(() => ref.read(completeDealProvider)(d.id), ok: 'Servicio marcado como hecho.'),
-                child: const Text('Servicio hecho'),
-              ),
-            ),
-          ]),
+        const SizedBox(height: 16),
+        Text(
+          'Díselo a ${d.providerName.split(' ').first} cuando llegue. Así confirmamos que se encontraron de verdad '
+          'y el trato cuenta para la reputación.',
+          style: context.tt.bodyMedium,
         ),
-      );
+        const SizedBox(height: 20),
+        SizedBox(
+          width: double.infinity,
+          child: OutlinedButton.icon(
+            onPressed: _busy
+                ? null
+                : () => _run(
+                    () => ref.read(validateMeetingCodeProvider)(d.id, d.code),
+                    ok: 'Código validado. Encuentro confirmado.',
+                  ),
+            icon: const Icon(Icons.science_outlined),
+            label: const Text('Demo: la otra persona ingresa el código'),
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          'Todavía no hay cuentas: este botón hace de la otra persona solo para la demostración.',
+          style: context.tt.bodySmall?.copyWith(color: context.tones.muted),
+        ),
+      ],
+    ),
+  );
 
-  Widget _rating(ThemeData theme, Deal d) => Card(
-        child: Padding(
-          padding: const EdgeInsets.all(14),
-          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text('Servicio realizado${d.duration != null ? ' en ${_fmt(d.duration!)}' : ''}. ¿Cómo te fue?', style: theme.textTheme.titleMedium),
-            const SizedBox(height: 8),
-            Row(children: [
-              for (var s = 1; s <= 5; s++)
-                IconButton(
-                  iconSize: 36,
-                  tooltip: '$s ${s == 1 ? 'estrella' : 'estrellas'}',
-                  onPressed: () => setState(() => _stars = s),
-                  icon: Icon(_stars >= s ? Icons.star : Icons.star_border),
+  Widget _inProgress(BuildContext context, Deal d) => BvPanel(
+    padding: const EdgeInsets.all(20),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const BvPill(
+          'Encuentro confirmado con código',
+          icon: Icons.verified_rounded,
+          tone: BvTone.trust,
+        ),
+        const SizedBox(height: 16),
+        Text('En curso', style: context.tt.titleMedium),
+        _Elapsed(since: d.startedAt!),
+        Text(
+          'Tiempo desde que se validó el código. Es informativo, no es un cobro.',
+          style: context.tt.bodySmall?.copyWith(color: context.tones.muted),
+        ),
+        const SizedBox(height: 20),
+        SizedBox(
+          width: double.infinity,
+          child: FilledButton.icon(
+            onPressed: _busy
+                ? null
+                : () => _run(
+                    () => ref.read(completeDealProvider)(d.id),
+                    ok: 'Servicio marcado como hecho.',
+                  ),
+            icon: const Icon(Icons.task_alt_rounded),
+            label: const Text('Servicio hecho'),
+          ),
+        ),
+      ],
+    ),
+  );
+
+  Widget _rating(BuildContext context, Deal d) => BvPanel(
+    padding: const EdgeInsets.all(20),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Servicio realizado${d.duration != null ? ' en ${_fmt(d.duration!)}' : ''}',
+          style: context.tt.titleMedium,
+        ),
+        const SizedBox(height: 4),
+        Text(
+          '¿Cómo te fue?',
+          style: context.tt.bodyMedium?.copyWith(color: context.tones.muted),
+        ),
+        const SizedBox(height: 8),
+        Center(
+          child: BvStars(
+            value: _stars,
+            size: 40,
+            onChanged: (s) => setState(() => _stars = s),
+          ),
+        ),
+        const SizedBox(height: 8),
+        TextField(
+          controller: _comment,
+          maxLength: 200,
+          textCapitalization: TextCapitalization.sentences,
+          decoration: const InputDecoration(labelText: 'Comentario (opcional)'),
+        ),
+        SwitchListTile(
+          contentPadding: EdgeInsets.zero,
+          title: Text(
+            'Recomendar a ${d.providerName.split(' ').first}',
+            style: context.tt.titleSmall,
+          ),
+          subtitle: const Text(
+            'Suma a "vecinos que lo recomiendan". Solo cuenta porque hubo un trato contigo.',
+          ),
+          value: _recommend,
+          onChanged: (v) => setState(() => _recommend = v),
+        ),
+        const SizedBox(height: 12),
+        SizedBox(
+          width: double.infinity,
+          child: FilledButton.icon(
+            onPressed: (_busy || _stars == 0)
+                ? null
+                : () => _run(
+                    () => ref.read(closeAndRateProvider)(
+                      d.id,
+                      stars: _stars,
+                      comment: _comment.text,
+                      recommend: _recommend,
+                    ),
+                    ok: 'Gracias. Tu calificación quedó guardada en tu teléfono.',
+                  ),
+            icon: const Icon(Icons.send_rounded),
+            label: const Text('Enviar calificación'),
+          ),
+        ),
+      ],
+    ),
+  );
+
+  Widget _closed(BuildContext context, Deal d) {
+    final summary = ref.watch(
+      closedSummaryProvider((dealId: d.id, providerId: d.providerId)),
+    );
+    final resolved =
+        ref
+            .watch(dealsStreamProvider)
+            .value
+            ?.where((x) => x.status == DealStatus.closed)
+            .length ??
+        1;
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: context.tones.trustSoft,
+        borderRadius: BorderRadius.circular(22),
+      ),
+      child: summary.when(
+        loading: () => const LinearProgressIndicator(),
+        error: (_, _) => const Text('Trato cerrado.'),
+        data: (s) => Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(
+                  Icons.check_circle_rounded,
+                  color: context.tones.trust,
+                  size: 30,
                 ),
-            ]),
-            TextField(
-              controller: _comment,
-              maxLength: 200,
-              decoration: const InputDecoration(labelText: 'Comentario (opcional)', border: OutlineInputBorder()),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    'Trato resuelto y calificado',
+                    style: context.tt.titleLarge,
+                  ),
+                ),
+              ],
             ),
-            SwitchListTile(
-              contentPadding: EdgeInsets.zero,
-              title: Text('Recomendar a ${d.providerName.split(' ').first}'),
-              subtitle: const Text('Suma a "vecinos que lo recomiendan". Solo cuenta porque hubo un trato contigo.'),
-              value: _recommend,
-              onChanged: (v) => setState(() => _recommend = v),
-            ),
-            SizedBox(
-              width: double.infinity,
-              child: FilledButton(
-                onPressed: (_busy || _stars == 0)
-                    ? null
-                    : () => _run(
-                          () => ref.read(closeAndRateProvider)(d.id, stars: _stars, comment: _comment.text, recommend: _recommend),
-                          ok: 'Gracias. Tu calificación quedó guardada en tu teléfono.',
-                        ),
-                child: const Text('Enviar calificación'),
-              ),
-            ),
-          ]),
-        ),
-      );
-
-  Widget _closed(ThemeData theme, Deal d) {
-    final summary = ref.watch(closedSummaryProvider((dealId: d.id, providerId: d.providerId)));
-    final resolved = ref.watch(dealsStreamProvider).value?.where((x) => x.status == DealStatus.closed).length ?? 1;
-    return Card(
-      color: theme.colorScheme.primaryContainer,
-      child: Padding(
-        padding: const EdgeInsets.all(14),
-        child: summary.when(
-          loading: () => const LinearProgressIndicator(),
-          error: (_, _) => const Text('Trato cerrado.'),
-          data: (s) => Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text('Trato resuelto y calificado', style: theme.textTheme.titleMedium),
-            const SizedBox(height: 8),
-            if (d.duration != null) _row('Servicio realizado en', _fmt(d.duration!)),
-            _row('Precio final', d.priceLabel),
+            const SizedBox(height: 14),
+            if (d.duration != null)
+              _row(context, 'Servicio realizado en', _fmt(d.duration!)),
+            _row(context, 'Precio final', d.priceLabel),
             if (s != null) ...[
-              _row('Reputación de ${d.providerName.split(' ').first}',
-                  '★ ${s.before.average.toStringAsFixed(2)} → ★ ${s.after.average.toStringAsFixed(2)}'),
-              _row('Calificaciones tuyas', '${s.after.realCount}'),
-              _row('Vecinos que lo recomiendan', '${s.vistoBueno.example} (ejemplo) + ${s.vistoBueno.confirmed} tuya${s.vistoBueno.confirmed == 1 ? '' : 's'}'),
+              _row(
+                context,
+                'Reputación de ${d.providerName.split(' ').first}',
+                '${s.before.average.toStringAsFixed(2)} → ${s.after.average.toStringAsFixed(2)} ★',
+              ),
+              _row(context, 'Calificaciones tuyas', '${s.after.realCount}'),
+              _row(
+                context,
+                'Vecinos que lo recomiendan',
+                '${s.vistoBueno.example} (ejemplo) + ${s.vistoBueno.confirmed} tuya${s.vistoBueno.confirmed == 1 ? '' : 's'}',
+              ),
             ],
-            _row('Necesidades resueltas', '$resolved'),
-            const SizedBox(height: 8),
-            Text('Cada necesidad resuelta deja al barrio mejor preparado para la siguiente. '
-                'La calificación de la otra persona hacia ti se mostrará cuando haya cuentas.', style: theme.textTheme.bodySmall),
-          ]),
+            _row(context, 'Necesidades resueltas', '$resolved'),
+            const SizedBox(height: 12),
+            Text(
+              'Cada necesidad resuelta deja al barrio mejor preparado para la siguiente. '
+              'La calificación de la otra persona hacia ti se mostrará cuando haya cuentas.',
+              style: context.tt.bodySmall?.copyWith(color: context.tones.muted),
+            ),
+          ],
         ),
       ),
     );
   }
 
-  Widget _row(String a, String b) => Padding(
-        padding: const EdgeInsets.symmetric(vertical: 3),
-        child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Expanded(child: Text(a)),
-          const SizedBox(width: 8),
-          Flexible(child: Text(b, textAlign: TextAlign.end, style: const TextStyle(fontWeight: FontWeight.w700))),
-        ]),
-      );
+  Widget _row(BuildContext context, String a, String b) => Padding(
+    padding: const EdgeInsets.symmetric(vertical: 5),
+    child: Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(child: Text(a, style: context.tt.bodyMedium)),
+        const SizedBox(width: 8),
+        Flexible(
+          child: Text(
+            b,
+            textAlign: TextAlign.end,
+            style: context.tt.titleSmall,
+          ),
+        ),
+      ],
+    ),
+  );
 
   static String _fmt(Duration d) {
     final m = d.inMinutes, s = d.inSeconds % 60;
     if (m == 0) return '${d.inSeconds.clamp(1, 59)} s';
     return '$m min${s > 0 ? ' $s s' : ''}';
+  }
+}
+
+/// Cuatro etapas con círculos unidos por una línea: hecho, actual y pendiente se distinguen
+/// por icono y color (no solo por color).
+class _Timeline extends StatelessWidget {
+  const _Timeline({required this.current});
+
+  final int current;
+
+  static const _steps = ['Aceptada', 'En curso', 'Falta calificar', 'Resuelta'];
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = context.cs;
+    return Semantics(
+      label: 'Etapa ${current + 1} de ${_steps.length}: ${_steps[current]}',
+      child: ExcludeSemantics(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            for (var i = 0; i < _steps.length; i++) ...[
+              Expanded(
+                child: Column(
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: i == 0
+                              ? const SizedBox()
+                              : _line(context, i <= current),
+                        ),
+                        _dot(context, i),
+                        Expanded(
+                          child: i == _steps.length - 1
+                              ? const SizedBox()
+                              : _line(context, i < current),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      _steps[i],
+                      textAlign: TextAlign.center,
+                      style: context.tt.labelSmall?.copyWith(
+                        color: i == current ? cs.primary : context.tones.muted,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _line(BuildContext context, bool done) => Container(
+    height: 4,
+    color: done ? context.tones.trust : context.tones.hairline,
+  );
+
+  Widget _dot(BuildContext context, int i) {
+    final cs = context.cs;
+    if (i < current) {
+      return Container(
+        width: 32,
+        height: 32,
+        decoration: BoxDecoration(
+          color: context.tones.trust,
+          shape: BoxShape.circle,
+        ),
+        child: Icon(Icons.check_rounded, size: 20, color: cs.onTertiary),
+      );
+    }
+    if (i == current) {
+      return Container(
+        width: 32,
+        height: 32,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(color: cs.primary, shape: BoxShape.circle),
+        child: Text(
+          '${i + 1}',
+          style: context.tt.labelMedium?.copyWith(color: cs.onPrimary),
+        ),
+      );
+    }
+    return Container(
+      width: 32,
+      height: 32,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: context.tones.hairline,
+        shape: BoxShape.circle,
+      ),
+      child: Text(
+        '${i + 1}',
+        style: context.tt.labelMedium?.copyWith(color: context.tones.muted),
+      ),
+    );
   }
 }
 
@@ -239,7 +476,10 @@ class _Elapsed extends StatefulWidget {
 }
 
 class _ElapsedState extends State<_Elapsed> {
-  late final Timer _t = Timer.periodic(const Duration(seconds: 1), (_) => setState(() {}));
+  late final Timer _t = Timer.periodic(
+    const Duration(seconds: 1),
+    (_) => setState(() {}),
+  );
 
   @override
   void dispose() {
@@ -252,6 +492,12 @@ class _ElapsedState extends State<_Elapsed> {
     final e = DateTime.now().difference(widget.since);
     final mm = e.inMinutes.toString().padLeft(2, '0');
     final ss = (e.inSeconds % 60).toString().padLeft(2, '0');
-    return Text('$mm:$ss', style: Theme.of(context).textTheme.headlineMedium);
+    return Text(
+      '$mm:$ss',
+      style: context.tt.displayMedium?.copyWith(
+        color: context.cs.primary,
+        letterSpacing: 0,
+      ),
+    );
   }
 }

@@ -12,7 +12,11 @@ class GeolocatorLocationProvider implements LocationProvider {
   Future<Result<ExactLocation>> currentLocation() async {
     try {
       if (!await Geolocator.isLocationServiceEnabled()) {
-        return const Err(PermissionFailure('Activa la ubicación del teléfono para ver lo que hay cerca.'));
+        return const Err(
+          PermissionFailure(
+            'Activa la ubicación del teléfono para ver lo que hay cerca.',
+          ),
+        );
       }
       var permission = await Geolocator.checkPermission();
       if (permission == LocationPermission.denied) {
@@ -20,7 +24,11 @@ class GeolocatorLocationProvider implements LocationProvider {
       }
       if (permission == LocationPermission.denied ||
           permission == LocationPermission.deniedForever) {
-        return const Err(PermissionFailure('Sin permiso de ubicación. Puedes elegir tu zona a mano.'));
+        return const Err(
+          PermissionFailure(
+            'Sin permiso de ubicación. Puedes elegir tu zona a mano.',
+          ),
+        );
       }
       final p = await Geolocator.getCurrentPosition(
         locationSettings: const LocationSettings(
@@ -28,9 +36,13 @@ class GeolocatorLocationProvider implements LocationProvider {
           timeLimit: Duration(seconds: 10),
         ),
       );
-      return Ok(ExactLocation(p.latitude, p.longitude, accuracyMeters: p.accuracy));
+      return Ok(
+        ExactLocation(p.latitude, p.longitude, accuracyMeters: p.accuracy),
+      );
     } catch (_) {
-      return const Err(UnknownFailure('No pudimos obtener tu ubicación. Inténtalo otra vez.'));
+      return const Err(
+        UnknownFailure('No pudimos obtener tu ubicación. Inténtalo otra vez.'),
+      );
     }
   }
 }

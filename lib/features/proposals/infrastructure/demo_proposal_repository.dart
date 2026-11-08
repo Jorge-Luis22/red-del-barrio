@@ -9,5 +9,6 @@ class DemoProposalRepository implements ProposalRepository {
   const DemoProposalRepository();
 
   @override
-  Future<List<Proposal>> forNeed(Need need) async => demoProposals[need.kind] ?? const [];
+  Future<List<Proposal>> forNeed(Need need) async =>
+      demoProposals[need.kind] ?? const [];
 }

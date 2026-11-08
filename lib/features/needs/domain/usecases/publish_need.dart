@@ -45,16 +45,18 @@ class PublishNeed {
     );
     final saved = await needs.save(need);
     if (saved case Err(:final failure)) return Err(failure);
-    final queued = await outbox.enqueue(OutboxOp(
-      id: need.id,
-      type: 'publish_need',
-      payload: jsonEncode({
-        'kind': kind.name,
-        'text': clean,
-        'urgency': urgency.name,
-      }),
-      createdAt: now,
-    ));
+    final queued = await outbox.enqueue(
+      OutboxOp(
+        id: need.id,
+        type: 'publish_need',
+        payload: jsonEncode({
+          'kind': kind.name,
+          'text': clean,
+          'urgency': urgency.name,
+        }),
+        createdAt: now,
+      ),
+    );
     if (queued case Err(:final failure)) return Err(failure);
     return Ok(need);
   }
