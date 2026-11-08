@@ -20,9 +20,17 @@ void main() {
       expect(classifyOffer(byId('w5')), PostKind.rentOffer); // alquiler
     });
 
-    test('un pedido no se responde como oferta', () {
-      expect(classifyOffer(byId('w1')), isNull);
+    test('un pedido gratis o de trueque se responde sin dinero', () {
+      expect(classifyOffer(byId('w1')), PostKind.helpFree);
+      expect(classifyOffer(byId('w4')), PostKind.barterRequest);
     });
+
+    test(
+      'un pedido de alquiler se oferta con precio, no con este formulario',
+      () {
+        expect(classifyOffer(byId('w11')), isNull);
+      },
+    );
 
     test('una oferta propia no se puede responder', () {
       const mine = WallEntry(
@@ -40,8 +48,34 @@ void main() {
 
   test('el precio solo aparece donde hay alquiler', () {
     expect(fieldsFor(PostKind.rentOffer), contains(ResponseField.price));
-    expect(fieldsFor(PostKind.loanOffer), isNot(contains(ResponseField.price)));
-    expect(fieldsFor(PostKind.barter), isNot(contains(ResponseField.price)));
+    for (final k in PostKind.values.where((k) => k != PostKind.rentOffer)) {
+      expect(fieldsFor(k), isNot(contains(ResponseField.price)), reason: '$k');
+    }
+  });
+
+  test('el trueque siempre pide algo a cambio', () {
+    expect(
+      requiredFor(PostKind.barter),
+      contains(ResponseField.offeredResource),
+    );
+    expect(
+      requiredFor(PostKind.barterRequest),
+      contains(ResponseField.inExchange),
+    );
+  });
+
+  test('el muro tiene al menos 3 publicaciones por modalidad y por lado', () {
+    for (final m in Modality.values) {
+      for (final pide in [true, false]) {
+        final n = demoWall
+            .where((e) => e.modality == m && e.isRequest == pide)
+            .length;
+        expect(n, greaterThanOrEqualTo(3), reason: '$m pide=$pide');
+      }
+    }
+    final ids = demoWall.map((e) => e.id).toList();
+    expect(ids.toSet().length, ids.length);
+    expect(demoWall.every((e) => (e.textEn ?? '').isNotEmpty), isTrue);
   });
 
   group('SendPostResponse', () {

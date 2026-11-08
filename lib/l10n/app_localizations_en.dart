@@ -10,7 +10,7 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
-  String get appName => 'Neighborhood Network';
+  String get appName => 'Mi Cuadra';
 
   @override
   String get inicio => 'Home';
@@ -1660,7 +1660,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get smsFooter =>
-      'Sent from Neighborhood Network. If it is serious, call emergency services.';
+      'Sent from Mi Cuadra. If it is serious, call emergency services.';
 
   @override
   String get failContactName => 'Write the contact’s name.';

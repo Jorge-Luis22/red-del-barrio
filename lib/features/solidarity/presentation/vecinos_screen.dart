@@ -202,7 +202,8 @@ class _WallRow extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final myBid = ref.watch(myBidForProvider(entry.id));
-    final canOffer = entry.isRequest && entry.isExample;
+    final canOffer =
+        entry.isRequest && entry.isExample && entry.modality == Modality.rent;
     final kind = classifyOffer(entry);
     final myResponse = ref.watch(myResponseForProvider(entry.id));
     final m = entry.modality;

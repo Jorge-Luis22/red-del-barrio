@@ -19,20 +19,26 @@ import 'wall_text.dart';
 String actionLabel(BuildContext context, PostKind k) => switch (k) {
   PostKind.loanOffer => tr(context, 'Pedir prestado', 'Borrow it'),
   PostKind.rentOffer => tr(context, 'Quiero alquilarlo', 'I want to rent it'),
-  PostKind.barter => tr(context, 'Proponer intercambio', 'Propose a swap'),
+  PostKind.barter || PostKind.barterRequest => tr(
+    context,
+    'Proponer intercambio',
+    'Propose a swap',
+  ),
+  PostKind.helpFree => tr(context, 'Puedo ayudarte', 'I can help'),
 };
 
 IconData actionIcon(PostKind k) => switch (k) {
   PostKind.loanOffer => Icons.handshake_rounded,
   PostKind.rentOffer => Icons.payments_rounded,
-  PostKind.barter => Icons.swap_horiz_rounded,
+  PostKind.barter || PostKind.barterRequest => Icons.swap_horiz_rounded,
+  PostKind.helpFree => Icons.volunteer_activism_rounded,
 };
 
 String _fieldLabel(BuildContext c, ResponseField f) => switch (f) {
   ResponseField.price => tr(
     c,
-    'Tu precio por día (S/)',
-    'Your price per day (S/)',
+    'Cuánto ofreces por día (S/)',
+    'What you offer per day (S/)',
   ),
   ResponseField.availability => tr(c, 'Disponibilidad', 'Availability'),
   ResponseField.duration => tr(c, 'Por cuánto tiempo', 'For how long'),
@@ -41,6 +47,11 @@ String _fieldLabel(BuildContext c, ResponseField f) => switch (f) {
     c,
     'Qué ofreces a cambio',
     'What you offer in return',
+  ),
+  ResponseField.inExchange => tr(
+    c,
+    'Qué pides a cambio',
+    'What you ask in return',
   ),
   ResponseField.coordination => tr(c, 'Cómo coordinamos', 'How we coordinate'),
   ResponseField.message => tr(c, 'Mensaje (opcional)', 'Message (optional)'),
@@ -58,6 +69,11 @@ String _fieldHint(BuildContext c, ResponseField f) => switch (f) {
     c,
     'Ej.: lo devuelvo limpio',
     'e.g. I return it clean',
+  ),
+  ResponseField.inExchange => tr(
+    c,
+    'Ej.: que me ayudes con el celular',
+    'e.g. help with my phone',
   ),
   ResponseField.offeredResource => tr(
     c,

@@ -10,12 +10,34 @@ import 'offer.dart';
 
 /// Qué tipo de oferta del muro se está respondiendo. No toda publicación se responde igual:
 /// pedir prestado, alquilar y proponer un trueque piden datos distintos.
-enum PostKind { loanOffer, rentOffer, barter }
+enum PostKind {
+  /// Alguien presta o regala algo: no hay dinero.
+  loanOffer,
 
-/// Clasifica una oferta ajena del muro. `null` si no se puede responder
-/// (es un pedido, o es una oferta propia).
+  /// Alguien alquila algo: hay precio.
+  rentOffer,
+
+  /// Alguien ofrece un trueque: se responde con qué se da a cambio.
+  barter,
+
+  /// Alguien pide algo gratis: se responde sin dinero.
+  helpFree,
+
+  /// Alguien pide algo a cambio de otra cosa: se responde con qué se pide a cambio.
+  barterRequest,
+}
+
+/// Clasifica una publicación ajena del muro según su modalidad. `null` si no se responde
+/// con este formulario: una oferta propia, o un pedido de alquiler (ese se oferta con precio).
 PostKind? classifyOffer(WallEntry e) {
-  if (e.isRequest || e.syncStatus != null) return null;
+  if (e.syncStatus != null) return null;
+  if (e.isRequest) {
+    return switch (e.modality) {
+      Modality.free => PostKind.helpFree,
+      Modality.barter => PostKind.barterRequest,
+      Modality.rent || null => null,
+    };
+  }
   return switch (e.modality) {
     Modality.free => PostKind.loanOffer,
     Modality.rent => PostKind.rentOffer,
@@ -31,12 +53,13 @@ enum ResponseField {
   duration,
   conditions,
   offeredResource,
+  inExchange,
   coordination,
   message,
 }
 
 /// Solo los campos que tienen sentido para cada tipo. El dinero aparece únicamente
-/// donde hay alquiler: nunca en préstamos gratis ni en trueques.
+/// donde hay alquiler: nunca en lo gratis ni en los trueques.
 List<ResponseField> fieldsFor(PostKind k) => switch (k) {
   PostKind.loanOffer => const [
     ResponseField.duration,
@@ -54,6 +77,16 @@ List<ResponseField> fieldsFor(PostKind k) => switch (k) {
     ResponseField.conditions,
     ResponseField.message,
   ],
+  PostKind.helpFree => const [
+    ResponseField.availability,
+    ResponseField.coordination,
+    ResponseField.message,
+  ],
+  PostKind.barterRequest => const [
+    ResponseField.inExchange,
+    ResponseField.availability,
+    ResponseField.message,
+  ],
 };
 
 /// Campos obligatorios; los demás son opcionales.
@@ -61,6 +94,8 @@ List<ResponseField> requiredFor(PostKind k) => switch (k) {
   PostKind.loanOffer => const [ResponseField.duration],
   PostKind.rentOffer => const [ResponseField.price, ResponseField.duration],
   PostKind.barter => const [ResponseField.offeredResource],
+  PostKind.helpFree => const [ResponseField.availability],
+  PostKind.barterRequest => const [ResponseField.inExchange],
 };
 
 /// Respuesta de la persona a una oferta del muro. Se guarda en el teléfono y entra

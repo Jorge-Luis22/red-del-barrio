@@ -1,6 +1,6 @@
 {
   "@@locale": "es",
-  "appName": "Red del barrio",
+  "appName": "Mi Cuadra",
   "inicio": "Inicio",
   "vecinos": "Vecinos",
   "mensajes": "Mensajes",
@@ -868,7 +868,7 @@
       }
     }
   },
-  "smsFooter": "Enviado desde Red del barrio. Si es grave, llama a emergencias.",
+  "smsFooter": "Enviado desde Mi Cuadra. Si es grave, llama a emergencias.",
   "failContactName": "Escribe el nombre del contacto.",
   "failContactPhone": "Escribe un teléfono válido (solo números).",
   "failContactDup": "Ya tienes ese contacto.",
