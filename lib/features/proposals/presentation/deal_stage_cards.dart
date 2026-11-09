@@ -384,7 +384,8 @@ class _SummaryRow extends StatelessWidget {
 }
 
 /// Calificación en el otro sentido: quien presta el servicio califica a quien lo pidió.
-/// En esta versión de un solo teléfono se puede simular; con servidor lo hará cada persona desde el suyo.
+/// Vive en la pantalla de quien prestó el servicio (`ProviderViewSheet`); en esta versión de un
+/// solo teléfono se abre como simulación, y con servidor lo hará cada persona desde la suya.
 class ClientRatingCard extends ConsumerStatefulWidget {
   const ClientRatingCard({super.key, required this.deal});
 
@@ -412,25 +413,23 @@ class _ClientRatingCardState extends ConsumerState<ClientRatingCard>
     final saved = all
         .where((i) => i.id == Interaction.clientRatingId(d.id))
         .firstOrNull;
-    final name = _firstName(d);
     return BvPanel(
       padding: const EdgeInsets.all(20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            tr(context, 'Calificación mutua', 'Mutual rating'),
+            tr(context, 'Califica al cliente', 'Rate the client'),
             style: context.tt.titleMedium,
           ),
           const SizedBox(height: 4),
           Text(
             tr(
               context,
-              '$name también califica a quien pidió el servicio. '
-                  'Así la confianza va en los dos sentidos. '
-                  'En esta versión de un solo teléfono puedes simularlo.',
-              '$name also rates the person who asked for the service. '
-                  'Trust goes both ways. In this single-phone version you can simulate it.',
+              'Califica a quien te pidió el servicio. '
+                  'Así la confianza va en los dos sentidos.',
+              'Rate the person who asked you for the service. '
+                  'Trust goes both ways.',
             ),
             style: context.tt.bodyMedium?.copyWith(color: context.tones.muted),
           ),

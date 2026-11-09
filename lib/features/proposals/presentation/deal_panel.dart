@@ -9,6 +9,7 @@ import '../domain/deal.dart';
 import 'deal_stage_cards.dart';
 import 'deal_timeline.dart';
 import 'price_review.dart';
+import 'provider_view_sheet.dart';
 import '../../assistant/presentation/tr.dart';
 
 /// Panel del trato: quién es, línea de tiempo y la tarjeta de la etapa en que va.
@@ -67,7 +68,7 @@ class DealPanel extends ConsumerWidget {
             children: [
               ClosedSummaryCard(deal: d),
               const SizedBox(height: 16),
-              ClientRatingCard(deal: d),
+              ClientRatingNotice(deal: d),
             ],
           ),
           DealStatus.cancelled => CancelledCard(deal: d),

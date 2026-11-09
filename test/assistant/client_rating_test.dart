@@ -3,6 +3,7 @@ import 'package:red_barrio/core/result.dart';
 import 'package:red_barrio/features/assistant/domain/barrio_stats.dart';
 import 'package:red_barrio/features/proposals/domain/deal.dart';
 import 'package:red_barrio/features/proposals/domain/usecases/deal_usecases.dart';
+import 'package:red_barrio/features/reputation/domain/deal_ratings.dart';
 import 'package:red_barrio/features/reputation/domain/interaction.dart';
 
 import '../fakes/fakes.dart';
@@ -88,5 +89,56 @@ void main() {
       interactions: [provider, client],
     );
     expect(s.averageStars, 4);
+  });
+
+  group('las dos calificaciones de un trato (DealRatings)', () {
+    Interaction ofProvider(String dealId, int stars) => Interaction(
+      id: 'p-$dealId',
+      dealId: dealId,
+      providerId: 'carlos',
+      raterId: 'me',
+      stars: stars,
+      recommended: true,
+      closedAt: DateTime(2026, 11, 8),
+      comment: 'Muy amable',
+    );
+    Interaction ofClient(String dealId, int stars) => Interaction(
+      id: Interaction.clientRatingId(dealId),
+      dealId: dealId,
+      providerId: '${Interaction.clientPrefix}$dealId',
+      raterId: 'carlos',
+      stars: stars,
+      recommended: false,
+      closedAt: DateTime(2026, 11, 8),
+    );
+
+    test('separa lo que el cliente calificó de lo que calificó quien presta el servicio', () {
+      final r = DealRatings.of('d1', [ofClient('d1', 2), ofProvider('d1', 5)]);
+      expect(r.ofProvider?.stars, 5);
+      expect(r.ofProvider?.comment, 'Muy amable');
+      expect(r.ofClient?.stars, 2);
+    });
+
+    test('ignora las calificaciones de otros tratos', () {
+      final r = DealRatings.of('d1', [ofClient('d2', 1), ofProvider('d2', 3)]);
+      expect(r.ofProvider, isNull);
+      expect(r.ofClient, isNull);
+    });
+
+    test('mientras falta una de las dos, esa queda en null', () {
+      final onlyProvider = DealRatings.of('d1', [ofProvider('d1', 4)]);
+      expect(onlyProvider.ofProvider?.stars, 4);
+      expect(onlyProvider.ofClient, isNull);
+
+      final onlyClient = DealRatings.of('d1', [ofClient('d1', 4)]);
+      expect(onlyClient.ofProvider, isNull);
+      expect(onlyClient.ofClient?.stars, 4);
+    });
+
+    test('sin calificaciones no hay ninguna', () {
+      final r = DealRatings.of('d1', const []);
+      expect(r.ofProvider, isNull);
+      expect(r.ofClient, isNull);
+    });
   });
 }
